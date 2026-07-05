@@ -78,3 +78,19 @@
 - tools/trace_solver.lua + tools/clue_audit.py: 5 замков, у каждого ≥2
   clue-источника; по трассе золотого пути каждый клю-док доступен
   строго раньше своего замка (маскированный отчёт, без значений).
+
+## Фаза 6 — Упаковка и Windows-верификация
+- work/game.love: main.lua, conf.lua, src/, assets/, design/ — 157 файлов.
+- Portable-пакет BrassJanissary-2.0.0/: exe (fuse love.exe 11.5 + .love),
+  DLL LÖVE, LOVE-license.txt, README.md (RU), LICENSE (MIT + zlib +
+  OFL), VERSION. Инсталлятора нет и не будет (portable-only).
+- docs/WALKTHROUGH_SPOILERS.md сгенерирован (единственный файл с
+  решениями; в ZIP не входит).
+- Wine 9.0 из пути «Тестовая папка 2.0 (проверка)» (кириллица+пробелы,
+  LANG=C.UTF-8): --selftest rc=0 (солвер 52 шага, null-audio пережит);
+  --autoplay rc=0 — полный гаунтлет 281 шаг, 18 скринов, победа.
+  Wine-рендер титула визуально идентичен нативному.
+- SHA-256:
+  f309e11d063fe7af82881c66f8c5e37a700eef230e4bb5f1369e81d91718f9e2  dist/BrassJanissary-2.0.0-win64-portable.zip
+  982419c2d4aac14e53ddd2a4455f9bea1f6906636d17eddfdc835eca8c8d4ab4  work/pkg/BrassJanissary-2.0.0/BrassJanissary2.exe
+- Размер ZIP: 66M.
