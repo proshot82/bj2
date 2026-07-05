@@ -1,7 +1,6 @@
 function love.conf(t)
   t.identity = "BrassJanissary2"
   t.version = "11.5"
-  t.console = false
   t.window.title = "Латунный янычар 2.0"
   t.window.icon = "assets/gfx/ui/icon_512.png"
   t.window.width = 1920
@@ -10,8 +9,5 @@ function love.conf(t)
   t.window.minwidth = 960
   t.window.minheight = 540
   t.window.vsync = 1
-  t.modules.joystick = false
-  t.modules.physics = false
-  t.modules.touch = false
-  t.modules.video = false
+  t.console = false
 end

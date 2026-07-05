@@ -125,7 +125,7 @@ A_cutouts = [
     CO("cutouts/st_door_open_final.png", [1476, 178], 0.62, z=40,
        show_on=["victory"], pos_day=[1512, 176]),
     # идл: рыбка в аквариуме на вайде (мелкая), пар над кофе
-    CO("cutouts/st_fish_a.png", [940, 300], 0.36, z=18, idle="fish_wide",
+    CO("cutouts/st_fish_a.png", [952, 412], 0.36, z=18, idle="fish_wide",
        frames=["cutouts/st_fish_a.png", "cutouts/st_fish_b.png"]),
     CO("cutouts/st_steam_a.png", [1176, 236], 0.5, z=22, idle="steam",
        frames=["cutouts/st_steam_a.png", "cutouts/st_steam_b.png",
