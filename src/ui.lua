@@ -40,6 +40,7 @@ function ui.state() return {dlg = dlg, widget = widget, reader = reader,
                             menu = menu, inv = inv} end
 function ui.in_menu() return menu ~= nil end
 function ui.title_shown() return menu == "title" end
+function ui.reader_open() return reader ~= nil end
 
 -- ================= звук =================
 local function snd(name)
@@ -149,7 +150,8 @@ local function dlg_draw()
   lg.setColor(1, 1, 1)
   lg.draw(port, px + 6, py + 6, 0, 0.5, 0.5)
   if (ST.flags.crown or ST.inv.crown) and cur.s == "lap" then
-    lg.draw(IMG["portraits/port_crown_overlay.png"], px + 6, py + 6 - 58, 0, 0.5, 0.5)
+    lg.draw(IMG["portraits/port_crown_overlay.png"], px + 128, py + 22,
+      -0.09, 0.36, 0.36, 261, 256)
   end
   local bcol = (cur.s == "anc") and C.steel or C.brass
   lg.setColor(bcol[1], bcol[2], bcol[3])
@@ -783,6 +785,7 @@ local function form_click(x, y)
       ui.after_fire("skud_form"); ui.close_widget()
     else
       snd("beep_err"); say_node("skud_form", "fail_code")
+      widget.no = ""; widget.dept_i = 1; widget.field = 1
     end
     return true
   end
@@ -827,8 +830,9 @@ function ui.widget_key(key)
 end
 
 -- бенч-операции (клики по хотспотам зума транслируются сюда)
-function ui.bench_node(id)
+function ui.bench_node(id, btn)
   local op = id:match("^bench_move_(%w+)$")
+  if op then op = op .. ((btn == 2) and "-" or "+") end
   if id == "bench_pump" then op = "PUMP"
   elseif id == "bench_reset" then op = "RESET" end
   local res, a, b = ST:bench_op(op)
@@ -864,13 +868,58 @@ function ui.bench_node(id)
 end
 
 -- ================= МЕНЮ/ТИТУЛ =================
+local function draw_title_logo()
+  -- движковая замена бракованного logo_title.png (бейслайн v2.0.0)
+  local l1, l2 = "ЛАТУННЫЙ", "ЯНЫЧАР"
+  lg.setFont(F.h1)
+  local function line(txt, y)
+    lg.setColor(0, 0, 0, 0.55)                       -- тень
+    lg.printf(txt, 5, y + 6, 1920, "center")
+    lg.setColor(0.22, 0.13, 0.04)                     -- обводка
+    for dx = -3, 3, 3 do
+      for dy = -3, 3, 3 do
+        if dx ~= 0 or dy ~= 0 then
+          lg.printf(txt, dx, y + dy, 1920, "center")
+        end
+      end
+    end
+    local hpx = F.h1:getHeight()
+    lg.setScissor(0, y, 1920, math.floor(hpx * 0.52)) -- верх: светлая латунь
+    lg.setColor(0.97, 0.84, 0.47)
+    lg.printf(txt, 0, y, 1920, "center")
+    lg.setScissor(0, y + math.floor(hpx * 0.52), 1920, hpx)
+    lg.setColor(0.76, 0.56, 0.24)                     -- низ: тёмная латунь
+    lg.printf(txt, 0, y, 1920, "center")
+    lg.setScissor()
+  end
+  line(l1, 108)
+  line(l2, 212)
+  -- росчерк-сабля под названием
+  local pts = {}
+  for i = 0, 24 do
+    local t = i / 24
+    local x = 700 + 520 * t
+    local y = 336 + math.sin(t * math.pi) * 22 - t * 10
+    pts[#pts + 1] = x; pts[#pts + 1] = y
+  end
+  lg.setLineWidth(9); lg.setColor(0.24, 0.14, 0.05)
+  lg.line(pts)
+  lg.setLineWidth(6); lg.setColor(0.86, 0.66, 0.3)
+  lg.line(pts)
+  lg.setLineWidth(2); lg.setColor(0.99, 0.9, 0.6)
+  lg.line(pts)
+  lg.setLineWidth(1)
+  lg.setFont(F.h2); lg.setColor(0.86, 0.66, 0.3)
+  lg.print("2.0", 1244, 300)
+  lg.setColor(1, 1, 1)
+end
+
 local title_btns
 local function menu_draw()
   if menu == nil then return end
   if menu == "title" then
     lg.draw(IMG["ui/bg_title.png"], 0, 0)
-    local logo = IMG["ui/logo_title.png"]
-    lg.draw(logo, 960 - 600 * 0.9 / 1, 90, 0, 0.9, 0.9)
+    draw_title_logo()
     title_btns = {}
     local labels = {{"start", T.ui.title_start}}
     if ui.has_save() then labels[#labels + 1] = {"cont", T.ui.title_continue} end
@@ -1014,9 +1063,11 @@ function ui.update(dt)
 end
 
 function ui.draw_overlays()
-  goals_draw()
-  inv_draw()
-  hud_draw()
+  if not (victory_stage and not ui.dialog_active()) then
+    goals_draw()
+    inv_draw()
+    hud_draw()
+  end
   widget_draw()
   reader_draw()
   dlg_draw()
@@ -1052,6 +1103,7 @@ local function world_click(x, y, btn)
   end
   idle_timer = 0
   if btn == 2 then
+    if h.bench then ui.bench_node(h.node, 2); return end
     if h.doc_rmb then ui.open_doc(h.doc_rmb); return end
     if h.look and T.looks[h.id] then
       push_lines(T.looks[h.id].look); maybe_nervous(); return
@@ -1098,7 +1150,7 @@ local function world_click(x, y, btn)
     else say_node("bolt_free", "fail") end
     return
   end
-  if h.bench then ui.bench_node(h.node); return end
+  if h.bench then ui.bench_node(h.node, btn); return end
   if h.node then
     local n = ST.nodes[h.node]
     if n.herring then
@@ -1167,7 +1219,7 @@ function ui.mousepressed(x, y, btn)
   end
   if btn == 2 then
     local h = SC.hit(x, y)
-    if h and (h.doc_rmb or (h.look and T.looks[h.id])) then
+    if h and (h.bench or h.doc_rmb or (h.look and T.looks[h.id])) then
       world_click(x, y, 2)
       return
     end

@@ -29,7 +29,7 @@
      "look": true
     },
     {
-     "id": "hs_sofa_под",
+     "id": "hs_sofa_under",
      "rect": [
       30,
       800,
@@ -70,10 +70,10 @@
     {
      "id": "hs_karaoke_sing",
      "rect": [
-      255,
-      470,
-      110,
-      90
+      230,
+      562,
+      160,
+      56
      ],
      "cursor": "act",
      "node": "h_karaoke_sing",
@@ -191,6 +191,9 @@
      ],
      "cursor": "zoom",
      "goto": "zoom_lap_drawer",
+     "show_on": [
+      "drawer_pried"
+     ],
      "name": "Ящик стола",
      "needs_flag": "drawer_pried"
     },
@@ -273,6 +276,21 @@
      "name": "Вентрешётка"
     },
     {
+     "id": "hs_red_button",
+     "rect": [
+      1158,
+      258,
+      84,
+      90
+     ],
+     "cursor": "act",
+     "name": "Красная кнопка",
+     "look": true,
+     "show_on": [
+      "power_on"
+     ]
+    },
+    {
      "id": "hs_wardrobe",
      "rect": [
       1180,
@@ -326,10 +344,10 @@
     {
      "id": "hs_ira_tumba",
      "rect": [
-      1030,
-      620,
-      150,
-      180
+      1352,
+      820,
+      130,
+      170
      ],
      "cursor": "zoom",
      "goto": "zoom_drawer_keypad",
@@ -338,10 +356,10 @@
     {
      "id": "hs_ira_drawer_out",
      "rect": [
-      1005,
-      610,
-      200,
-      90
+      1148,
+      896,
+      205,
+      96
      ],
      "cursor": "zoom",
      "doc": "doc_registry",
@@ -373,7 +391,7 @@
      "rect": [
       1748,
       408,
-      164,
+      120,
       44
      ],
      "cursor": "act",
@@ -385,7 +403,7 @@
      "rect_day": [
       1800,
       445,
-      120,
+      88,
       44
      ]
     },
@@ -497,9 +515,9 @@
      "goto": "zoom_alarm",
      "name": "Сигнализация",
      "rect_day": [
-      1598,
+      1606,
       382,
-      60,
+      52,
       180
      ]
     },
@@ -590,16 +608,16 @@
       1832,
       328,
       88,
-      234
+      180
      ],
      "cursor": "act",
      "node": "h_extinguisher",
      "name": "Огнетушитель",
      "rect_day": [
-      1876,
+      1852,
       388,
-      44,
-      196
+      56,
+      60
      ]
     }
    ],
@@ -671,8 +689,8 @@
     {
      "img": "cutouts/st_ira_drawer_open.png",
      "pos": [
-      1008,
-      618
+      1150,
+      900
      ],
      "scale": 0.4,
      "z": 20,
@@ -888,6 +906,9 @@
      ],
      "cursor": "zoom",
      "goto": "zoom_panel",
+     "show_on": [
+      "panel_open"
+     ],
      "name": "Электрощиток",
      "needs_flag": "panel_open"
     },
@@ -984,7 +1005,7 @@
       "box_down"
      ],
      "hide_on": [
-      "relic_fez"
+      "item:relic_fez"
      ]
     },
     {
@@ -999,10 +1020,10 @@
      "node": "search_box_again",
      "name": "Коробка (ещё раз)",
      "show_on": [
-      "relic_fez"
+      "item:relic_fez"
      ],
      "hide_on": [
-      "crown"
+      "item:crown"
      ]
     },
     {
@@ -1365,7 +1386,7 @@
      "node": "search_drawer_again",
      "name": "Хлам справа",
      "hide_on": [
-      "relic_yatagan"
+      "item:relic_yatagan"
      ]
     },
     {
@@ -1653,10 +1674,10 @@
     {
      "id": "hs_z_plate",
      "rect": [
-      560,
-      80,
-      370,
-      200
+      575,
+      85,
+      640,
+      270
      ],
      "cursor": "act",
      "name": "Табличка",
@@ -1668,7 +1689,7 @@
      "rect": [
       430,
       300,
-      860,
+      1030,
       620
      ],
      "cursor": "act",
@@ -1681,10 +1702,10 @@
     {
      "id": "hs_z_reader_small",
      "rect": [
-      1592,
-      468,
-      62,
-      82
+      1620,
+      462,
+      210,
+      200
      ],
      "cursor": "act",
      "node": "reader_swipe",
@@ -1693,10 +1714,10 @@
     {
      "id": "hs_z_bolt",
      "rect": [
-      1330,
-      340,
-      120,
-      300
+      1385,
+      470,
+      92,
+      165
      ],
      "cursor": "act",
      "node": "bolt_free",
@@ -1740,51 +1761,39 @@
      "name": "Домофон"
     },
     {
-     "id": "hs_z_bell",
-     "rect": [
-      1548,
-      388,
-      145,
-      145
-     ],
-     "cursor": "act",
-     "name": "Звонок",
-     "look": true
-    },
-    {
      "id": "hs_z_alarm_go",
      "rect": [
-      1550,
-      630,
-      210,
-      450
+      1596,
+      688,
+      262,
+      336
      ],
      "cursor": "zoom",
      "goto": "zoom_alarm",
-     "name": "Сигнализация"
+     "name": "Панель сигнализации"
     }
    ],
    "cutouts": [],
    "led": {
     "reader_small": [
-     1622,
-     505
+     1768,
+     618
     ]
    },
    "bolt_geom": {
     "plate": [
-     1352,
-     356,
-     66,
-     268
+     1398,
+     480,
+     64,
+     140
     ],
     "knob_closed": [
-     1385,
-     420
+     1433,
+     512
     ],
     "knob_open": [
-     1385,
-     566
+     1433,
+     588
     ]
    },
    "bg": "zooms/zoom_exit_door.png"
@@ -1796,9 +1805,9 @@
     {
      "id": "hs_z_breaker_row",
      "rect": [
-      634,
-      292,
-      246,
+      845,
+      392,
+      282,
       176
      ],
      "cursor": "act",
@@ -1812,8 +1821,8 @@
       "h_br_rezerv",
       null
      ],
-     "breaker_x0": 641,
-     "breaker_step": 38
+     "breaker_x0": 845,
+     "breaker_step": 46.8
     },
     {
      "id": "hs_z_schema",
@@ -1844,10 +1853,10 @@
     {
      "img": "cutouts/st_breaker_down.png",
      "pos": [
-      646,
-      352
+      837,
+      456
      ],
-     "scale": 0.42,
+     "scale": 0.6,
      "z": 20,
      "breaker_slot": 0,
      "hide_on": [
@@ -1857,10 +1866,10 @@
     {
      "img": "cutouts/st_breaker_up.png",
      "pos": [
-      646,
-      348
+      841,
+      416
      ],
-     "scale": 0.42,
+     "scale": 0.6,
      "z": 20,
      "breaker_slot": 0,
      "show_on": [
@@ -1870,10 +1879,10 @@
     {
      "img": "cutouts/st_breaker_down.png",
      "pos": [
-      684,
-      352
+      884,
+      456
      ],
-     "scale": 0.42,
+     "scale": 0.6,
      "z": 20,
      "breaker_slot": 1,
      "hide_on": [
@@ -1883,10 +1892,10 @@
     {
      "img": "cutouts/st_breaker_up.png",
      "pos": [
-      684,
-      348
+      888,
+      416
      ],
-     "scale": 0.42,
+     "scale": 0.6,
      "z": 20,
      "breaker_slot": 1,
      "show_on": [
@@ -1896,10 +1905,10 @@
     {
      "img": "cutouts/st_breaker_down.png",
      "pos": [
-      722,
-      352
+      931,
+      456
      ],
-     "scale": 0.42,
+     "scale": 0.6,
      "z": 20,
      "breaker_slot": 2,
      "hide_on": [
@@ -1909,10 +1918,10 @@
     {
      "img": "cutouts/st_breaker_up.png",
      "pos": [
-      722,
-      348
+      935,
+      416
      ],
-     "scale": 0.42,
+     "scale": 0.6,
      "z": 20,
      "breaker_slot": 2,
      "show_on": [
@@ -1922,10 +1931,10 @@
     {
      "img": "cutouts/st_breaker_down.png",
      "pos": [
-      760,
-      352
+      977,
+      456
      ],
-     "scale": 0.42,
+     "scale": 0.6,
      "z": 20,
      "breaker_slot": 3,
      "toggle_visual": "srv"
@@ -1933,10 +1942,10 @@
     {
      "img": "cutouts/st_breaker_down.png",
      "pos": [
-      798,
-      352
+      1024,
+      456
      ],
-     "scale": 0.42,
+     "scale": 0.6,
      "z": 20,
      "breaker_slot": 4,
      "toggle_visual": "rezerv"
@@ -1944,10 +1953,10 @@
     {
      "img": "cutouts/st_breaker_down.png",
      "pos": [
-      836,
-      352
+      1071,
+      456
      ],
-     "scale": 0.42,
+     "scale": 0.6,
      "z": 20,
      "breaker_slot": 5
     }
@@ -1968,13 +1977,16 @@
     {
      "id": "hs_z_valve_p",
      "rect": [
-      520,
+      700,
+      150,
       130,
-      120,
-      290
+      300
      ],
      "cursor": "act",
      "node": "bench_move_P",
+     "show_on": [
+      "wheel_on"
+     ],
      "name": "П",
      "bench": true,
      "needs_flag": "wheel_on"
@@ -1982,10 +1994,10 @@
     {
      "id": "hs_z_valve_p_empty",
      "rect": [
-      520,
+      700,
+      150,
       130,
-      120,
-      290
+      300
      ],
      "cursor": "act",
      "node": "install_wheel",
@@ -1997,10 +2009,10 @@
     {
      "id": "hs_z_valve_k1",
      "rect": [
-      660,
-      120,
-      120,
-      300
+      870,
+      150,
+      130,
+      290
      ],
      "cursor": "act",
      "node": "bench_move_K1",
@@ -2010,9 +2022,9 @@
     {
      "id": "hs_z_valve_k2",
      "rect": [
-      795,
+      1050,
+      150,
       130,
-      120,
       290
      ],
      "cursor": "act",
@@ -2023,10 +2035,10 @@
     {
      "id": "hs_z_valve_s",
      "rect": [
-      935,
-      130,
-      100,
-      280
+      1240,
+      150,
+      115,
+      330
      ],
      "cursor": "act",
      "node": "bench_move_S",
@@ -2036,10 +2048,10 @@
     {
      "id": "hs_z_pump",
      "rect": [
-      1240,
+      1330,
       200,
-      220,
-      380
+      190,
+      430
      ],
      "cursor": "act",
      "node": "bench_pump",
@@ -2062,10 +2074,10 @@
     {
      "id": "hs_z_gauge",
      "rect": [
-      270,
-      60,
-      190,
-      220
+      368,
+      92,
+      215,
+      222
      ],
      "cursor": "act",
      "name": "Манометр",
@@ -2086,10 +2098,10 @@
     {
      "id": "hs_z_collector",
      "rect": [
-      1400,
-      660,
-      260,
-      300
+      1410,
+      690,
+      290,
+      185
      ],
      "cursor": "act",
      "node": "take_collector",
@@ -2104,10 +2116,10 @@
     {
      "id": "hs_z_hatch",
      "rect": [
-      1428,
-      76,
-      140,
-      152
+      1385,
+      82,
+      100,
+      135
      ],
      "cursor": "act",
      "name": "Лючок",
@@ -2118,8 +2130,8 @@
     {
      "img": "cutouts/st_valve_wheel_off.png",
      "pos": [
-      575,
-      172
+      700,
+      180
      ],
      "scale": 1.0,
      "z": 20,
@@ -2132,8 +2144,8 @@
     {
      "img": "cutouts/st_valve_wheel_on.png",
      "pos": [
-      575,
-      172
+      700,
+      180
      ],
      "scale": 1.0,
      "z": 20,
@@ -2146,8 +2158,8 @@
     {
      "img": "cutouts/st_valve_wheel_red_off.png",
      "pos": [
-      712,
-      165
+      870,
+      180
      ],
      "scale": 1.0,
      "z": 20,
@@ -2157,8 +2169,8 @@
     {
      "img": "cutouts/st_valve_wheel_red_on.png",
      "pos": [
-      712,
-      165
+      870,
+      180
      ],
      "scale": 1.0,
      "z": 20,
@@ -2168,8 +2180,8 @@
     {
      "img": "cutouts/st_valve_wheel_red_off.png",
      "pos": [
-      847,
-      172
+      1050,
+      180
      ],
      "scale": 1.0,
      "z": 20,
@@ -2179,8 +2191,8 @@
     {
      "img": "cutouts/st_valve_wheel_red_on.png",
      "pos": [
-      847,
-      172
+      1050,
+      180
      ],
      "scale": 1.0,
      "z": 20,
@@ -2190,8 +2202,8 @@
     {
      "img": "cutouts/st_valve_wheel_red_off.png",
      "pos": [
-      978,
-      168
+      1244,
+      187
      ],
      "scale": 0.82,
      "z": 20,
@@ -2201,8 +2213,8 @@
     {
      "img": "cutouts/st_valve_wheel_red_on.png",
      "pos": [
-      978,
-      168
+      1244,
+      187
      ],
      "scale": 0.82,
      "z": 20,
@@ -2232,8 +2244,8 @@
     {
      "img": "cutouts/st_collector_clamped.png",
      "pos": [
-      1418,
-      700
+      1450,
+      705
      ],
      "scale": 0.9,
      "z": 20,
@@ -2247,19 +2259,37 @@
     {
      "img": "cutouts/st_gauge_glass.png",
      "pos": [
-      278,
-      68
+      366,
+      96
      ],
-     "scale": 0.68,
+     "scale": 0.84,
      "z": 30,
      "always": true
     }
    ],
    "gauge": {
-    "cx": 360,
-    "cy": 165,
-    "r": 62
+    "cx": 475,
+    "cy": 205,
+    "r": 80
    },
+   "valve_labels": [
+    [
+     "П",
+     765
+    ],
+    [
+     "К1",
+     935
+    ],
+    [
+     "К2",
+     1115
+    ],
+    [
+     "С",
+     1297
+    ]
+   ],
    "bg": "zooms/zoom_bench.png"
   },
   "zoom_workbench": {

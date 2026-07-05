@@ -124,16 +124,26 @@ end
 
 -- ---------- стенд ----------
 -- ops: "P","K1","K2","S" (перекладка вентиля), "PUMP", "RESET"
+function M:_vent_seq()
+  if not self._vents then
+    self._vents = {}
+    for _, m in ipairs(self.answers.bench_seq) do
+      if not m:match("^PUMP") then self._vents[#self._vents + 1] = m end
+    end
+  end
+  return self._vents
+end
+
 -- Правило: вентили в порядке answers.bench_seq; ошибка -> сброс seq.
 -- После полной последовательности PUMP x bench_pumps -> solved.
 function M:bench_op(op)
   if self.done.bench_solve then return "already" end
-  if not self.flags.wheel_on and (op == "P") then return "no_wheel" end
+  if not self.flags.wheel_on and op:match("^P[+%-]") then return "no_wheel" end
   if not self.flags.wheel_on then
     -- без маховика на П последовательность не собрать, но крутить можно
     if op == "RESET" then self.bench.seq = {}; self.bench.pumps = 0; return "reset" end
   end
-  local need = self.answers.bench_seq            -- массив ходов
+  local need = self:_vent_seq()                  -- вентильные ходы
   local pumps_need = self.answers.bench_pumps
   self.steps = self.steps + 1
   if op == "RESET" then
@@ -169,7 +179,7 @@ function M:bench_op(op)
 end
 
 function M:gauge_frac()
-  local need = self.answers.bench_seq
+  local need = self:_vent_seq()
   local pn = self.answers.bench_pumps
   if self.done.bench_solve then return 1 end
   if #self.bench.seq < #need then return 0.06 * #self.bench.seq end
@@ -239,7 +249,7 @@ function M:solve(max_steps)
       elseif n.lock.kind == "form" then
         self:try_form(self.answers.skud.card_number, self.answers.skud.dept)
       elseif n.lock.kind == "bench" then
-        for _, op in ipairs(self.answers.bench_seq) do self:bench_op(op) end
+        for _, op in ipairs(self:_vent_seq()) do self:bench_op(op) end
         for _ = 1, self.answers.bench_pumps do self:bench_op("PUMP") end
       end
     else

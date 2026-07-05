@@ -106,6 +106,41 @@ local function exec(s)
   elseif op == "dismiss" then
     if dismiss_once() then return false end
     return true
+  elseif op == "dismiss_all" then
+    if dismiss_once() then return false end
+    return true
+  elseif op == "close_reader" then
+    if E.ui.reader_open() then click(1200, 500, 2); return false end
+    return true
+  elseif op == "bench_bad" then
+    -- кликнуть заведомо неверный ПЕРВЫЙ вентиль (рантайм сам выбирает)
+    if E.ui.dialog_active() then dismiss_once(); return false end
+    local first
+    for _, m in ipairs(E.puzzles.answers.bench_seq) do
+      if not m:match("^PUMP") then first = m; break end
+    end
+    local fbase = first:match("^(%u+%d?)")
+    local map = {P = "hs_z_valve_p", K1 = "hs_z_valve_k1",
+                 K2 = "hs_z_valve_k2", S = "hs_z_valve_s"}
+    local pick
+    for _, v in ipairs({"K1", "K2", "S", "P"}) do
+      if v ~= fbase then pick = v; break end
+    end
+    local cx, cy = hs_center(map[pick])
+    if not cx then die("нет вентиля для bench_bad") end
+    click(cx, cy, 1)
+    return true
+  elseif op == "pump_early" then
+    if E.ui.dialog_active() then dismiss_once(); return false end
+    local cx, cy = hs_center("hs_z_pump")
+    if not cx then die("нет насоса") end
+    click(cx, cy, 1)
+    return true
+  elseif op == "assert_bench_seq_len" then
+    if #E.state.bench.seq ~= s.n then
+      die("bench seq " .. #E.state.bench.seq .. " ≠ " .. s.n)
+    end
+    return true
   elseif op == "start_game" then
     -- реальный клик по «НАЧАТЬ НОВУЮ» на титуле
     click(960, 596, 1); return true
@@ -149,26 +184,39 @@ local function exec(s)
   elseif op == "form" then
     if E.ui.dialog_active() then dismiss_once(); return false end
     if E.ui.widget_kind() ~= "form" then die("форма не открыта") end
+    for _ = 1, 10 do key("backspace") end
     local no = s.no or tostring(E.puzzles.answers.skud.card_number)
-    local dept = s.dept or E.puzzles.answers.skud.dept
     for ch in no:gmatch(".") do key(ch) end
-    key("tab")
-    local depts = E.puzzles.tokens.depts
-    local want
-    for i, d in ipairs(depts) do if d == dept then want = i end end
-    for _ = 1, (want - 1) % #depts do key("right") end
+    if not s.no then
+      -- верная отправка: выставить отдел из ответов (форма сброшена на 1)
+      key("tab")
+      local depts = E.puzzles.tokens.depts
+      local want
+      for i, d in ipairs(depts) do
+        if d == E.puzzles.answers.skud.dept then want = i end
+      end
+      for _ = 1, (want - 1) % #depts do key("right") end
+    end
     click(660 + 190 + 110, 280 + 310 + 32, 1)
     return true
   elseif op == "bench_seq" then
     if E.ui.dialog_active() then dismiss_once(); return false end
+    if not s._vents then
+      s._vents = {}
+      for _, m in ipairs(E.puzzles.answers.bench_seq) do
+        if not m:match("^PUMP") then s._vents[#s._vents + 1] = m end
+      end
+    end
     s._i = (s._i or 0) + 1
-    local seq = E.puzzles.answers.bench_seq
-    if s._i > #seq then return true end
+    if s._i > #s._vents then return true end
+    local mv = s._vents[s._i]
+    local base, dir = mv:match("^(%u+%d?)([+%-])$")
+    if not base then die("плохой ход стенда: " .. tostring(mv)) end
     local map = {P = "hs_z_valve_p", K1 = "hs_z_valve_k1",
                  K2 = "hs_z_valve_k2", S = "hs_z_valve_s"}
-    local cx, cy = hs_center(map[seq[s._i]])
-    if not cx then die("нет вентиля " .. seq[s._i]) end
-    click(cx, cy, 1)
+    local cx, cy = hs_center(map[base])
+    if not cx then die("нет вентиля " .. base) end
+    click(cx, cy, dir == "-" and 2 or 1)
     return false
   elseif op == "bench_pumps" then
     if E.ui.dialog_active() then dismiss_once(); return false end
@@ -177,6 +225,12 @@ local function exec(s)
     local cx, cy = hs_center("hs_z_pump")
     click(cx, cy, 1)
     return false
+  elseif op == "breaker" then
+    if E.ui.dialog_active() then dismiss_once(); return false end
+    local cx, cy, h = hs_center("hs_z_breaker_row")
+    if not cx then die("нет рейки автоматов") end
+    click(h.breaker_x0 + (s.i - 0.5) * h.breaker_step, cy, 1)
+    return true
   elseif op == "hint" then
     if E.ui.dialog_active() then dismiss_once(); return false end
     click(1640 + 125, 12 + 24, 1)
@@ -255,6 +309,11 @@ function ap.update(dt)
   if not s then
     print("AUTOPLAY OK")
     os.exit(0)
+  end
+  if not s._logged then
+    s._logged = true
+    info(tostring(s.op) .. " " ..
+      tostring(s.id or s.node or s.name or s.f or s.i or s.a or ""))
   end
   local r = exec(s)
   if r == true then

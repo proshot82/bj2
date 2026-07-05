@@ -23,8 +23,18 @@ local s2 = State.new(P, items)
 assert(select(2, s2:fire("take_handle")) == "needs", "neg needs")
 assert(select(2, s2:try_code("pc_unlock", "0000")) == "badcode" or
        tostring(P.answers.pc_pin) == "0000", "neg badcode")
-assert(s2:bench_op("K1") == "seq_bad" or P.answers.bench_seq[1] == "K1",
-       "bench first move check")
+do
+  s2.flags.wheel_on = true
+  local first
+  for _, m in ipairs(P.answers.bench_seq) do
+    if not m:match("^PUMP") then first = m; break end
+  end
+  local flipped = first:gsub("[+%-]$", function(c)
+    return c == "+" and "-" or "+"
+  end)
+  assert(s2:bench_op(flipped) == "seq_bad", "bench wrong direction -> reset")
+  assert(#s2.bench.seq == 0, "bench seq cleared")
+end
 print("negatives: ok")
 
 -- 3) round-trip

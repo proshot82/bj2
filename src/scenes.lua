@@ -169,10 +169,28 @@ function scenes.active_hotspots()
       if not a.needs_flag or ST:has_flag(a.needs_flag) then
         out[#out + 1] = {id = "arrow_" .. a.dir, rect = a.rect,
                          goto_room = a.goto_room, cursor = "move",
+                         _arrow = true,
                          name = (a.dir == "right") and "→" or "←"}
       end
     end
   end
+  -- приоритет попадания: интерактивные раньше фоновых «осмотров»,
+  -- мелкие раньше крупных (стикер на мониторе, указка на доске)
+  for i, h in ipairs(out) do h._seq = i end
+  local function rank(h)
+    if h._arrow then return 1 end
+    if h.node or h["goto"] or h.goto_room or h.doc
+       or h.widget or h.bench then return 0 end
+    return 2
+  end
+  table.sort(out, function(a, b)
+    local ia, ib = rank(a), rank(b)
+    if ia ~= ib then return ia < ib end
+    local ra, rb = pick_rect(a), pick_rect(b)
+    local sa, sb = ra[3] * ra[4], rb[3] * rb[4]
+    if sa ~= sb then return sa < sb end
+    return a._seq < b._seq
+  end)
   return out
 end
 
@@ -209,7 +227,7 @@ function scenes.draw_zoom_engine(zid)
     lg.setColor(0.16, 0.13, 0.10, 0.9)
     lg.setFont(FontS.plate)
     local txt = scenes.texts.ui.door_plate
-    lg.printf(txt, 585, 108, 330, "center")
+    lg.printf(txt, 785, 158, 360, "center")
     lg.setColor(1, 1, 1, 1)
     -- засов: пластина запечена, головка движком
     local g = z.bolt_geom
@@ -219,10 +237,12 @@ function scenes.draw_zoom_engine(zid)
       k = {g.knob_closed[1],
            g.knob_closed[2] + (g.knob_open[2] - g.knob_closed[2]) * f}
     end
-    lg.setColor(0.72, 0.60, 0.38)
-    lg.rectangle("fill", k[1] - 16, k[2] - 26, 32, 52, 6, 6)
+    lg.setColor(0.78, 0.65, 0.4)
+    lg.rectangle("fill", k[1] - 13, k[2] - 22, 26, 44, 5, 5)
     lg.setColor(0.35, 0.27, 0.15)
-    lg.rectangle("line", k[1] - 16, k[2] - 26, 32, 52, 6, 6)
+    lg.rectangle("line", k[1] - 13, k[2] - 22, 26, 44, 5, 5)
+    lg.setColor(1, 1, 0.9, 0.35)
+    lg.rectangle("fill", k[1] - 10, k[2] - 19, 8, 38, 3, 3)
     lg.setColor(1, 1, 1, 1)
     -- мини-LED считывателя
     local led = z.led.reader_small
@@ -241,23 +261,40 @@ function scenes.draw_zoom_engine(zid)
     lg.setColor(1, 1, 1, 1)
   elseif zid == "zoom_panel" then
     lg.setFont(FontS.tiny)
+    local row
+    for _, h in ipairs(z.hotspots) do
+      if h.breaker_x0 then row = h end
+    end
+    local ly = row.rect[2] + row.rect[4] + 16
     for i, name in ipairs(z.labels_engine) do
       if name ~= "" then
-        local cx = 641 + (i - 1) * 38 + 19
+        local cx = row.breaker_x0 + (i - 0.5) * row.breaker_step
         lg.setColor(0, 0, 0, 0.55)
         lg.push()
-        lg.translate(cx + 1, 475); lg.rotate(math.rad(90))
-        lg.printf(name, 0, -60, 120, "left")
+        lg.translate(cx + 1 + 7, ly + 1); lg.rotate(math.rad(90))
+        lg.printf(name, 0, 0, 120, "left")
         lg.pop()
         lg.setColor(0.95, 0.93, 0.86, 0.98)
         lg.push()
-        lg.translate(cx, 474); lg.rotate(math.rad(90))
-        lg.printf(name, 0, -60, 120, "left")
+        lg.translate(cx + 7, ly); lg.rotate(math.rad(90))
+        lg.printf(name, 0, 0, 120, "left")
         lg.pop()
       end
     end
     lg.setColor(1, 1, 1, 1)
   elseif zid == "zoom_bench" then
+    -- бирки вентилей
+    lg.setFont(FontS.plate)
+    for _, vl in ipairs(z.valve_labels or {}) do
+      local w = FontS.plate:getWidth(vl[1]) + 22
+      lg.setColor(0.13, 0.11, 0.08, 0.88)
+      lg.rectangle("fill", vl[2] - w / 2, 452, w, 40, 6, 6)
+      lg.setColor(0.72, 0.58, 0.34)
+      lg.rectangle("line", vl[2] - w / 2, 452, w, 40, 6, 6)
+      lg.setColor(0.93, 0.88, 0.75)
+      lg.printf(vl[1], vl[2] - w / 2, 457, w, "center")
+    end
+    lg.setColor(1, 1, 1, 1)
     -- стрелка манометра
     local g = z.gauge
     local frac = ST:gauge_frac()
@@ -269,6 +306,13 @@ function scenes.draw_zoom_engine(zid)
     lg.setLineWidth(1)
     lg.setColor(0.2, 0.75, 0.3, frac >= 0.99 and 1 or 0)
     lg.circle("fill", g.cx, g.cy, 10)
+    -- легенда управления вентилями
+    lg.setColor(0, 0, 0, 0.55)
+    lg.rectangle("fill", 560, 1016, 800, 44, 10, 10)
+    lg.setColor(0.9, 0.88, 0.8)
+    lg.setFont(FontS.small)
+    lg.printf("ЛКМ — по часовой (+)   ·   ПКМ — против часовой (−)",
+      560, 1026, 800, "center")
     lg.setColor(1, 1, 1, 1)
   elseif zid == "zoom_pc" then
     if not ST.flags.pc_on then

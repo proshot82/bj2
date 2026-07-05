@@ -179,6 +179,74 @@ for n in P["nodes"]:
         for c in lk["clue_sources"]:
             if c not in doc_ids: err(f"{n['id']}: клю не док: {c}")
 
+# 11a) show/hide: голые токены — только флаги; предметы через item:
+flags_set = set()
+for n in P["nodes"]:
+    for g in n["gives"]:
+        if g not in set(T["item_names"]): flags_set.add(g)
+for vid, h in spots:
+    for k in ("show_on", "hide_on"):
+        for f in h.get(k) or []:
+            if ":" not in f:
+                if f in set(T["item_names"]):
+                    err(f"{vid}/{h['id']}: {k} «{f}» — предмет, нужен item:{f}")
+                elif f not in flags_set:
+                    err(f"{vid}/{h['id']}: {k} «{f}» — неизвестный флаг")
+
+# 11b) consumes — только предметы; у каждого предмета есть иконка
+items_set = set(T["item_names"].keys())
+for n in P["nodes"]:
+    for c in n.get("consumes", []):
+        if c not in items_set:
+            err(f"{n['id']}: consumes «{c}» вне item_names")
+for iid in items_set:
+    need_file("icons/ic_" + iid.replace("relic_", "") + ".png",
+              "иконка " + iid)
+
+# 12) hit-тени: центр интерактивного хотспота не перехватывается более
+# приоритетным (модель движка: интерактивные < look, мельче < крупнее)
+def interactive(h):
+    return bool(h.get("node") or h.get("goto") or h.get("goto_room")
+                or h.get("doc") or h.get("widget") or h.get("bench"))
+def rect_mode(h, day):
+    return (h.get("rect_day") or h["rect"]) if day else \
+           (h.get("rect") or h["rect_day"])
+def excl(a, b):
+    sa, ha = set(a.get("show_on", [])), set(a.get("hide_on", []))
+    sb, hb = set(b.get("show_on", [])), set(b.get("hide_on", []))
+    return bool((sa & hb) or (sb & ha))
+def prio(h, seq, day):
+    r = rect_mode(h, day)
+    if h.get("_arrow"): rank = 1
+    elif interactive(h): rank = 0
+    else: rank = 2
+    return (rank, r[2] * r[3], seq)
+
+by_view = {}
+for vid, h in spots:
+    by_view.setdefault(vid, []).append(h)
+for rid, room in S["rooms"].items():
+    for a in room.get("arrows", []):
+        by_view[rid].append({"id": "arrow_" + a["dir"], "rect": a["rect"],
+                             "goto_room": a["goto_room"], "_arrow": True})
+for vid, hs in by_view.items():
+    for day in (False, True):
+        order = sorted(range(len(hs)), key=lambda i: prio(hs[i], i, day))
+        for pos, i in enumerate(order):
+            b = hs[i]
+            if not interactive(b): continue
+            rb = rect_mode(b, day)
+            cx, cy = rb[0] + rb[2] / 2, rb[1] + rb[3] / 2
+            for j in order[:pos]:
+                a = hs[j]
+                if excl(a, b): continue
+                if a.get("goto_room") and a.get("goto_room") == b.get("goto_room"):
+                    continue  # действие идентично — перехват безвреден
+                ra = rect_mode(a, day)
+                if ra[0] <= cx < ra[0] + ra[2] and ra[1] <= cy < ra[1] + ra[3]:
+                    err(f"{vid}: центр {b['id']} перехвачен {a['id']}"
+                        f" ({'день' if day else 'ночь'})")
+
 print(f"хотспотов={len(spots)} катаутов={len(cutouts)} реплик={len(reps)} "
       f"мат={share:.0f}% доков={len(T['docs'])}")
 if ERR:
