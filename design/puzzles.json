@@ -1,0 +1,1171 @@
+{
+ "meta": {
+  "game": "Латунный янычар 2.0",
+  "version": "2.0.0",
+  "graph_rev": 1
+ },
+ "answers": {
+  "pc_pin": "5312",
+  "pin_glyphs": [
+   "yatagan",
+   "crescent",
+   "drum",
+   "fez"
+  ],
+  "glyph_map": {
+   "fez": "2",
+   "yatagan": "5",
+   "crescent": "3",
+   "star": "9",
+   "drum": "1",
+   "horseshoe": "6",
+   "teapot": "8",
+   "key": "0",
+   "fish": "7",
+   "snowflake": "4"
+  },
+  "ira_code": "4991",
+  "alarm_code": "1612",
+  "skud": {
+   "card_number": "131383",
+   "dept": "СКЛАД"
+  },
+  "bench_seq": [
+   "P+",
+   "K1+",
+   "K2+",
+   "S-",
+   "PUMP7"
+  ],
+  "bench_seq_ru": [
+   "П открыть",
+   "К1 открыть",
+   "К2 открыть",
+   "С закрыть",
+   "насос ×7"
+  ],
+  "bench_printed_ru": [
+   "П закрыть",
+   "К1 открыть",
+   "К2 открыть",
+   "С закрыть"
+  ],
+  "bench_fix_idx": 0,
+  "bench_pumps": 7
+ },
+ "tokens": {
+  "about_year": "1994",
+  "ira_rule": "год основания задом наперёд",
+  "alarm_day": "16",
+  "alarm_rule": "ДДММ",
+  "card_number": "131383",
+  "gena_dept": "СКЛАД",
+  "depts": [
+   "АХО",
+   "ОП-1",
+   "ОП-2",
+   "БУХ",
+   "СКЛАД"
+  ],
+  "bench_pumps": "7",
+  "glyph_names_ru": {
+   "fez": "феска",
+   "yatagan": "ятаган",
+   "crescent": "полумесяц",
+   "star": "звезда",
+   "drum": "барабан",
+   "horseshoe": "подкова",
+   "teapot": "чайник",
+   "key": "ключ",
+   "fish": "рыба",
+   "snowflake": "снежинка"
+  }
+ },
+ "docs": [
+  {
+   "id": "doc_sticker",
+   "title": "Стикер под клавиатурой",
+   "room": "A",
+   "at": "zoom_pc",
+   "needs": []
+  },
+  {
+   "id": "doc_poster",
+   "title": "Плакат по охране труда",
+   "room": "A",
+   "at": "wide",
+   "needs": []
+  },
+  {
+   "id": "doc_calendar",
+   "title": "Календарь отдела",
+   "room": "A",
+   "at": "wide",
+   "needs": []
+  },
+  {
+   "id": "doc_karaoke",
+   "title": "Караоке-список",
+   "room": "A",
+   "at": "wide",
+   "needs": []
+  },
+  {
+   "id": "doc_santa",
+   "title": "Бирки Тайного Санты",
+   "room": "A",
+   "at": "zoom_tree",
+   "needs": []
+  },
+  {
+   "id": "doc_postcard",
+   "title": "Открытка «на кофе»",
+   "room": "A",
+   "at": "inv",
+   "needs": [
+    "take_gift"
+   ]
+  },
+  {
+   "id": "doc_card",
+   "title": "Пропуск Гены",
+   "room": "A",
+   "at": "inv",
+   "needs": [
+    "fish_card"
+   ]
+  },
+  {
+   "id": "doc_chat",
+   "title": "Чат отдела",
+   "room": "A",
+   "at": "zoom_pc",
+   "needs": [
+    "pc_unlock"
+   ]
+  },
+  {
+   "id": "doc_order",
+   "title": "Приказ №7",
+   "room": "A",
+   "at": "zoom_pc",
+   "needs": [
+    "pc_unlock"
+   ]
+  },
+  {
+   "id": "doc_about",
+   "title": "«О компании»",
+   "room": "A",
+   "at": "zoom_pc",
+   "needs": [
+    "pc_unlock"
+   ]
+  },
+  {
+   "id": "doc_dict",
+   "title": "Словарь сокращений",
+   "room": "A",
+   "at": "zoom_pc",
+   "needs": [
+    "pc_unlock"
+   ]
+  },
+  {
+   "id": "doc_registry",
+   "title": "Реестр отделов",
+   "room": "A",
+   "at": "zoom_drawer",
+   "needs": [
+    "ira_code"
+   ]
+  },
+  {
+   "id": "doc_journal",
+   "title": "Журнал испытаний",
+   "room": "B",
+   "at": "wide",
+   "needs": [
+    "open_utility"
+   ]
+  },
+  {
+   "id": "doc_bench_note",
+   "title": "Листок-инструкция стенда",
+   "room": "B",
+   "at": "zoom_bench",
+   "needs": [
+    "open_utility"
+   ]
+  },
+  {
+   "id": "doc_schema",
+   "title": "Схема щитка",
+   "room": "B",
+   "at": "zoom_panel",
+   "needs": [
+    "open_panel"
+   ]
+  },
+  {
+   "id": "doc_mop_tag",
+   "title": "Инвентарная бирка швабры",
+   "room": "B",
+   "at": "zoom_closet",
+   "needs": [
+    "open_utility"
+   ]
+  },
+  {
+   "id": "doc_skud_blank",
+   "title": "Форма СКУД-2 (бланк)",
+   "room": "A",
+   "at": "zoom_pc",
+   "needs": [
+    "pc_unlock"
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "id": "survey_door",
+   "branch": "D0",
+   "room": "A",
+   "type": "action",
+   "needs": [],
+   "gives": [
+    "surveyed"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "take_ruler",
+   "branch": "D0",
+   "room": "A",
+   "type": "pickup",
+   "needs": [],
+   "gives": [
+    "ruler"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "pry_drawer",
+   "branch": "D0",
+   "room": "A",
+   "type": "action",
+   "needs": [
+    "ruler"
+   ],
+   "gives": [
+    "drawer_pried"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "take_handle",
+   "branch": "D0",
+   "room": "A",
+   "type": "pickup",
+   "needs": [
+    "drawer_pried"
+   ],
+   "gives": [
+    "handle"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "search_drawer_again",
+   "branch": "D0",
+   "room": "A",
+   "type": "pickup",
+   "needs": [
+    "drawer_pried",
+    "handle"
+   ],
+   "gives": [
+    "relic_yatagan"
+   ],
+   "mand": false,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": true
+  },
+  {
+   "id": "open_utility",
+   "branch": "D0",
+   "room": "A",
+   "type": "action",
+   "needs": [
+    "handle"
+   ],
+   "gives": [
+    "utility_open"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [
+    "handle"
+   ],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "see_net",
+   "branch": "D1",
+   "room": "B",
+   "type": "action",
+   "needs": [
+    "utility_open"
+   ],
+   "gives": [
+    "seen_net"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "take_pointer",
+   "branch": "D1",
+   "room": "A",
+   "type": "pickup",
+   "needs": [],
+   "gives": [
+    "pointer"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "push_net",
+   "branch": "D1",
+   "room": "A",
+   "type": "action",
+   "needs": [
+    "pointer",
+    "seen_net"
+   ],
+   "gives": [
+    "net_down",
+    "vents_open"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "take_net",
+   "branch": "D1",
+   "room": "B",
+   "type": "pickup",
+   "needs": [
+    "net_down"
+   ],
+   "gives": [
+    "net"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "combine_longnet",
+   "branch": "D1",
+   "room": "inv",
+   "type": "combine",
+   "needs": [
+    "net",
+    "pointer"
+   ],
+   "gives": [
+    "longnet"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [
+    "net",
+    "pointer"
+   ],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "fish_card",
+   "branch": "D1",
+   "room": "A",
+   "type": "action",
+   "needs": [
+    "longnet"
+   ],
+   "gives": [
+    "card"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "pc_unlock",
+   "branch": "D1",
+   "room": "A",
+   "type": "lock",
+   "needs": [],
+   "gives": [
+    "pc_on"
+   ],
+   "mand": true,
+   "lock": {
+    "kind": "keypad",
+    "id": "pc_pin",
+    "len": 4,
+    "clue_sources": [
+     "doc_sticker",
+     "doc_poster"
+    ]
+   },
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "ira_code",
+   "branch": "D1",
+   "room": "A",
+   "type": "lock",
+   "needs": [],
+   "gives": [
+    "drawer_ira_open"
+   ],
+   "mand": true,
+   "lock": {
+    "kind": "keypad",
+    "id": "ira_code",
+    "len": 4,
+    "clue_sources": [
+     "doc_chat",
+     "doc_about"
+    ]
+   },
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "skud_form",
+   "branch": "D1",
+   "room": "A",
+   "type": "lock",
+   "needs": [
+    "card",
+    "pc_on"
+   ],
+   "gives": [
+    "card_active"
+   ],
+   "mand": true,
+   "lock": {
+    "kind": "form",
+    "id": "skud",
+    "clue_sources": [
+     "doc_card",
+     "doc_registry",
+     "doc_order"
+    ]
+   },
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "copy_pass",
+   "branch": "D1",
+   "room": "A",
+   "type": "action",
+   "needs": [
+    "card",
+    "sockets_on"
+   ],
+   "gives": [
+    "copy"
+   ],
+   "mand": false,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "alarm_off",
+   "branch": "D2",
+   "room": "A",
+   "type": "lock",
+   "needs": [],
+   "gives": [
+    "alarm_off"
+   ],
+   "mand": true,
+   "lock": {
+    "kind": "keypad",
+    "id": "alarm_code",
+    "len": 4,
+    "clue_sources": [
+     "doc_calendar",
+     "doc_journal",
+     "doc_chat"
+    ]
+   },
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "take_key_toy",
+   "branch": "D3",
+   "room": "A",
+   "type": "pickup",
+   "needs": [],
+   "gives": [
+    "key_toy"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "open_workbench",
+   "branch": "D3",
+   "room": "B",
+   "type": "action",
+   "needs": [
+    "key_toy",
+    "utility_open"
+   ],
+   "gives": [
+    "wb_open"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [
+    "key_toy"
+   ],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "take_wrench",
+   "branch": "D3",
+   "room": "B",
+   "type": "pickup",
+   "needs": [
+    "wb_open"
+   ],
+   "gives": [
+    "wrench"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "take_wheel",
+   "branch": "D3",
+   "room": "A",
+   "type": "pickup",
+   "needs": [],
+   "gives": [
+    "wheel"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "install_wheel",
+   "branch": "D3",
+   "room": "B",
+   "type": "action",
+   "needs": [
+    "wheel",
+    "utility_open"
+   ],
+   "gives": [
+    "wheel_on"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [
+    "wheel"
+   ],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "bench_solve",
+   "branch": "D3",
+   "room": "B",
+   "type": "lock",
+   "needs": [
+    "wheel_on"
+   ],
+   "gives": [
+    "bench_solved"
+   ],
+   "mand": true,
+   "lock": {
+    "kind": "bench",
+    "id": "bench_seq",
+    "clue_sources": [
+     "doc_bench_note",
+     "doc_journal"
+    ]
+   },
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "take_collector",
+   "branch": "D3",
+   "room": "B",
+   "type": "pickup",
+   "needs": [
+    "bench_solved"
+   ],
+   "gives": [
+    "collector"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "combine_trikey",
+   "branch": "D3",
+   "room": "inv",
+   "type": "combine",
+   "needs": [
+    "wrench",
+    "collector"
+   ],
+   "gives": [
+    "trikey"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [
+    "collector"
+   ],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "open_panel",
+   "branch": "D3",
+   "room": "B",
+   "type": "action",
+   "needs": [
+    "trikey",
+    "utility_open"
+   ],
+   "gives": [
+    "panel_open"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "power_main",
+   "branch": "D3",
+   "room": "B",
+   "type": "action",
+   "needs": [
+    "panel_open"
+   ],
+   "gives": [
+    "power_on"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "sockets_on",
+   "branch": "D3",
+   "room": "B",
+   "type": "action",
+   "needs": [
+    "panel_open"
+   ],
+   "gives": [
+    "sockets_on"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "take_gift",
+   "branch": "D4",
+   "room": "A",
+   "type": "pickup",
+   "needs": [],
+   "gives": [
+    "hundred"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "brew_coffee",
+   "branch": "D4",
+   "room": "A",
+   "type": "action",
+   "needs": [
+    "sockets_on",
+    "hundred"
+   ],
+   "gives": [
+    "coffee"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [
+    "hundred"
+   ],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "take_validol",
+   "branch": "D4",
+   "room": "B",
+   "type": "pickup",
+   "needs": [
+    "utility_open"
+   ],
+   "gives": [
+    "validol"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "combine_calm",
+   "branch": "D4",
+   "room": "inv",
+   "type": "combine",
+   "needs": [
+    "validol",
+    "coffee"
+   ],
+   "gives": [
+    "calm_down"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [
+    "validol",
+    "coffee"
+   ],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "take_grease",
+   "branch": "D5",
+   "room": "B",
+   "type": "pickup",
+   "needs": [
+    "utility_open"
+   ],
+   "gives": [
+    "grease"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "bolt_free",
+   "branch": "D5",
+   "room": "A",
+   "type": "action",
+   "needs": [
+    "grease",
+    "wrench"
+   ],
+   "gives": [
+    "bolt_free"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [
+    "grease"
+   ],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "relic_badge",
+   "branch": "D6",
+   "room": "A",
+   "type": "action",
+   "needs": [
+    "longnet"
+   ],
+   "gives": [
+    "relic_badge"
+   ],
+   "mand": false,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": true
+  },
+  {
+   "id": "take_mop",
+   "branch": "D6",
+   "room": "B",
+   "type": "pickup",
+   "needs": [
+    "utility_open"
+   ],
+   "gives": [
+    "mop"
+   ],
+   "mand": false,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "box_down",
+   "branch": "D6",
+   "room": "B",
+   "type": "action",
+   "needs": [
+    "mop",
+    "utility_open"
+   ],
+   "gives": [
+    "box_down"
+   ],
+   "mand": false,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "open_box",
+   "branch": "D6",
+   "room": "B",
+   "type": "action",
+   "needs": [
+    "box_down"
+   ],
+   "gives": [
+    "relic_fez"
+   ],
+   "mand": false,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": true
+  },
+  {
+   "id": "search_box_again",
+   "branch": "D6",
+   "room": "B",
+   "type": "action",
+   "needs": [
+    "relic_fez"
+   ],
+   "gives": [
+    "crown"
+   ],
+   "mand": false,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": true
+  },
+  {
+   "id": "reader_swipe",
+   "branch": "WIN",
+   "room": "A",
+   "type": "action",
+   "needs": [
+    "card_active",
+    "power_on"
+   ],
+   "gives": [
+    "reader_green"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "door_open",
+   "branch": "WIN",
+   "room": "A",
+   "type": "win",
+   "needs": [
+    "surveyed",
+    "reader_green",
+    "alarm_off",
+    "bolt_free",
+    "calm_down"
+   ],
+   "gives": [
+    "victory"
+   ],
+   "mand": true,
+   "lock": null,
+   "consumes": [],
+   "herring": false,
+   "secret": false
+  },
+  {
+   "id": "h_window",
+   "branch": "H",
+   "room": "A",
+   "type": "herring",
+   "needs": [],
+   "gives": [],
+   "mand": false,
+   "lock": null,
+   "consumes": [],
+   "herring": true,
+   "secret": false
+  },
+  {
+   "id": "h_intercom",
+   "branch": "H",
+   "room": "A",
+   "type": "herring",
+   "needs": [],
+   "gives": [],
+   "mand": false,
+   "lock": null,
+   "consumes": [],
+   "herring": true,
+   "secret": false
+  },
+  {
+   "id": "h_extinguisher",
+   "branch": "H",
+   "room": "A",
+   "type": "herring",
+   "needs": [],
+   "gives": [],
+   "mand": false,
+   "lock": null,
+   "consumes": [],
+   "herring": true,
+   "secret": false
+  },
+  {
+   "id": "h_phone",
+   "branch": "H",
+   "room": "A",
+   "type": "herring",
+   "needs": [],
+   "gives": [],
+   "mand": false,
+   "lock": null,
+   "consumes": [],
+   "herring": true,
+   "secret": false
+  },
+  {
+   "id": "h_boiler",
+   "branch": "H",
+   "room": "B",
+   "type": "herring",
+   "needs": [],
+   "gives": [],
+   "mand": false,
+   "lock": null,
+   "consumes": [],
+   "herring": true,
+   "secret": false
+  },
+  {
+   "id": "h_sink_valve",
+   "branch": "H",
+   "room": "B",
+   "type": "herring",
+   "needs": [],
+   "gives": [],
+   "mand": false,
+   "lock": null,
+   "consumes": [],
+   "herring": true,
+   "secret": false
+  },
+  {
+   "id": "h_br_elka",
+   "branch": "H",
+   "room": "B",
+   "type": "herring",
+   "needs": [
+    "panel_open"
+   ],
+   "gives": [
+    "garland_on"
+   ],
+   "mand": false,
+   "lock": null,
+   "consumes": [],
+   "herring": true,
+   "secret": false
+  },
+  {
+   "id": "h_br_srv",
+   "branch": "H",
+   "room": "B",
+   "type": "herring",
+   "needs": [
+    "panel_open"
+   ],
+   "gives": [],
+   "mand": false,
+   "lock": null,
+   "consumes": [],
+   "herring": true,
+   "secret": false
+  },
+  {
+   "id": "h_br_rezerv",
+   "branch": "H",
+   "room": "B",
+   "type": "herring",
+   "needs": [
+    "panel_open"
+   ],
+   "gives": [],
+   "mand": false,
+   "lock": null,
+   "consumes": [],
+   "herring": true,
+   "secret": false
+  },
+  {
+   "id": "h_fish_poke",
+   "branch": "H",
+   "room": "A",
+   "type": "herring",
+   "needs": [],
+   "gives": [],
+   "mand": false,
+   "lock": null,
+   "consumes": [],
+   "herring": true,
+   "secret": false
+  },
+  {
+   "id": "h_karaoke_sing",
+   "branch": "H",
+   "room": "A",
+   "type": "herring",
+   "needs": [],
+   "gives": [],
+   "mand": false,
+   "lock": null,
+   "consumes": [],
+   "herring": true,
+   "secret": false
+  }
+ ],
+ "relics": [
+  "relic_yatagan",
+  "relic_badge",
+  "relic_fez"
+ ],
+ "bonus": "crown",
+ "goals": [
+  {
+   "id": "g_card",
+   "flag": "card_active",
+   "t": "Оживить пропуск"
+  },
+  {
+   "id": "g_power",
+   "flag": "power_on",
+   "t": "Дать свет"
+  },
+  {
+   "id": "g_alarm",
+   "flag": "alarm_off",
+   "t": "Снять сигнализацию"
+  },
+  {
+   "id": "g_bolt",
+   "flag": "bolt_free",
+   "t": "Победить засов"
+  },
+  {
+   "id": "g_calm",
+   "flag": "calm_down",
+   "t": "Унять тряску"
+  }
+ ]
+}
