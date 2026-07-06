@@ -469,10 +469,38 @@ end
 
 -- ================= цели =================
 local goal_texts = nil
+local goals_min = false          -- свёрнута ли плашка (тоггл кликом)
+local function goals_rect()
+  if not ST.flags.surveyed then return nil end
+  local h = goals_min and 34 or (34 + #P.goals * 30 + 32)
+  return 20, 120, 330, h
+end
+function ui.goals_click(mx, my)
+  local x, y, w, h = goals_rect()
+  if not x then return false end
+  if mx >= x and mx < x + w and my >= y and my < y + h then
+    goals_min = not goals_min
+    return true
+  end
+  return false
+end
 local function goals_draw()
   if not ST.flags.surveyed then return end
   local ox, oy = shk(3)
   local x, y = 20 + ox, 120 + oy
+  if goals_min then
+    lg.setColor(C.panel)
+    lg.rectangle("fill", x, y, 330, 34, 10, 10)
+    lg.setColor(C.panel_line)
+    lg.rectangle("line", x, y, 330, 34, 10, 10)
+    lg.setFont(F.badge)
+    lg.setColor(C.brass)
+    local dn, tot = 0, #P.goals
+    for _, g in ipairs(P.goals) do if ST.flags[g.flag] then dn = dn + 1 end end
+    lg.print(T.ui.goals .. "  " .. dn .. "/" .. tot .. "  ▸", x + 14, y + 6)
+    lg.setColor(1, 1, 1)
+    return
+  end
   lg.setColor(C.panel)
   lg.rectangle("fill", x, y, 330, 34 + #P.goals * 30 + 32, 10, 10)
   lg.setColor(C.panel_line)
@@ -1149,6 +1177,9 @@ function ui.mousepressed(x, y, btn)
   if ui.dialog_active() then
     if btn == 1 then dlg_click() end
     return
+  end
+  if btn == 1 and not widget and ui.goals_click(x, y) then
+    snd("ui_click"); return       -- тоггл плашки целей, клик не сквозит в сцену
   end
   if widget then
     if btn == 2 then ui.close_widget(); snd("zoom_out"); return end

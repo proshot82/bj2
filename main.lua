@@ -181,6 +181,7 @@ local function recalc_letterbox()
   letter.oy = (h - 1080 * s) / 2
 end
 function love.resize() recalc_letterbox() end
+-- scenes получает живую ссылку на letterbox (для scissor снега)
 
 local function to_world(x, y)
   return (x - letter.ox) / letter.sx, (y - letter.oy) / letter.sy
@@ -189,6 +190,7 @@ end
 -- ---------- цикл ----------
 function love.update(dt)
   recalc_letterbox()
+  scenes.set_letterbox(letter)
   if not ui.in_menu() then scenes.update(dt) end
   ui.update(dt)
   local ap = package.loaded["src.autoplay"]

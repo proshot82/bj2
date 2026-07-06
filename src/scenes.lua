@@ -6,6 +6,7 @@ local S, ST, IMG   -- scene.json, state, кэш картинок
 local view = {kind = "room", room = "A", zoom = nil}
 local t_global = 0
 local snow = nil
+local LB = {sx = 1, sy = 1, ox = 0, oy = 0}   -- letterbox из main.lua
 
 function scenes.init(scene_json, state, images, texts)
   S, ST, IMG = scene_json, state, images
@@ -18,6 +19,7 @@ function scenes.init(scene_json, state, images, texts)
   end
 end
 
+function scenes.set_letterbox(lb) LB = lb end
 function scenes.view() return view end
 function scenes.mode() return ST.flags.power_on and "day" or "night" end
 
@@ -113,7 +115,8 @@ end
 
 -- снег за окном офиса (ночь и день)
 local function draw_snow()
-  lg.setScissor(6, 64, 320, 534)
+  -- scissor в ЭКРАННЫХ координатах: учитываем letterbox
+  lg.setScissor(LB.ox + 6 * LB.sx, LB.oy + 64 * LB.sy, 320 * LB.sx, 534 * LB.sy)
   lg.setColor(1, 1, 1, 0.85)
   for _, f in ipairs(snow) do
     lg.circle("fill", f.x, f.y, 2.1)
