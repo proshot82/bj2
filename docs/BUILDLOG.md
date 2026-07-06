@@ -110,6 +110,8 @@
 - Wine 9.0 из пути «Тестовая папка 2.0 (проверка)»: --selftest rc=0,
   --autoplay rc=0, 18/18 скринов; титул wine≈native (mean|Δ|=1,3).
 - SHA-256:
-  ed4fa834fa128ce06068bb8563d16fce7d5c56f4d010d9f2f1d611059650ebdf  dist/BrassJanissary-2.0.1-win64-portable.zip
-  2ea91ca760cfd31cefd8bf71a6691674b95ac9c4d06b9c3bf80bf920b8ff3fcd  BrassJanissary2.exe (2.0.1)
+  d93c4604a1d6229125af6cdab7c3dba70cf31763d7701c9455861388c1477b37  dist/BrassJanissary-2.0.1-win64-portable.zip
+  6cc87a3bfbc0d9864a3f6563e8eed9aacfd051dac31665b9bf1511c9d0070e08  BrassJanissary2.exe (2.0.1)
+- Пересборка до публикации: бейдж «2.0» убран с титула (титул —
+  только арт-лого); конвейер и wine-гаунтлет прогнаны заново, PASS.
 - Размер ZIP: 66M. Portable-only, инсталлятора нет.

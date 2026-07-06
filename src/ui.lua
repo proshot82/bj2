@@ -873,9 +873,6 @@ local function draw_title_logo()
   -- движковый вариант v2.0.0 — в git-истории (санация бракованного лого)
   lg.setColor(1, 1, 1)
   lg.draw(IMG["ui/logo_title.png"], 360, 84)
-  lg.setFont(F.h2); lg.setColor(0.86, 0.66, 0.3)
-  lg.print("2.0", 1446, 272)
-  lg.setColor(1, 1, 1)
 end
 
 local title_btns
