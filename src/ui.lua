@@ -869,48 +869,12 @@ end
 
 -- ================= МЕНЮ/ТИТУЛ =================
 local function draw_title_logo()
-  -- движковая замена бракованного logo_title.png (бейслайн v2.0.0)
-  local l1, l2 = "ЛАТУННЫЙ", "ЯНЫЧАР"
-  lg.setFont(F.h1)
-  local function line(txt, y)
-    lg.setColor(0, 0, 0, 0.55)                       -- тень
-    lg.printf(txt, 5, y + 6, 1920, "center")
-    lg.setColor(0.22, 0.13, 0.04)                     -- обводка
-    for dx = -3, 3, 3 do
-      for dy = -3, 3, 3 do
-        if dx ~= 0 or dy ~= 0 then
-          lg.printf(txt, dx, y + dy, 1920, "center")
-        end
-      end
-    end
-    local hpx = F.h1:getHeight()
-    lg.setScissor(0, y, 1920, math.floor(hpx * 0.52)) -- верх: светлая латунь
-    lg.setColor(0.97, 0.84, 0.47)
-    lg.printf(txt, 0, y, 1920, "center")
-    lg.setScissor(0, y + math.floor(hpx * 0.52), 1920, hpx)
-    lg.setColor(0.76, 0.56, 0.24)                     -- низ: тёмная латунь
-    lg.printf(txt, 0, y, 1920, "center")
-    lg.setScissor()
-  end
-  line(l1, 108)
-  line(l2, 212)
-  -- росчерк-сабля под названием
-  local pts = {}
-  for i = 0, 24 do
-    local t = i / 24
-    local x = 700 + 520 * t
-    local y = 336 + math.sin(t * math.pi) * 22 - t * 10
-    pts[#pts + 1] = x; pts[#pts + 1] = y
-  end
-  lg.setLineWidth(9); lg.setColor(0.24, 0.14, 0.05)
-  lg.line(pts)
-  lg.setLineWidth(6); lg.setColor(0.86, 0.66, 0.3)
-  lg.line(pts)
-  lg.setLineWidth(2); lg.setColor(0.99, 0.9, 0.6)
-  lg.line(pts)
-  lg.setLineWidth(1)
+  -- арт-логотип 2.0.1 (перегенерация по MIGRATION §5.1);
+  -- движковый вариант v2.0.0 — в git-истории (санация бракованного лого)
+  lg.setColor(1, 1, 1)
+  lg.draw(IMG["ui/logo_title.png"], 360, 84)
   lg.setFont(F.h2); lg.setColor(0.86, 0.66, 0.3)
-  lg.print("2.0", 1244, 300)
+  lg.print("2.0", 1446, 272)
   lg.setColor(1, 1, 1)
 end
 

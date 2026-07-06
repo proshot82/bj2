@@ -94,3 +94,22 @@
   f309e11d063fe7af82881c66f8c5e37a700eef230e4bb5f1369e81d91718f9e2  dist/BrassJanissary-2.0.0-win64-portable.zip
   982419c2d4aac14e53ddd2a4455f9bea1f6906636d17eddfdc835eca8c8d4ab4  work/pkg/BrassJanissary-2.0.0/BrassJanissary2.exe
 - Размер ZIP: 66M.
+
+## Фаза 6.1 — Релиз 2.0.1 (арт-титул)
+- MIGRATION §5.1–5.2 закрыты: арт-лого и арт-фон титула сгенерированы
+  пользователем (ChatGPT) по промптам §5, интегрированы промерами.
+- logo_title.png: кроп по bbox альфы, нормализация в холст 1200×420;
+  src/ui.lua: draw_title_logo() теперь рисует картинку (движковый
+  вариант v2.0.0 — в git-истории). Бейдж «2.0» сохранён.
+- bg_title.png: апскейл 1672×941 → 1920×1080 (LANCZOS, аспект совпал
+  до 0,06%); вывеска очищена до пустой рамы по споку (генератор
+  нарисовал «VALTEC» латиницей — реальный товарный знак; убрано
+  нормализованной диффузией, снег/рама сохранены). Зона титула:
+  std 4,6 — чисто. Поставленные оригиналы — work/orig_*_2.0.1.png.
+- Конвейер §3 целиком: все гейты PASS (см. отчёт сессии).
+- Wine 9.0 из пути «Тестовая папка 2.0 (проверка)»: --selftest rc=0,
+  --autoplay rc=0, 18/18 скринов; титул wine≈native (mean|Δ|=1,3).
+- SHA-256:
+  ed4fa834fa128ce06068bb8563d16fce7d5c56f4d010d9f2f1d611059650ebdf  dist/BrassJanissary-2.0.1-win64-portable.zip
+  2ea91ca760cfd31cefd8bf71a6691674b95ac9c4d06b9c3bf80bf920b8ff3fcd  BrassJanissary2.exe (2.0.1)
+- Размер ZIP: 66M. Portable-only, инсталлятора нет.
