@@ -86,7 +86,7 @@ function scenes.update(dt)
   for _, f in ipairs(snow) do
     f.y = f.y + f.v * dt
     f.x = f.x + math.sin(t_global * 0.8 + f.ph) * 8 * dt
-    if f.y > 596 then f.y = 66; end
+    if f.y > 492 then f.y = 66; end
     if f.x < 4 then f.x = 322 elseif f.x > 326 then f.x = 8 end
   end
 end
@@ -116,7 +116,7 @@ end
 -- снег за окном офиса (ночь и день)
 local function draw_snow()
   -- scissor в ЭКРАННЫХ координатах: учитываем letterbox
-  lg.setScissor(LB.ox + 6 * LB.sx, LB.oy + 64 * LB.sy, 320 * LB.sx, 534 * LB.sy)
+  lg.setScissor(LB.ox + 6 * LB.sx, LB.oy + 64 * LB.sy, 320 * LB.sx, 436 * LB.sy)
   lg.setColor(1, 1, 1, 0.85)
   for _, f in ipairs(snow) do
     lg.circle("fill", f.x, f.y, 2.1)
@@ -320,16 +320,18 @@ function scenes.draw_zoom_engine(zid)
   elseif zid == "zoom_pc" then
     if not ST.flags.pc_on then
       -- скринсейвер DVD-style
-      local w, h = 250, 84
-      local x = 390 + math.abs(((t_global * 120) % (2 * (645 - w))) - (645 - w))
-      local y = 110 + math.abs(((t_global * 88) % (2 * (555 - h))) - (555 - h))
+      -- экран монитора в арте зума: 1090..1830 x 130..800
+      local w, h = 460, 110
+      local x = 1092 + math.abs(((t_global * 120) % (2 * (736 - w))) - (736 - w))
+      local y = 132 + math.abs(((t_global * 88) % (2 * (666 - h))) - (666 - h))
       lg.setColor(0.05, 0.07, 0.13)
-      lg.rectangle("fill", 392, 112, 641, 551)
+      lg.rectangle("fill", 1092, 132, 736, 666)
       lg.setColor(0.83, 0.68, 0.35)
       lg.setFont(FontS.h2)
-      lg.printf("ВАЛТЕК", x, y + 18, w, "center")
+      lg.printf("У КОГО СТОИТ «ВАЛТЕК» —", x, y + 8, w, "center")
+      lg.printf("У ТОГО СТОИТ НАВЕК", x, y + 46, w, "center")
       lg.setFont(FontS.small)
-      lg.printf("нажми, если смелый", x, y + 54, w, "center")
+      lg.printf("нажми, если смелый", x, y + 84, w, "center")
       lg.setColor(1, 1, 1, 1)
     end
   end

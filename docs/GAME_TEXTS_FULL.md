@@ -1,0 +1,1236 @@
+# ПОЛНЫЙ ТЕКСТ ИГРЫ — для ручной редактуры
+
+> ВАЖНО: файл сгенерирован. Правки вносить НЕ сюда, а в tools/gen_texts.py
+> (реплики/документы/UI) и tools/gen_scene.py (названия зон), затем перегенерация.
+> Данный файл — слепок design/texts.json + подписей зон для вычитки.
+
+- `ui.title_start`: НАЧАТЬ
+- `ui.title_continue`: ПРОДОЛЖИТЬ
+- `ui.title_settings`: НАСТРОЙКИ
+- `ui.title_quit`: ВЫХОД
+- `ui.pause`: ПАУЗА
+- `ui.resume`: Вернуться
+- `ui.save_quit`: Сохранить и выйти
+- `ui.settings`: Настройки
+- `ui.music`: Музыка
+- `ui.sound`: Звуки
+- `ui.fullscreen`: Полный экран
+- `ui.noshake`: Убрать тряску
+- `ui.back`: Назад
+- `ui.goals`: ЦЕЛИ
+- `ui.secret_goal`: ??? %d/3
+- `ui.hint_btn`: СОВЕТ ПРЕДКА
+- `ui.inventory`: КАРМАНЫ
+- `ui.combine_fail`: Это между собой не женится.
+- `ui.reader_close`: Закрыть [ПКМ]
+- `ui.form_send`: ОТПРАВИТЬ
+- `ui.form_card_no`: № карты
+- `ui.form_dept`: Отдел
+- `ui.yes`: Да
+- `ui.no`: Нет
+- `ui.saved`: Сохранено.
+- `ui.age_gate`: 18+  ·  мат, никотин пассивно, офис
+- `ui.loading`: Грузим январь…
+- `ui.victory_title`: СВОБОДА
+- `ui.stats_steps`: Действий: %d
+- `ui.stats_time`: Времени: %s
+- `ui.stats_relics`: Реликвий: %d/3
+- `ui.stats_crown`: Корона: да
+- `ui.door_plate`: ООО «ВАЛТЕК»
+Отдел продаж
+Закрыто по 8.01
+Отгрузка — Геннадий
+- `opening[0].s`: lap
+- `opening[0].e`: tired
+- `opening[0].t`: Первое января. Три ночи. Я в офисе.
+- `opening[1].s`: lap
+- `opening[1].e`: angry
+- `opening[1].t`: Корпоратив кончился, все свалили, а я, блядь, уснул на диване под «Иронию судьбы».
+- `opening[2].s`: lap
+- `opening[2].e`: panic
+- `opening[2].t`: Дверь на магнитном замке. Электричества нет. Телефон — три процента, и те на фонарик.
+- `opening[3].s`: anc
+- `opening[3].e`: calm
+- `opening[3].t`: Не скули, потомок. Твой пращур брал Измаил. А ты возьми хотя бы дверь.
+- `opening[4].s`: lap
+- `opening[4].e`: worried
+- `opening[4].t`: О нет. Опять ты. Воображаемый янычар — это когда совсем плохо с головой или ещё терпимо?
+- `opening[5].s`: anc
+- `opening[5].e`: proud
+- `opening[5].t`: Я — голос крови. Латунной, судя по этому офису. Осмотрись. Начни с двери, раз она твой враг.
+- `opening[6].s`: lap
+- `opening[6].e`: neutral
+- `opening[6].t`: Ладно, хуле. План: осмотреть дверь, найти свет, не сдохнуть. В таком порядке.
+- `opening[7].s`: lap
+- `opening[7].e`: worried
+- `opening[7].t`: И руки ходуном — похмелье трясёт весь экран моей жизни.
+- `opening[8].s`: anc
+- `opening[8].e`: stern
+- `opening[8].t`: Дрожь уймут турецкий кофе и валидол — янычар выпьет оба разом. Размазня полезет в настройки, там есть «Убрать тряску».
+- `nodes.survey_door.do[0].s`: lap
+- `nodes.survey_door.do[0].e`: neutral
+- `nodes.survey_door.do[0].t`: Так. Магнитный замок, считыватель мёртвый, засов прикипел. И сигналка мигает, сука.
+- `nodes.survey_door.do[1].s`: anc
+- `nodes.survey_door.do[1].e`: stern
+- `nodes.survey_door.do[1].t`: Разведка проведена. Теперь у тебя есть список целей, солдат. На стене твоего разума.
+- `nodes.survey_door.do[2].s`: lap
+- `nodes.survey_door.do[2].e`: tired
+- `nodes.survey_door.do[2].t`: На стене моего разума висит только календарь с телеграм-каналами. Но ладно, цели так цели.
+- `nodes.survey_door.already[0].s`: lap
+- `nodes.survey_door.already[0].e`: neutral
+- `nodes.survey_door.already[0].t`: Дверь. Всё ещё закрыта. Всё ещё дверь.
+- `nodes.take_ruler.do[0].s`: lap
+- `nodes.take_ruler.do[0].e`: neutral
+- `nodes.take_ruler.do[0].t`: Линейка. Тридцать сантиметров канцелярской, блядь, агрессии.
+- `nodes.take_ruler.already[0].s`: lap
+- `nodes.take_ruler.already[0].e`: neutral
+- `nodes.take_ruler.already[0].t`: Линейку я уже прикарманил.
+- `nodes.pry_drawer.do[0].s`: lap
+- `nodes.pry_drawer.do[0].e`: smug
+- `nodes.pry_drawer.do[0].t`: Хрусь. Ящик вскрыт. Моя мебель — что хочу, то и ломаю.
+- `nodes.pry_drawer.do[1].s`: anc
+- `nodes.pry_drawer.do[1].e`: proud
+- `nodes.pry_drawer.do[1].t`: Ятаганом было бы изящнее. Но линейка — тоже сталь. Почти.
+- `nodes.pry_drawer.fail[0].s`: lap
+- `nodes.pry_drawer.fail[0].e`: worried
+- `nodes.pry_drawer.fail[0].t`: Заперт, сука. Ключ я посеял ещё в октябре. Нужно что-то плоское и наглое.
+- `nodes.pry_drawer.already[0].s`: lap
+- `nodes.pry_drawer.already[0].e`: neutral
+- `nodes.pry_drawer.already[0].t`: Уже вскрыт. Дважды ломать — это уже вандализм.
+- `nodes.take_handle.do[0].s`: lap
+- `nodes.take_handle.do[0].e`: inspired
+- `nodes.take_handle.do[0].t`: Под лотком — ручка-шток! Квадратная, как мой график. Я её с двери щитовой снял ещё летом, чтоб уборщица кофе мой не пила.
+- `nodes.take_handle.do[1].s`: anc
+- `nodes.take_handle.do[1].e`: smug
+- `nodes.take_handle.do[1].t`: Гениальный стратег, ёб твою дивизию. Запер сам себя от самого себя.
+- `nodes.take_handle.already[0].s`: lap
+- `nodes.take_handle.already[0].e`: neutral
+- `nodes.take_handle.already[0].t`: Ручка уже в кармане, дальше рыться — только скрепки, блядь, будить.
+- `nodes.search_drawer_again.do[0].s`: lap
+- `nodes.search_drawer_again.do[0].e`: inspired
+- `nodes.search_drawer_again.do[0].t`: Стоп. На дне, под скрепками… канцелярский ятаган! Нож для писем в форме сабли, с корпоратива-2016!
+- `nodes.search_drawer_again.do[1].s`: anc
+- `nodes.search_drawer_again.do[1].e`: proud
+- `nodes.search_drawer_again.do[1].t`: РЕЛИКВИЯ ПЕРВАЯ! Клинок предков! Пусть и для вскрытия конвертов, а не черепов.
+- `nodes.search_drawer_again.do[2].s`: lap
+- `nodes.search_drawer_again.do[2].e`: smug
+- `nodes.search_drawer_again.do[2].t`: Черепа у нас вскрывает только квартальный отчёт.
+- `nodes.search_drawer_again.already[0].s`: lap
+- `nodes.search_drawer_again.already[0].e`: neutral
+- `nodes.search_drawer_again.already[0].t`: Там больше ни хуя. Только пыль и сожаления.
+- `nodes.open_utility.do[0].s`: lap
+- `nodes.open_utility.do[0].e`: neutral
+- `nodes.open_utility.do[0].t`: Насаживаю квадрат на шток… поворот… Щёлк. Дверь щитовой открыта, блядь, наконец-то.
+- `nodes.open_utility.do[1].s`: anc
+- `nodes.open_utility.do[1].e`: calm
+- `nodes.open_utility.do[1].t`: Врата пали. Входи. Там темно, как в шатре визиря, но ты же не боишься?
+- `nodes.open_utility.do[2].s`: lap
+- `nodes.open_utility.do[2].e`: worried
+- `nodes.open_utility.do[2].t`: Боюсь, бля. Но у меня фонарик и три процента храбрости.
+- `nodes.open_utility.fail[0].s`: lap
+- `nodes.open_utility.fail[0].e`: tired
+- `nodes.open_utility.fail[0].t`: Голый квадратный шток. Пальцами не провернуть — я пробовал, до сих пор стыдно.
+- `nodes.open_utility.already[0].s`: lap
+- `nodes.open_utility.already[0].e`: neutral
+- `nodes.open_utility.already[0].t`: Открыто уже.
+- `nodes.see_net.do[0].s`: lap
+- `nodes.see_net.do[0].e`: neutral
+- `nodes.see_net.do[0].t`: На шкафу — сачок. Без ручки. Высоко, сука — с пола не достать, а стремянку проебали в 2021-м.
+- `nodes.see_net.do[1].s`: anc
+- `nodes.see_net.do[1].e`: stern
+- `nodes.see_net.do[1].t`: Вспомни: стена между комнатами дырявая. Вентиляция. Думай, как осада, а не как офис.
+- `nodes.see_net.already[0].s`: lap
+- `nodes.see_net.already[0].e`: neutral
+- `nodes.see_net.already[0].t`: Сачок всё там же. Дразнится.
+- `nodes.take_pointer.do[0].s`: lap
+- `nodes.take_pointer.do[0].e`: neutral
+- `nodes.take_pointer.do[0].t`: Указка с KPI-доски. Ей Ира тычет в цифры, а цифры делают вид, что растут, хитрые твари.
+- `nodes.take_pointer.already[0].s`: lap
+- `nodes.take_pointer.already[0].e`: neutral
+- `nodes.take_pointer.already[0].t`: Указка у меня. KPI теперь беззащитны.
+- `nodes.push_net.do[0].s`: lap
+- `nodes.push_net.do[0].e`: inspired
+- `nodes.push_net.do[0].t`: Просовываю указку в решётку… тычок вслепую… ШЛЁП. Судя по звуку, сачок спикировал в подсобке.
+- `nodes.push_net.do[1].s`: anc
+- `nodes.push_net.do[1].e`: proud
+- `nodes.push_net.do[1].t`: Артиллерия сказала своё слово! Обе решётки нараспашку — сквозняк истории.
+- `nodes.push_net.fail[0].s`: lap
+- `nodes.push_net.fail[0].e`: worried
+- `nodes.push_net.fail[0].t`: В решётку надо тыкать чем-то длинным. И сначала понять, на кой хер — я же не видел, чему там падать.
+- `nodes.push_net.already[0].s`: lap
+- `nodes.push_net.already[0].e`: neutral
+- `nodes.push_net.already[0].t`: Решётка уже выпотрошена. Хватит насиловать вентиляцию.
+- `nodes.take_net.do[0].s`: lap
+- `nodes.take_net.do[0].e`: neutral
+- `nodes.take_net.do[0].t`: Подбираю сачок. Обод есть, сетка есть, ручки нет. Как у всего в этой ёбаной конторе.
+- `nodes.take_net.already[0].s`: lap
+- `nodes.take_net.already[0].e`: neutral
+- `nodes.take_net.already[0].t`: Сачок уже мой.
+- `nodes.combine_longnet.do[0].s`: lap
+- `nodes.combine_longnet.do[0].e`: inspired
+- `nodes.combine_longnet.do[0].t`: Указка + сачок + изолента взгляда = ДЛИННЫЙ САЧОК. Инженер года, принимайте.
+- `nodes.combine_longnet.do[1].s`: anc
+- `nodes.combine_longnet.do[1].e`: smug
+- `nodes.combine_longnet.do[1].t`: Копьё! Наконец-то ты собрал копьё. Пусть и для ловли рыбы в бухгалтерском аквариуме.
+- `nodes.fish_card.do[0].s`: lap
+- `nodes.fish_card.do[0].e`: smug
+- `nodes.fish_card.do[0].t`: Тянусь длинным сачком… мимо… мимо… ЕСТЬ! Пропуск Гены. Утоплен, как его же премия.
+- `nodes.fish_card.do[1].s`: anc
+- `nodes.fish_card.do[1].e`: calm
+- `nodes.fish_card.do[1].t`: Трофей со дна морского. Осталось вдохнуть в него жизнь.
+- `nodes.fish_card.do[2].s`: lap
+- `nodes.fish_card.do[2].e`: neutral
+- `nodes.fish_card.do[2].t`: Пластик мокрый, чип вроде цел. Гена, прости. Хотя нет — хуй тебе, а не прощение: сам уронил.
+- `nodes.fish_card.fail[0].s`: lap
+- `nodes.fish_card.fail[0].e`: worried
+- `nodes.fish_card.fail[0].t`: Вон он, блестит на дне, сука. Рукой — глубоко, рукав жалко, рыба кусается. Нужен инструмент подлиннее.
+- `nodes.fish_card.already[0].s`: lap
+- `nodes.fish_card.already[0].e`: neutral
+- `nodes.fish_card.already[0].t`: Со дна уже всё выловлено, кроме смысла жизни. Тот утонул наглухо.
+- `nodes.pc_unlock.open[0].s`: lap
+- `nodes.pc_unlock.open[0].e`: neutral
+- `nodes.pc_unlock.open[0].t`: Комп Иры. Заставка мечется по экрану, как я по жизни — от угла к углу, блядь.
+- `nodes.pc_unlock.open[1].s`: anc
+- `nodes.pc_unlock.open[1].e`: stern
+- `nodes.pc_unlock.open[1].t`: Код — рисунки. Толмач-табличка где-то на стене. Сопоставь, писарь.
+- `nodes.pc_unlock.do[0].s`: lap
+- `nodes.pc_unlock.do[0].e`: smug
+- `nodes.pc_unlock.do[0].t`: ПИН подошёл, ура блядь! Здравствуй, рабочий стол, давно не виделись. Со вчера.
+- `nodes.pc_unlock.do[1].s`: anc
+- `nodes.pc_unlock.do[1].e`: proud
+- `nodes.pc_unlock.do[1].t`: Крепость пала. Грабь архивы!
+- `nodes.pc_unlock.fail_code[0].s`: lap
+- `nodes.pc_unlock.fail_code[0].e`: angry
+- `nodes.pc_unlock.fail_code[0].t`: Не тот код, блядь. Экран моргнул с укоризной.
+- `nodes.pc_unlock.fail_code[1].s`: lap
+- `nodes.pc_unlock.fail_code[1].e`: tired
+- `nodes.pc_unlock.fail_code[1].t`: Мимо. Стикер врать не должен — значит, вру я. Перечитаю.
+- `nodes.pc_unlock.already[0].s`: lap
+- `nodes.pc_unlock.already[0].e`: neutral
+- `nodes.pc_unlock.already[0].t`: Комп уже разблокирован. Не трогай, а то заснёт обратно.
+- `nodes.ira_code.open[0].s`: lap
+- `nodes.ira_code.open[0].e`: neutral
+- `nodes.ira_code.open[0].t`: Кодовый ящик Иры. Четыре цифры между мной и её секретами. Канцелярскими, надеюсь, бля.
+- `nodes.ira_code.open[1].s`: anc
+- `nodes.ira_code.open[1].e`: calm
+- `nodes.ira_code.open[1].t`: Хозяйка сейфа любит своё дело. Код — где-то в её гордости за контору.
+- `nodes.ira_code.do[0].s`: lap
+- `nodes.ira_code.do[0].e`: smug
+- `nodes.ira_code.do[0].t`: Пик-пик-пик-пик — щёлк! Ящик Иры сдался. Прости, Ир, у меня форс-мажор.
+- `nodes.ira_code.do[1].s`: anc
+- `nodes.ira_code.do[1].e`: smug
+- `nodes.ira_code.do[1].t`: Добыча! Только не читай её личное, воин. Мы грабим корованы, а не дневники.
+- `nodes.ira_code.fail_code[0].s`: lap
+- `nodes.ira_code.fail_code[0].e`: worried
+- `nodes.ira_code.fail_code[0].t`: Отказ. Ящик пискнул так, будто сейчас Ире позвонит.
+- `nodes.ira_code.fail_code[1].s`: lap
+- `nodes.ira_code.fail_code[1].e`: angry
+- `nodes.ira_code.fail_code[1].t`: Да ёб твою мать, не подходит. Думай, голова, шапку куплю.
+- `nodes.ira_code.already[0].s`: lap
+- `nodes.ira_code.already[0].e`: neutral
+- `nodes.ira_code.already[0].t`: Ящик открыт. Реестр я уже видел.
+- `nodes.skud_form.open[0].s`: lap
+- `nodes.skud_form.open[0].e`: neutral
+- `nodes.skud_form.open[0].t`: Форма СКУД-2. «Активация утерянной карты». Бюрократия — древнейшая, блядь, магия.
+- `nodes.skud_form.open[1].s`: anc
+- `nodes.skud_form.open[1].e`: stern
+- `nodes.skud_form.open[1].t`: Заполняй без ошибок. Одна неверная руна — и джинн канцелярии съест заявку.
+- `nodes.skud_form.do[0].s`: lap
+- `nodes.skud_form.do[0].e`: triumphant
+- `nodes.skud_form.do[0].t`: «Заявка обработана». Карта Гены снова жива! Ай да я, ай да отдел кадров в моём лице.
+- `nodes.skud_form.do[1].s`: anc
+- `nodes.skud_form.do[1].e`: proud
+- `nodes.skud_form.do[1].t`: Печать поставлена, свиток отправлен. Теперь железо у двери обязано тебе поклониться.
+- `nodes.skud_form.fail_code[0].s`: lap
+- `nodes.skud_form.fail_code[0].e`: angry
+- `nodes.skud_form.fail_code[0].t`: «Проверьте данные». Сука. Номер? Отдел? Что-то из этого — враньё.
+- `nodes.skud_form.fail_code[1].s`: lap
+- `nodes.skud_form.fail_code[1].e`: tired
+- `nodes.skud_form.fail_code[1].t`: Отказ. Перепроверю пропуск и реестр, где-то я слепой.
+- `nodes.skud_form.fail[0].s`: lap
+- `nodes.skud_form.fail[0].e`: worried
+- `nodes.skud_form.fail[0].t`: Форма хочет карту в руках и живой комп. Без этого — просто красивое окно, нахуй никому.
+- `nodes.skud_form.already[0].s`: lap
+- `nodes.skud_form.already[0].e`: neutral
+- `nodes.skud_form.already[0].t`: Карта уже активна. Не зли СКУД повторными заявками.
+- `nodes.copy_pass.do[0].s`: lap
+- `nodes.copy_pass.do[0].e`: smug
+- `nodes.copy_pass.do[0].t`: Копир ожил и выплюнул копию пропуска. Тёплую. Единственное тёплое в этом офисе.
+- `nodes.copy_pass.do[1].s`: anc
+- `nodes.copy_pass.do[1].e`: calm
+- `nodes.copy_pass.do[1].t`: Дубликат свитка. Мудро. Оригиналы имеют привычку тонуть.
+- `nodes.copy_pass.fail[0].s`: lap
+- `nodes.copy_pass.fail[0].e`: neutral
+- `nodes.copy_pass.fail[0].t`: Копир мёртв без розеток. Да и копировать пока хуй да маленько.
+- `nodes.copy_pass.already[0].s`: lap
+- `nodes.copy_pass.already[0].e`: neutral
+- `nodes.copy_pass.already[0].t`: Одной копии хватит. Мы не типография.
+- `nodes.alarm_off.open[0].s`: lap
+- `nodes.alarm_off.open[0].e`: worried
+- `nodes.alarm_off.open[0].t`: Панель сигнализации. Моргает красным, как глаз начальства в пятницу, сука, вечером.
+- `nodes.alarm_off.open[1].s`: anc
+- `nodes.alarm_off.open[1].e`: stern
+- `nodes.alarm_off.open[1].t`: Четыре цифры. День и месяц, когда крепость проверяли чужаки. Ты это где-то видел. Дважды.
+- `nodes.alarm_off.do[0].s`: lap
+- `nodes.alarm_off.do[0].e`: triumphant
+- `nodes.alarm_off.do[0].t`: Пик… длинный писк… ТИШИНА. Сигналка снята. Я почти заплакал.
+- `nodes.alarm_off.do[1].s`: anc
+- `nodes.alarm_off.do[1].e`: proud
+- `nodes.alarm_off.do[1].t`: Часовой усыплён. Без крови. Растёшь.
+- `nodes.alarm_off.fail_code[0].s`: lap
+- `nodes.alarm_off.fail_code[0].e`: panic
+- `nodes.alarm_off.fail_code[0].t`: ПИИИК! Не тот код! Если она сейчас заорёт — я заору громче.
+- `nodes.alarm_off.fail_code[1].s`: lap
+- `nodes.alarm_off.fail_code[1].e`: angry
+- `nodes.alarm_off.fail_code[1].t`: Отбой, отбой… Фух. Ещё раз ошибусь — и охрана приедет раньше такси.
+- `nodes.alarm_off.already[0].s`: lap
+- `nodes.alarm_off.already[0].e`: neutral
+- `nodes.alarm_off.already[0].t`: Сигналка спит. Тс-с, блядь, тс-с.
+- `nodes.take_key_toy.do[0].s`: lap
+- `nodes.take_key_toy.do[0].e`: neutral
+- `nodes.take_key_toy.do[0].t`: На ветке — ключик. Игрушка, ага. С биркой «инв. №». Кто-то вешал инвентарь на ёлку. Гений, блядь.
+- `nodes.take_key_toy.do[1].s`: anc
+- `nodes.take_key_toy.do[1].e`: smug
+- `nodes.take_key_toy.do[1].t`: В моё время на ёлки вешали головы врагов. Ключик практичнее, признаю.
+- `nodes.take_key_toy.already[0].s`: lap
+- `nodes.take_key_toy.already[0].e`: neutral
+- `nodes.take_key_toy.already[0].t`: Ключик снят. Ёлка облегчённо выдохнула хвоей.
+- `nodes.open_workbench.do[0].s`: lap
+- `nodes.open_workbench.do[0].e`: smug
+- `nodes.open_workbench.do[0].t`: Ключик-«игрушка» входит в замочек, как зарплата в ипотеку. Щёлк — открыто.
+- `nodes.open_workbench.do[1].s`: anc
+- `nodes.open_workbench.do[1].e`: calm
+- `nodes.open_workbench.do[1].t`: Замок пал перед ёлочным украшением. Символично. Всё в этой стране — ёлочное украшение.
+- `nodes.open_workbench.fail[0].s`: lap
+- `nodes.open_workbench.fail[0].e`: neutral
+- `nodes.open_workbench.fail[0].t`: Висячий замочек. Маленький, но принципиальный, гадёныш. Нужен ключ соразмерной наглости.
+- `nodes.open_workbench.already[0].s`: lap
+- `nodes.open_workbench.already[0].e`: neutral
+- `nodes.open_workbench.already[0].t`: Ящик верстака уже открыт.
+- `nodes.take_wrench.do[0].s`: lap
+- `nodes.take_wrench.do[0].e`: neutral
+- `nodes.take_wrench.do[0].t`: Разводной ключ. Тяжёлый, честный. Единственный в конторе, кто не выгорел нахуй.
+- `nodes.take_wrench.already[0].s`: lap
+- `nodes.take_wrench.already[0].e`: neutral
+- `nodes.take_wrench.already[0].t`: Разводник при мне.
+- `nodes.take_wheel.do[0].s`: lap
+- `nodes.take_wheel.do[0].e`: neutral
+- `nodes.take_wheel.do[0].t`: Снимаю экспонат со стены — вместе с рамкой и табличкой: «На этом маховике Лапидус вертел всех конкурентов». Не поспоришь. Прости, интерьер, ты сам виноват.
+- `nodes.take_wheel.do[1].s`: anc
+- `nodes.take_wheel.do[1].e`: proud
+- `nodes.take_wheel.do[1].t`: Латунь! Металл янычар и смесителей! Верни его машине — экспонаты должны работать.
+- `nodes.take_wheel.already[0].s`: lap
+- `nodes.take_wheel.already[0].e`: neutral
+- `nodes.take_wheel.already[0].t`: Стена уже голая, от рамки остался силуэт. Маховик у меня.
+- `nodes.install_wheel.do[0].s`: lap
+- `nodes.install_wheel.do[0].e`: neutral
+- `nodes.install_wheel.do[0].t`: Накручиваю маховик на голый шток «П». Сел, как родной. Он и есть родной, подозреваю.
+- `nodes.install_wheel.do[1].s`: anc
+- `nodes.install_wheel.do[1].e`: calm
+- `nodes.install_wheel.do[1].t`: Орудие укомплектовано. Теперь — порядок залпов. Он записан. Дважды.
+- `nodes.install_wheel.fail[0].s`: lap
+- `nodes.install_wheel.fail[0].e`: neutral
+- `nodes.install_wheel.fail[0].t`: Шток «П» голый. Пальцами крутить — хуй там, резьба злая.
+- `nodes.install_wheel.already[0].s`: lap
+- `nodes.install_wheel.already[0].e`: neutral
+- `nodes.install_wheel.already[0].t`: Маховик уже на месте.
+- `nodes.bench_solve.do[0].s`: lap
+- `nodes.bench_solve.do[0].e`: triumphant
+- `nodes.bench_solve.do[0].t`: Стрелка доползла до зелёного, зажим ПШИКНУЛ и разжался! Коллектор свободен!
+- `nodes.bench_solve.do[1].s`: anc
+- `nodes.bench_solve.do[1].e`: proud
+- `nodes.bench_solve.do[1].t`: Машина признала тебя мастером. Забирай трофей из её пасти.
+- `nodes.bench_solve.already[0].s`: lap
+- `nodes.bench_solve.already[0].e`: neutral
+- `nodes.bench_solve.already[0].t`: Стенд уже отстрелялся. Не еби ветерана.
+- `nodes.take_collector.do[0].s`: lap
+- `nodes.take_collector.do[0].e`: neutral
+- `nodes.take_collector.do[0].t`: Вынимаю коллектор из зажима. Латунный, гранёный… а сбоку — тот самый трёхгранный хвостовик!
+- `nodes.take_collector.already[0].s`: lap
+- `nodes.take_collector.already[0].e`: neutral
+- `nodes.take_collector.already[0].t`: Коллектор уже у меня.
+- `nodes.combine_trikey.do[0].s`: lap
+- `nodes.combine_trikey.do[0].e`: inspired
+- `nodes.combine_trikey.do[0].t`: Разводником скручиваю с коллектора хвостовик… Готово. ТРЁХГРАННИК. Ключ от всех щитков страны.
+- `nodes.combine_trikey.do[1].s`: anc
+- `nodes.combine_trikey.do[1].e`: smug
+- `nodes.combine_trikey.do[1].t`: Ты выточил ключ из трофея. Почти кузнец. Почти.
+- `nodes.open_panel.do[0].s`: lap
+- `nodes.open_panel.do[0].e`: neutral
+- `nodes.open_panel.do[0].t`: Трёхгранник в замок, четверть оборота… Дверца щитка нараспашку. Внутри — цивилизация.
+- `nodes.open_panel.do[1].s`: anc
+- `nodes.open_panel.do[1].e`: stern
+- `nodes.open_panel.do[1].t`: Сердце крепости. Не тычь пальцами куда попало. Хотя кого я обманываю — тычь, там подписи.
+- `nodes.open_panel.fail[0].s`: lap
+- `nodes.open_panel.fail[0].e`: tired
+- `nodes.open_panel.fail[0].t`: Заперто на трёхгранку. Ногтем не взять, я пробовал. Ноготь до сих пор в трауре, блядь.
+- `nodes.open_panel.already[0].s`: lap
+- `nodes.open_panel.already[0].e`: neutral
+- `nodes.open_panel.already[0].t`: Щиток открыт.
+- `nodes.power_main.do[0].s`: lap
+- `nodes.power_main.do[0].e`: triumphant
+- `nodes.power_main.do[0].t`: ГЛАВНЫЙ — вверх. ЩЁЛК. Свет! СВЕТ, БЛЯДЬ! Я почти ослеп и абсолютно счастлив.
+- `nodes.power_main.do[1].s`: anc
+- `nodes.power_main.do[1].e`: proud
+- `nodes.power_main.do[1].t`: Да будет свет — сказал потомок янычара, и стало. Считыватель у двери проснулся. Красным глазом.
+- `nodes.power_main.do[2].s`: lap
+- `nodes.power_main.do[2].e`: smug
+- `nodes.power_main.do[2].t`: Красный — уже жизнь. Зелёным сделаем позже, ёпта.
+- `nodes.power_main.already[0].s`: lap
+- `nodes.power_main.already[0].e`: neutral
+- `nodes.power_main.already[0].t`: Свет уже дан. Не трогай главный, примета плохая.
+- `nodes.sockets_on.do[0].s`: lap
+- `nodes.sockets_on.do[0].e`: smug
+- `nodes.sockets_on.do[0].t`: «РОЗЕТКИ» — вверх. Где-то в офисе радостно пискнула кофемашина. Иду, родная!
+- `nodes.sockets_on.do[1].s`: anc
+- `nodes.sockets_on.do[1].e`: calm
+- `nodes.sockets_on.do[1].t`: Линия жизни. В смысле, кофе.
+- `nodes.sockets_on.already[0].s`: lap
+- `nodes.sockets_on.already[0].e`: neutral
+- `nodes.sockets_on.already[0].t`: Розетки уже живые.
+- `nodes.take_gift.do[0].s`: lap
+- `nodes.take_gift.do[0].e`: neutral
+- `nodes.take_gift.do[0].t`: Разворачиваю подарок… Открытка «на кофе» и СОТНЯ. Наличными. Тайный Санта, ты лучший из анонимов.
+- `nodes.take_gift.do[1].s`: anc
+- `nodes.take_gift.do[1].e`: smug
+- `nodes.take_gift.do[1].t`: Сто рублей. В моё время за такое давали деревню. Маленькую. Ладно, курицу.
+- `nodes.take_gift.already[0].s`: lap
+- `nodes.take_gift.already[0].e`: neutral
+- `nodes.take_gift.already[0].t`: Подарок уже вскрыт. Санта дважды не приходит.
+- `nodes.brew_coffee.do[0].s`: lap
+- `nodes.brew_coffee.do[0].e`: inspired
+- `nodes.brew_coffee.do[0].t`: Сотня в приёмник, кнопка «американо»… Ж-ж-ж… ЗАПАХ. Кофе. Настоящий. Я снова человек.
+- `nodes.brew_coffee.do[1].s`: anc
+- `nodes.brew_coffee.do[1].e`: calm
+- `nodes.brew_coffee.do[1].t`: Эликсир бодрости сварен. Тёплый, как ханский шатёр.
+- `nodes.brew_coffee.fail[0].s`: lap
+- `nodes.brew_coffee.fail[0].e`: tired
+- `nodes.brew_coffee.fail[0].t`: Машина мертва без розеток, а я — без сотни. Оба, блядь, нуждающиеся.
+- `nodes.brew_coffee.already[0].s`: lap
+- `nodes.brew_coffee.already[0].e`: neutral
+- `nodes.brew_coffee.already[0].t`: Кофе уже сварен. Второй — это уже зависимость. У меня она есть, но не сегодня.
+- `nodes.take_validol.do[0].s`: lap
+- `nodes.take_validol.do[0].e`: neutral
+- `nodes.take_validol.do[0].t`: Аптечка. Внутри: бинт из 2015-го, йод-мумия и — охуеть — валидол. Живой.
+- `nodes.take_validol.do[1].s`: anc
+- `nodes.take_validol.do[1].e`: stern
+- `nodes.take_validol.do[1].t`: Лекарство труса. Или мудреца. Сегодня это одно и то же.
+- `nodes.take_validol.already[0].s`: lap
+- `nodes.take_validol.already[0].e`: neutral
+- `nodes.take_validol.already[0].t`: Валидол у меня. Аптечка пуста, как обещания HR.
+- `nodes.combine_calm.do[0].s`: lap
+- `nodes.combine_calm.do[0].e`: neutral
+- `nodes.combine_calm.do[0].t`: Валидол под язык, кофе сверху. По медицине — бред, по жизни — единственно верно.
+- `nodes.combine_calm.do[1].s`: lap
+- `nodes.combine_calm.do[1].e`: inspired
+- `nodes.combine_calm.do[1].t`: …Руки перестали трястись. Мир перестал дребезжать. Я собран, зол и опасен.
+- `nodes.combine_calm.do[2].s`: anc
+- `nodes.combine_calm.do[2].e`: proud
+- `nodes.combine_calm.do[2].t`: Вот теперь ты похож на воина, а не на желе в пиджаке.
+- `nodes.take_grease.do[0].s`: lap
+- `nodes.take_grease.do[0].e`: neutral
+- `nodes.take_grease.do[0].t`: Банка смазки. «Литол», судя по запаху — ровесник здания. Такое не портится. Такое, сука, пугает.
+- `nodes.take_grease.already[0].s`: lap
+- `nodes.take_grease.already[0].e`: neutral
+- `nodes.take_grease.already[0].t`: Смазка в кармане. Карман, прости.
+- `nodes.bolt_free.do[0].s`: lap
+- `nodes.bolt_free.do[0].e`: neutral
+- `nodes.bolt_free.do[0].t`: Смазка на ригель, разводник на шток, тянем-потянем… ХРУСТЬ. Пошёл! Засов сдвинулся, зараза ржавая!
+- `nodes.bolt_free.do[1].s`: anc
+- `nodes.bolt_free.do[1].e`: proud
+- `nodes.bolt_free.do[1].t`: Ржавчина — тоже враг. И этот враг повержен. Пахнешь литолом и победой.
+- `nodes.bolt_free.fail[0].s`: lap
+- `nodes.bolt_free.fail[0].e`: angry
+- `nodes.bolt_free.fail[0].t`: Прикипел намертво, падла. Голыми руками — только грыжу заработаю. Нужна химия и рычаг.
+- `nodes.bolt_free.already[0].s`: lap
+- `nodes.bolt_free.already[0].e`: neutral
+- `nodes.bolt_free.already[0].t`: Засов уже ходит. Не скрипи им, соседей разбудишь. Хотя каких соседей…
+- `nodes.relic_badge.do[0].s`: lap
+- `nodes.relic_badge.do[0].e`: smug
+- `nodes.relic_badge.do[0].t`: Шарю длинным сачком под диваном… пыль, фантик, — ОП. Значок. «Лучший продавец 2017». МОЙ значок!
+- `nodes.relic_badge.do[1].s`: anc
+- `nodes.relic_badge.do[1].e`: proud
+- `nodes.relic_badge.do[1].t`: РЕЛИКВИЯ ВТОРАЯ! Орден доблести, потерянный в диванных степях! Носи с честью.
+- `nodes.relic_badge.do[2].s`: lap
+- `nodes.relic_badge.do[2].e`: neutral
+- `nodes.relic_badge.do[2].t`: Я его два года искал. Он был в метре от меня. Как и всё хорошее в жизни.
+- `nodes.relic_badge.fail[0].s`: lap
+- `nodes.relic_badge.fail[0].e`: neutral
+- `nodes.relic_badge.fail[0].t`: Под диваном что-то блестит, но рука не лезет — щель узкая, диван жирный. Нужна длинная лапа.
+- `nodes.relic_badge.already[0].s`: lap
+- `nodes.relic_badge.already[0].e`: neutral
+- `nodes.relic_badge.already[0].t`: Под диваном теперь только пыль и экзистенция. Обе — на выброс.
+- `nodes.take_mop.do[0].s`: lap
+- `nodes.take_mop.do[0].e`: neutral
+- `nodes.take_mop.do[0].t`: Швабра с крюком на черенке. Крюк — чтоб коробки с антресолей цеплять. Зина — инженер от бога, без пизды.
+- `nodes.take_mop.already[0].s`: lap
+- `nodes.take_mop.already[0].e`: neutral
+- `nodes.take_mop.already[0].t`: Швабра у меня. Зина, я верну. Наверное.
+- `nodes.box_down.do[0].s`: lap
+- `nodes.box_down.do[0].e`: neutral
+- `nodes.box_down.do[0].t`: Цепляю крюком коробку… тяну… ОП-ПА! Коробка «НГ-2019» летит вниз и взрывается мишурой.
+- `nodes.box_down.do[1].s`: anc
+- `nodes.box_down.do[1].e`: smug
+- `nodes.box_down.do[1].t`: Осада антресоли завершена. Трофей — на полу. Мишура — везде. Как после хорошего штурма.
+- `nodes.box_down.fail[0].s`: lap
+- `nodes.box_down.fail[0].e`: neutral
+- `nodes.box_down.fail[0].t`: Высоко, блядь. Прыгать не буду — у меня спина и достоинство. Ну, спина точно.
+- `nodes.box_down.already[0].s`: lap
+- `nodes.box_down.already[0].e`: neutral
+- `nodes.box_down.already[0].t`: Коробка уже внизу.
+- `nodes.open_box.do[0].s`: lap
+- `nodes.open_box.do[0].e`: inspired
+- `nodes.open_box.do[0].t`: Роюсь в коробке: дождик, шары, бенгальские трупики… и — ФЕСКА. Красная. С кисточкой. НАСТОЯЩАЯ.
+- `nodes.open_box.do[1].s`: anc
+- `nodes.open_box.do[1].e`: proud
+- `nodes.open_box.do[1].t`: РЕЛИКВИЯ ТРЕТЬЯ! Головной убор рода! Надень — и предки увидят тебя из вечности!
+- `nodes.open_box.do[2].s`: lap
+- `nodes.open_box.do[2].e`: smug
+- `nodes.open_box.do[2].t`: С корпоратива-2019, «восточная вечеринка». Предки, отвернитесь, вам не понравится контекст.
+- `nodes.open_box.already[0].s`: lap
+- `nodes.open_box.already[0].e`: neutral
+- `nodes.open_box.already[0].t`: Феску я уже спас. В коробке остался только дождик-людоед.
+- `nodes.search_box_again.do[0].s`: lap
+- `nodes.search_box_again.do[0].e`: smug
+- `nodes.search_box_again.do[0].t`: Ковыряюсь глубже… под дождиком… КОРОНА. Картонная, золотая, «С Новым 2019». Держится на скотче и вере.
+- `nodes.search_box_again.do[1].s`: anc
+- `nodes.search_box_again.do[1].e`: smug
+- `nodes.search_box_again.do[1].t`: Венец! Пусть картонный — но какая осанка! Носи. Приказываю.
+- `nodes.search_box_again.do[2].s`: lap
+- `nodes.search_box_again.do[2].e`: triumphant
+- `nodes.search_box_again.do[2].t`: Царь офиса. Самодержец опенспейса. Ладно, уговорил.
+- `nodes.search_box_again.already[0].s`: lap
+- `nodes.search_box_again.already[0].e`: neutral
+- `nodes.search_box_again.already[0].t`: Коробка выпотрошена до самого дна нулевых.
+- `nodes.reader_swipe.do[0].s`: lap
+- `nodes.reader_swipe.do[0].e`: triumphant
+- `nodes.reader_swipe.do[0].t`: Прикладываю карту… ПИК. ЗЕЛЁНЫЙ. Зелёный, ты видел?! Магнит отпустил дверь!
+- `nodes.reader_swipe.do[1].s`: anc
+- `nodes.reader_swipe.do[1].e`: proud
+- `nodes.reader_swipe.do[1].t`: Железный страж признал грамоту. Осталась последняя цепь.
+- `nodes.reader_swipe.fail[0].s`: lap
+- `nodes.reader_swipe.fail[0].e`: neutral
+- `nodes.reader_swipe.fail[0].t`: Считыватель мёртв или карта — труп. Нужны живая карта и живое электричество. Как всем нам, блядь.
+- `nodes.reader_swipe.already[0].s`: lap
+- `nodes.reader_swipe.already[0].e`: neutral
+- `nodes.reader_swipe.already[0].t`: Уже зелёный. Не выпикивай из него душу, ирод.
+- `nodes.door_open.fail[0].s`: lap
+- `nodes.door_open.fail[0].e`: worried
+- `nodes.door_open.fail[0].t`: Дверь всё ещё держат: что-то из списка не добито. Сверься с целями, Лапидус.
+- `nodes.door_open.fail[1].s`: anc
+- `nodes.door_open.fail[1].e`: stern
+- `nodes.door_open.fail[1].t`: Рано, солдат. Крепость сдаётся только тому, кто закрыл ВСЕ фланги.
+- `nodes.h_window.do[0].s`: lap
+- `nodes.h_window.do[0].e`: neutral
+- `nodes.h_window.do[0].t`: Окно. Четвёртый этаж, сугробы, минус двадцать, ёпт. Красиво. Смертельно, но красиво.
+- `nodes.h_window.again[0].s`: lap
+- `nodes.h_window.again[0].e`: worried
+- `nodes.h_window.again[0].t`: Можно выпрыгнуть. В сугроб. С четвёртого. Я почти готов… Нет. НЕТ.
+- `nodes.h_window.again[1].s`: lap
+- `nodes.h_window.again[1].e`: angry
+- `nodes.h_window.again[1].t`: Так, отошёл от окна, Лапидус. Мы не настолько отчаялись. Пока не настолько, блядь.
+- `nodes.h_window.calm[0].s`: lap
+- `nodes.h_window.calm[0].e`: neutral
+- `nodes.h_window.calm[0].t`: За окном Питер спит. И я бы спал. Но дверь.
+- `nodes.h_intercom.do[0].s`: lap
+- `nodes.h_intercom.do[0].e`: neutral
+- `nodes.h_intercom.do[0].t`: Домофон. Тычу кнопки — тишина. Сдох, как и вся связь с внешним миром.
+- `nodes.h_intercom.powered[0].s`: lap
+- `nodes.h_intercom.powered[0].e`: neutral
+- `nodes.h_intercom.powered[0].t`: Домофон ожил и весело пиликает. Но трубку на том конце некому брать: город спит и видит оливье.
+- `nodes.h_intercom.powered[1].s`: anc
+- `nodes.h_intercom.powered[1].e`: smug
+- `nodes.h_intercom.powered[1].t`: Поёт, как муэдзин на рассвете. Толку — столько же для неверующего.
+- `nodes.h_extinguisher.do[0].s`: lap
+- `nodes.h_extinguisher.do[0].e`: neutral
+- `nodes.h_extinguisher.do[0].t`: Огнетушитель. Можно выбить окно… и превратить «заперт в офисе» в «заперт в офисе с ветром и статьёй».
+- `nodes.h_extinguisher.do[1].s`: anc
+- `nodes.h_extinguisher.do[1].e`: stern
+- `nodes.h_extinguisher.do[1].t`: Оставь. Порох — для войны, пена — для пожара. У тебя — головоломка.
+- `nodes.h_extinguisher.again[0].s`: lap
+- `nodes.h_extinguisher.again[0].e`: tired
+- `nodes.h_extinguisher.again[0].t`: Нет, огнетушитель, мы уже это обсуждали. Ты — план «Я», после всех остальных букв.
+- `nodes.h_phone.do[0].s`: lap
+- `nodes.h_phone.do[0].e`: neutral
+- `nodes.h_phone.do[0].t`: Стационарный телефон. Гудков нет. АТС сдохла вместе с рубильником, а может и раньше — в 2009-м, блядь.
+- `nodes.h_phone.again[0].s`: lap
+- `nodes.h_phone.again[0].e`: tired
+- `nodes.h_phone.again[0].t`: Алло? Алло, блядь? …Тишина. Даже спам-роботы отдыхают.
+- `nodes.h_boiler.do[0].s`: lap
+- `nodes.h_boiler.do[0].e`: neutral
+- `nodes.h_boiler.do[0].t`: Бойлер. Урчит своё «не трожь, нахуй». В окошке — синий огонёк дежурного самолюбия.
+- `nodes.h_boiler.again[0].s`: lap
+- `nodes.h_boiler.again[0].e`: worried
+- `nodes.h_boiler.again[0].t`: Слить из него воду? Зачем?! Не знаю. Ощущение, что в каждой игре надо. НЕ НАДО.
+- `nodes.h_sink_valve.do[0].s`: lap
+- `nodes.h_sink_valve.do[0].e`: neutral
+- `nodes.h_sink_valve.do[0].t`: Вентиль под раковиной. Кручу… вода зашипела и плюнула ржавчиной. Закручиваю обратно. Извини, что разбудил.
+- `nodes.h_sink_valve.again[0].s`: lap
+- `nodes.h_sink_valve.again[0].e`: neutral
+- `nodes.h_sink_valve.again[0].t`: Этот вентиль отвечает за раковину и обиду. Больше ни за что.
+- `nodes.h_br_elka.do[0].s`: lap
+- `nodes.h_br_elka.do[0].e`: smug
+- `nodes.h_br_elka.do[0].t`: Автомат «ЁЛКА» — вверх. …Из офиса донеслось тёплое пиликанье гирлянды. Ну хоть кому-то праздник.
+- `nodes.h_br_elka.do[1].s`: anc
+- `nodes.h_br_elka.do[1].e`: calm
+- `nodes.h_br_elka.do[1].t`: Иллюминация! Пусть горит. Свет — всегда союзник.
+- `nodes.h_br_srv.do[0].s`: lap
+- `nodes.h_br_srv.do[0].e`: neutral
+- `nodes.h_br_srv.do[0].t`: «СРВ» — щёлк. Ни хуя. Ни звука, ни света. Сервер? Сервант? Сюрприз? Загадка на века.
+- `nodes.h_br_srv.do[1].s`: anc
+- `nodes.h_br_srv.do[1].e`: stern
+- `nodes.h_br_srv.do[1].t`: Не буди то, что подписано тремя буквами.
+- `nodes.h_br_srv.again[0].s`: lap
+- `nodes.h_br_srv.again[0].e`: neutral
+- `nodes.h_br_srv.again[0].t`: СРВ молчит. И правильно делает.
+- `nodes.h_br_rezerv.do[0].s`: lap
+- `nodes.h_br_rezerv.do[0].e`: neutral
+- `nodes.h_br_rezerv.do[0].t`: «РЕЗЕРВ» — щёлк. Тишина. Резерв чего? Надежд? Хуежд. Их давно нет, автомат.
+- `nodes.h_br_rezerv.again[0].s`: lap
+- `nodes.h_br_rezerv.again[0].e`: tired
+- `nodes.h_br_rezerv.again[0].t`: Резерв по-прежнему резервирует пустоту.
+- `nodes.h_fish_poke.do[0].s`: lap
+- `nodes.h_fish_poke.do[0].e`: neutral
+- `nodes.h_fish_poke.do[0].t`: Тук-тук по стеклу. Рыба посмотрела на меня, как Ира на мой отчёт.
+- `nodes.h_fish_poke.do[1].s`: anc
+- `nodes.h_fish_poke.do[1].e`: stern
+- `nodes.h_fish_poke.do[1].t`: Не дразни зверя. Даже маленького. Особенно маленького — им нечего терять.
+- `nodes.h_fish_poke.again[0].s`: lap
+- `nodes.h_fish_poke.again[0].e`: smug
+- `nodes.h_fish_poke.again[0].t`: Рыбёха, нас тут двое запертых. Держись, боец.
+- `nodes.h_fish_poke.again[1].s`: lap
+- `nodes.h_fish_poke.again[1].e`: neutral
+- `nodes.h_fish_poke.again[1].t`: Рыба демонстративно уплыла за замок. Понимаю.
+- `nodes.h_karaoke_sing.do[0].s`: lap
+- `nodes.h_karaoke_sing.do[0].e`: smug
+- `nodes.h_karaoke_sing.do[0].t`: «Ветер с моря ду-у-ул…» — Голос после корпоратива как наждачка. Рыба спряталась. Уважаю её выбор.
+- `nodes.h_karaoke_sing.do[1].s`: anc
+- `nodes.h_karaoke_sing.do[1].e`: stern
+- `nodes.h_karaoke_sing.do[1].t`: ПРЕКРАТИ. Янычары шли в бой под барабаны, а не под ЭТО.
+- `nodes.h_karaoke_sing.again[0].s`: lap
+- `nodes.h_karaoke_sing.again[0].e`: tired
+- `nodes.h_karaoke_sing.again[0].t`: Нет. Второй куплет — это уже военное преступление.
+- `looks.hs_window.look[0].s`: lap
+- `looks.hs_window.look[0].e`: neutral
+- `looks.hs_window.look[0].t`: Питер за стеклом. Снег идёт так, будто ему за это платят сверхурочные.
+- `looks.hs_red_button.look[0].s`: lap
+- `looks.hs_red_button.look[0].e`: worried
+- `looks.hs_red_button.look[0].t`: Красная кнопка. Надпись стёрта. Осталось только «НЕ». Значит — НЕ нажимать. Наверное.
+- `looks.hs_red_button.look[1].s`: lap
+- `looks.hs_red_button.look[1].e`: smug
+- `looks.hs_red_button.look[1].t`: При свете вылезла красная кнопка, которой ночью не было. Офис живёт своей жизнью, и она насыщеннее моей.
+- `looks.hs_sofa.look[0].s`: lap
+- `looks.hs_sofa.look[0].e`: tired
+- `looks.hs_sofa.look[0].t`: Диван. Место преступления. Здесь я уснул и проспал свою свободу, мудила.
+- `looks.hs_sofa.look[1].s`: lap
+- `looks.hs_sofa.look[1].e`: neutral
+- `looks.hs_sofa.look[1].t`: На диване бумаги и вмятина в форме моей биографии.
+- `looks.hs_table_mugs.look[0].s`: lap
+- `looks.hs_table_mugs.look[0].e`: neutral
+- `looks.hs_table_mugs.look[0].t`: Кружки с корпоратива. В одной — недопитый глинтвейн, в другой — чья-то, блядь, совесть.
+- `looks.hs_flipchart.look[0].s`: lap
+- `looks.hs_flipchart.look[0].e`: neutral
+- `looks.hs_flipchart.look[0].t`: Флипчарт девственно чист. Как наши планы на Q1.
+- `looks.hs_lap_desk.look[0].s`: lap
+- `looks.hs_lap_desk.look[0].e`: neutral
+- `looks.hs_lap_desk.look[0].t`: Мой стол. Мой бардак. Моя крепость из стикеров и проёбанных дедлайнов.
+- `looks.hs_aq_tumba.look[0].s`: lap
+- `looks.hs_aq_tumba.look[0].e`: neutral
+- `looks.hs_aq_tumba.look[0].t`: Тумба под аквариумом. Дверцы заклинило году в восемнадцатом, никто не расстроился.
+- `looks.hs_wardrobe.look[0].s`: lap
+- `looks.hs_wardrobe.look[0].e`: neutral
+- `looks.hs_wardrobe.look[0].t`: Шкаф-гардероб. Внутри — пуховики призраков и один зонт-инвалид. Хер кто заберёт.
+- `looks.hs_ira_desk.look[0].s`: lap
+- `looks.hs_ira_desk.look[0].e`: neutral
+- `looks.hs_ira_desk.look[0].t`: Стол Иры. Стерильно, как в операционной. Даже пыль лежит по линеечке.
+- `looks.hs_kpi_board.look[0].s`: lap
+- `looks.hs_kpi_board.look[0].e`: tired
+- `looks.hs_kpi_board.look[0].t`: KPI-доска. Стрелка вверх нарисована увереннее, чем идут дела.
+- `looks.hs_kpi_board.look[1].s`: lap
+- `looks.hs_kpi_board.look[1].e`: neutral
+- `looks.hs_kpi_board.look[1].t`: Графики. Красный маркер кончился на слове «рост». Символично, блядь.
+- `looks.hs_exit_sign.look[0].s`: lap
+- `looks.hs_exit_sign.look[0].e`: neutral
+- `looks.hs_exit_sign.look[0].t`: Табличка EXIT светится зелёным. Единственная, кто верит, что выход есть.
+- `looks.hs_util_shaft.look[0].s`: lap
+- `looks.hs_util_shaft.look[0].e`: neutral
+- `looks.hs_util_shaft.look[0].t`: Квадратный шток вместо ручки. Я сам её снял. Прошлый я — редкостный стратег, сука.
+- `looks.hs_shelf.look[0].s`: lap
+- `looks.hs_shelf.look[0].e`: neutral
+- `looks.hs_shelf.look[0].t`: Стеллаж: хлам, хлам, ценный хлам, хлам, блядь, исторического значения.
+- `looks.hs_vent_util.look[0].s`: lap
+- `looks.hs_vent_util.look[0].e`: neutral
+- `looks.hs_vent_util.look[0].t`: Решётка вентиляции. Судя по сквозняку — дышит прямо в офис.
+- `looks.hs_sink.look[0].s`: lap
+- `looks.hs_sink.look[0].e`: neutral
+- `looks.hs_sink.look[0].t`: Раковина. Кран капает морзянкой: «за-е-ба-ло».
+- `looks.hs_bucket.look[0].s`: lap
+- `looks.hs_bucket.look[0].e`: neutral
+- `looks.hs_bucket.look[0].t`: Ведро. Верный оруженосец швабры.
+- `looks.hs_z_balls.look[0].s`: lap
+- `looks.hs_z_balls.look[0].e`: neutral
+- `looks.hs_z_balls.look[0].t`: Шары. Один надбит — это который «за счастье».
+- `looks.hs_z_stand.look[0].s`: lap
+- `looks.hs_z_stand.look[0].e`: neutral
+- `looks.hs_z_stand.look[0].t`: Крестовина. Держит ёлку крепче, чем меня — трудовой договор.
+- `looks.hs_z_bin.look[0].s`: lap
+- `looks.hs_z_bin.look[0].e`: neutral
+- `looks.hs_z_bin.look[0].t`: Корзина для бумаг. Кладбище черновиков и одной новогодней открытки от налоговой.
+- `looks.hs_z_photos.look[0].s`: lap
+- `looks.hs_z_photos.look[0].e`: smug
+- `looks.hs_z_photos.look[0].t`: Фотки с корпоративов. На каждой я всё старше, а костюм всё тот же, сука, единственный.
+- `looks.hs_z_mouse.look[0].s`: lap
+- `looks.hs_z_mouse.look[0].e`: neutral
+- `looks.hs_z_mouse.look[0].t`: Мышь Иры. Коврик с котиком. Котик видел всё.
+- `looks.hs_z_pencils.look[0].s`: lap
+- `looks.hs_z_pencils.look[0].e`: neutral
+- `looks.hs_z_pencils.look[0].t`: Карандашница. Семнадцать ручек, пишет полторы.
+- `looks.hs_z_slot.look[0].s`: lap
+- `looks.hs_z_slot.look[0].e`: neutral
+- `looks.hs_z_slot.look[0].t`: Щель шредера. Кормили его в основном моими идеями.
+- `looks.hs_z_mini_drawer.look[0].s`: lap
+- `looks.hs_z_mini_drawer.look[0].e`: neutral
+- `looks.hs_z_mini_drawer.look[0].t`: Ящичек заперт на веки вечные. Ира говорит — там «личное». Ссыкотно представить.
+- `looks.hs_z_castle.look[0].s`: lap
+- `looks.hs_z_castle.look[0].e`: neutral
+- `looks.hs_z_castle.look[0].t`: Замок в аквариуме. Единственная недвижимость, до которой я дорос.
+- `looks.hs_z_weed.look[0].s`: lap
+- `looks.hs_z_weed.look[0].e`: neutral
+- `looks.hs_z_weed.look[0].t`: Водоросли. Зелёные и бессмысленные, как согласования.
+- `looks.hs_z_alarm_tag.look[0].s`: lap
+- `looks.hs_z_alarm_tag.look[0].e`: neutral
+- `looks.hs_z_alarm_tag.look[0].t`: Бирка монтажника: закорючка, дата, «М.». Спасибо, М. Очень информативно, М.
+- `looks.hs_z_alarm_horn.look[0].s`: lap
+- `looks.hs_z_alarm_horn.look[0].e`: worried
+- `looks.hs_z_alarm_horn.look[0].t`: Сирена. Спит. Пусть спит. ПУСТЬ, БЛЯДЬ, СПИТ.
+- `looks.hs_z_plate.look[0].s`: lap
+- `looks.hs_z_plate.look[0].e`: angry
+- `looks.hs_z_plate.look[0].t`: «Закрыто по 8.01». ПО ВОСЬМОЕ, БЛЯДЬ, ЯНВАРЯ. Неделя. Я бы тут мхом порос.
+- `looks.hs_z_handle_lock.look[0].s`: lap
+- `looks.hs_z_handle_lock.look[0].e`: neutral
+- `looks.hs_z_handle_lock.look[0].t`: Ручка нажимная и магнитный замок. Ручка нажимается. Замок ржёт в голос.
+- `looks.hs_z_keyhole.look[0].s`: lap
+- `looks.hs_z_keyhole.look[0].e`: neutral
+- `looks.hs_z_keyhole.look[0].t`: Скважина. Ключа от неё нет ни у кого — «у нас же СКУД». СКУД, ага.
+- `looks.hs_z_gauge.look[0].s`: lap
+- `looks.hs_z_gauge.look[0].e`: neutral
+- `looks.hs_z_gauge.look[0].t`: Манометр. Стрелка на нуле — у стенда давление, как у меня мотивация. Ни хера нет.
+- `looks.hs_z_hatch.look[0].s`: lap
+- `looks.hs_z_hatch.look[0].e`: neutral
+- `looks.hs_z_hatch.look[0].t`: Лючок с замочной скважиной. Не сегодня, лючок. У меня моногамия с одной дверью.
+- `looks.hs_z_vise.look[0].s`: lap
+- `looks.hs_z_vise.look[0].e`: neutral
+- `looks.hs_z_vise.look[0].t`: Тиски. Держат крепко, отпускают неохотно. Как эта ёбаная работа.
+- `looks.hs_z_tinsel.look[0].s`: lap
+- `looks.hs_z_tinsel.look[0].e`: neutral
+- `looks.hs_z_tinsel.look[0].t`: Мишура свисает с антресоли, как ленивая золотая змея.
+- `looks.hs_z_dust.look[0].s`: lap
+- `looks.hs_z_dust.look[0].e`: neutral
+- `looks.hs_z_dust.look[0].t`: Пыльный след от коробки. Прямоугольная тень прошлого.
+- `looks.hs_z_hooks.look[0].s`: lap
+- `looks.hs_z_hooks.look[0].e`: neutral
+- `looks.hs_z_hooks.look[0].t`: Крючки. На одном висела швабра. Теперь там висит только вопрос «а вернёшь?»
+- `looks.hs_z_rag.look[0].s`: lap
+- `looks.hs_z_rag.look[0].e`: neutral
+- `looks.hs_z_rag.look[0].t`: Тряпка. Видала виды. Виды были так себе.
+- `looks.hs_z_bottles.look[0].s`: lap
+- `looks.hs_z_bottles.look[0].e`: neutral
+- `looks.hs_z_bottles.look[0].t`: Бутыли с химией. «Крот», «Прогресс» и что-то безымянное, что булькает само.
+- `looks.hs_z_bucket2.look[0].s`: lap
+- `looks.hs_z_bucket2.look[0].e`: neutral
+- `looks.hs_z_bucket2.look[0].t`: Ведро №2. У Зины их коллекция.
+- `looks.hs_z_ext_switch.look[0].s`: lap
+- `looks.hs_z_ext_switch.look[0].e`: neutral
+- `looks.hs_z_ext_switch.look[0].t`: Рубильник на трубе. Табличка стёрта. Не буду. Даже я не буду.
+- `nervous_suffix[0].s`: lap
+- `nervous_suffix[0].e`: worried
+- `nervous_suffix[0].t`: …Рука дрогнула, блядь. Кофе бы. И чего-нибудь под язык.
+- `nervous_suffix[1].s`: lap
+- `nervous_suffix[1].e`: panic
+- `nervous_suffix[1].t`: Сердце стучит в ушах, как сосед с перфоратором.
+- `nervous_suffix[2].s`: lap
+- `nervous_suffix[2].e`: worried
+- `nervous_suffix[2].t`: Пальцы трясутся. Мелкая моторика объявила, сука, забастовку.
+- `docs.doc_sticker.title`: Стикер под клавиатурой
+- `docs.doc_sticker.pages[0][0]`: жёлтый стикер, почерк Иры:
+- `docs.doc_sticker.pages[0][1]`: «ПИН (никому!!!):
+- `docs.doc_sticker.pages[0][2]`: {PIN_GLYPHS}
+- `docs.doc_sticker.pages[0][3]`: …я же не дура цифрами писать»
+- `docs.doc_poster.title`: Плакат по охране труда
+- `docs.doc_poster.pages[0][0]`: ОХРАНА ТРУДА: ЗНАКИ УЧАСТКА
+- `docs.doc_poster.pages[0][1]`: (утв. в 1998, выцвело в 2003)
+- `docs.doc_poster.pages[0][2]`: {LEGEND}
+- `docs.doc_poster.pages[0][3]`: Знай знаки — целее будешь.
+- `docs.doc_calendar.title`: Календарь «ДЕКАБРЬ»
+- `docs.doc_calendar.pages[0][0]`: ВАЛТЕК · декабрь · санузлы оптом
+- `docs.doc_calendar.pages[0][1]`: {CAL}
+- `docs.doc_calendar.pages[0][2]`: обведено красным: {TOK:alarm_day} — «приезд СБ!!»
+- `docs.doc_calendar.pages[0][3]`: приписка: «убрать кружки с сервера»
+- `docs.doc_karaoke.title`: Караоке-список
+- `docs.doc_karaoke.pages[0][0]`: КОРПОРАТИВ · СПИСОК ПЕСЕН
+- `docs.doc_karaoke.pages[0][1]`: 1. Ветер с моря дул — Ира
+- `docs.doc_karaoke.pages[0][2]`: 2. Владимирский централ — Гена (вычеркнуто)
+- `docs.doc_karaoke.pages[0][3]`: 3. トруба зовёт — Лапидус (почерк не мой!)
+- `docs.doc_karaoke.pages[0][4]`: 4. Мурка (запрещена приказом №6)
+- `docs.doc_santa.title`: Бирки Тайного Санты
+- `docs.doc_santa.pages[0][0]`: «Кому: ЛАПИДУСУ. От: угадай :)»
+- `docs.doc_santa.pages[0][1]`: «Ты в этом году старался. Почти.»
+- `docs.doc_santa.pages[0][2]`: «Внутри — на кофе. Не благодари.»
+- `docs.doc_santa.pages[0][3]`: P.S. «С НГ, зануда. — И.»
+- `docs.doc_postcard.title`: Открытка «на кофе»
+- `docs.doc_postcard.pages[0][0]`: открытка с котом в шапке:
+- `docs.doc_postcard.pages[0][1]`: «Кофе — за мой счёт.
+- `docs.doc_postcard.pages[0][2]`: Сотни хватит. Машина у копира.
+- `docs.doc_postcard.pages[0][3]`: Сдачу оставь себе, богач. — И.»
+- `docs.doc_card.title`: Пропуск Гены
+- `docs.doc_card.pages[0][0]`: ООО «ВАЛТЕК» · ПРОПУСК
+- `docs.doc_card.pages[0][1]`: ФИО: Геннадий В.
+- `docs.doc_card.pages[0][2]`: № карты: {TOK:card_number}
+- `docs.doc_card.pages[0][3]`: Отдел: (затёрто пальцем)
+- `docs.doc_card.pages[0][4]`: фото: Гена моргнул
+- `docs.doc_chat.title`: Чат отдела (экран)
+- `docs.doc_chat.pages[0][0]`: #валтек-продажи, 30 дек:
+- `docs.doc_chat.pages[0][1]`: Ира: код сейфа простой — {TOK:ira_rule}
+- `docs.doc_chat.pages[0][2]`: Гена: опять картой в аквариум 🤦
+- `docs.doc_chat.pages[0][3]`: Ира: сигналку ставлю как всегда:
+- `docs.doc_chat.pages[0][4]`: Ира: {TOK:alarm_rule} — день, когда СБ приезжала, потом месяц
+- `docs.doc_chat.pages[0][5]`: Гена: только не как в тот раз))
+- `docs.doc_order.title`: Приказ №7
+- `docs.doc_order.pages[0][0]`: ПРИКАЗ №7 «Об утерянных картах»
+- `docs.doc_order.pages[0][1]`: 1. Утерянную карту деактивировать.
+- `docs.doc_order.pages[0][2]`: 2. Повторная активация — форма СКУД-2:
+- `docs.doc_order.pages[0][3]`:    указать № карты И отдел владельца.
+- `docs.doc_order.pages[0][4]`: 3. Ответственный: И. (она всё равно всё делает)
+- `docs.doc_about.title`: «О компании» (экран)
+- `docs.doc_about.pages[0][0]`: ООО «ВАЛТЕК» — латунь, санфаянс, судьба.
+- `docs.doc_about.pages[0][1]`: Основана в {TOK:about_year} году
+- `docs.doc_about.pages[0][2]`: гордыми людьми в спортивных костюмах.
+- `docs.doc_about.pages[0][3]`: Сегодня мы — лидер рынка кранов
+- `docs.doc_about.pages[0][4]`: в пределах этого бизнес-центра.
+- `docs.doc_dict.title`: Словарь сокращений (экран)
+- `docs.doc_dict.pages[0][0]`: СРВ — не спрашивай.
+- `docs.doc_dict.pages[0][1]`: СБ — служба безопасности (страшные).
+- `docs.doc_dict.pages[0][2]`: СКУД — система контроля и учёта доступа.
+- `docs.doc_dict.pages[0][3]`: КПП — кофе после планёрки.
+- `docs.doc_dict.pages[0][4]`: П/К1/К2/С — подача/контуры/сброс (стенд).
+- `docs.doc_skud_blank.title`: Форма СКУД-2 (экран)
+- `docs.doc_skud_blank.pages[0][0]`: ФОРМА СКУД-2 · активация карты
+- `docs.doc_skud_blank.pages[0][1]`: Поля: № карты (6 цифр), отдел.
+- `docs.doc_skud_blank.pages[0][2]`: Отделы: {TOK:depts}
+- `docs.doc_skud_blank.pages[0][3]`: Ошибся отделом — заявка в мусор.
+- `docs.doc_registry.title`: Реестр отделов
+- `docs.doc_registry.pages[0][0]`: РЕЕСТР СОТРУДНИКОВ (актуальн.)
+- `docs.doc_registry.pages[0][1]`: Ира — АХО (и фактически всё)
+- `docs.doc_registry.pages[0][2]`: Лапидус — ОП-2 (со скрипом)
+- `docs.doc_registry.pages[0][3]`: Геннадий В. — {TOK:gena_dept}
+- `docs.doc_registry.pages[0][4]`: Рыба — ОП-1 (почётно)
+- `docs.doc_journal.title`: Журнал испытаний
+- `docs.doc_journal.pages[0][0]`: ЖУРНАЛ ИСПЫТАНИЙ СТЕНДА
+- `docs.doc_journal.pages[0][1]`: {TOK:alarm_day}.12 — приезд СБ, стенд предъявлен.
+- `docs.doc_journal.pages[0][2]`: Замечание СБ: «порядок только по листку!»
+- `docs.doc_journal.pages[0][3]`: Качков насосом до зелёного: {TOK:bench_pumps}.
+- `docs.doc_journal.pages[0][4]`: Подпись: З. (Зина видела всё)
+- `docs.doc_bench_note.title`: Листок-инструкция стенда
+- `docs.doc_bench_note.pages[0][0]`: ПОРЯДОК ПРОДУВКИ (печатн.):
+- `docs.doc_bench_note.pages[0][1]`: {ANS:bench_printed_ru}
+- `docs.doc_bench_note.pages[0][2]`: затем качать насосом до зелёного.
+- `docs.doc_bench_note.pages[0][3]`: — поверх напечатанного, красным:
+- `docs.doc_bench_note.pages[0][4]`: «ОПЕЧАТКА! {ANS:bench_fix_ru}. Проверено. З.»
+- `docs.doc_schema.title`: Схема щитка
+- `docs.doc_schema.pages[0][0]`: СХЕМА (карандаш, кривовато):
+- `docs.doc_schema.pages[0][1]`: 1-ГЛАВНЫЙ  2-РОЗЕТКИ  3-ЁЛКА(?!)
+- `docs.doc_schema.pages[0][2]`: 4-СРВ  5-РЕЗЕРВ  6-(стёрто)
+- `docs.doc_schema.pages[0][3]`: «ГЛАВНЫЙ включать ПЕРВЫМ, потом жизнь»
+- `docs.doc_mop_tag.title`: Инвентарная бирка (швабра)
+- `docs.doc_mop_tag.pages[0][0]`: ИНВ. № 0001/шв
+- `docs.doc_mop_tag.pages[0][1]`: «Швабра универсальная, с крюком.
+- `docs.doc_mop_tag.pages[0][2]`: Крюк — для коробок с антресоли.
+- `docs.doc_mop_tag.pages[0][3]`: НЕ ДЛЯ ДРАК. — З.»
+- `hints.intro[0].s`: anc
+- `hints.intro[0].e`: calm
+- `hints.intro[0].t`: Слушай сюда, потомок. Спрашивай — подскажу. Трижды на тему, дальше — сам.
+- `hints.cooldown[0].s`: anc
+- `hints.cooldown[0].e`: stern
+- `hints.cooldown[0].t`: Дай мыслям остыть. Подойди позже — совет должен настояться, как чай.
+- `hints.topics.t_start[0].s`: anc
+- `hints.topics.t_start[0].e`: calm
+- `hints.topics.t_start[0].t`: Начни с главной двери. Врага надо знать в лицо — осмотри её.
+- `hints.topics.t_start[1].s`: anc
+- `hints.topics.t_start[1].e`: stern
+- `hints.topics.t_start[1].t`: Твой стол хранит больше, чем ты помнишь. Ящик. Он заперт? Найди рычаг — плоский, длинный.
+- `hints.topics.t_start[2].s`: anc
+- `hints.topics.t_start[2].e`: smug
+- `hints.topics.t_start[2].t`: Линейка со стола — в щель ящика. Внутри то, что откроет тебе вторую комнату. Шток у синей двери ждёт квадрат.
+- `hints.topics.t_utility[0].s`: anc
+- `hints.topics.t_utility[0].e`: calm
+- `hints.topics.t_utility[0].t`: Синяя дверь без ручки — не тупик, а вопрос. Ответ квадратного сечения.
+- `hints.topics.t_utility[1].s`: anc
+- `hints.topics.t_utility[1].e`: stern
+- `hints.topics.t_utility[1].t`: Ручка-шток прячется там, где ты сам её спрятал. Свой стол проверь, стратег.
+- `hints.topics.t_utility[2].s`: anc
+- `hints.topics.t_utility[2].e`: smug
+- `hints.topics.t_utility[2].t`: Насади ручку из ящика на шток — и подсобка твоя.
+- `hints.topics.t_card[0].s`: anc
+- `hints.topics.t_card[0].e`: calm
+- `hints.topics.t_card[0].t`: Пропуск утонул у всех на виду. Загляни в аквариум. И подумай, чем тянуться.
+- `hints.topics.t_card[1].s`: anc
+- `hints.topics.t_card[1].e`: stern
+- `hints.topics.t_card[1].t`: Сачок без ручки на шкафу в подсобке. Ручка-указка — на доске в офисе. Вентиляция сквозная — используй её как катапульту.
+- `hints.topics.t_card[2].s`: anc
+- `hints.topics.t_card[2].e`: smug
+- `hints.topics.t_card[2].t`: Длинным сачком — карту со дна. Дальше бумаги: комп скажет, ящик Иры уточнит отдел, форма СКУД-2 оживит пластик.
+- `hints.topics.t_power[0].s`: anc
+- `hints.topics.t_power[0].e`: calm
+- `hints.topics.t_power[0].t`: Свет живёт в железном ящике на стене подсобки. Ящик под трёхгранник.
+- `hints.topics.t_power[1].s`: anc
+- `hints.topics.t_power[1].e`: stern
+- `hints.topics.t_power[1].t`: Трёхгранник не ищут — его добывают. Стенд отдаст коллектор, если накормить его порядком и давлением. Порядок — на листке, но листку верь с поправкой.
+- `hints.topics.t_power[2].s`: anc
+- `hints.topics.t_power[2].e`: smug
+- `hints.topics.t_power[2].t`: Правку красным читай как истину. Ходы, потом насос до зелёного. Коллектор плюс разводник — вот твой трёхгранник. Щиток, ГЛАВНЫЙ вверх.
+- `hints.topics.t_alarm[0].s`: anc
+- `hints.topics.t_alarm[0].e`: calm
+- `hints.topics.t_alarm[0].t`: Красный глаз у двери гасят числом. Число ты видел. На стене и в бумаге.
+- `hints.topics.t_alarm[1].s`: anc
+- `hints.topics.t_alarm[1].e`: stern
+- `hints.topics.t_alarm[1].t`: День, когда приезжали чужаки в пиджаках. Календарь его обвёл, журнал в подсобке подтвердил. Месяц — сам знаешь какой.
+- `hints.topics.t_alarm[2].s`: anc
+- `hints.topics.t_alarm[2].e`: smug
+- `hints.topics.t_alarm[2].t`: День приезда СБ и номер месяца — четыре цифры подряд. Панель у двери слушает.
+- `hints.topics.t_bolt[0].s`: anc
+- `hints.topics.t_bolt[0].e`: calm
+- `hints.topics.t_bolt[0].t`: Засов прикипел. Ржавчину не уговаривают — её смазывают и ломают.
+- `hints.topics.t_bolt[1].s`: anc
+- `hints.topics.t_bolt[1].e`: stern
+- `hints.topics.t_bolt[1].t`: Смазка на стеллаже подсобки. Рычаг — в ящике верстака, под замочком. Ключ от замочка висит на ёлке, как ни смешно.
+- `hints.topics.t_bolt[2].s`: anc
+- `hints.topics.t_bolt[2].e`: smug
+- `hints.topics.t_bolt[2].t`: Литол на ригель, разводник на себя. Зум двери, и дёргай.
+- `hints.topics.t_calm[0].s`: anc
+- `hints.topics.t_calm[0].e`: calm
+- `hints.topics.t_calm[0].t`: Руки твои дрожат, а дрожащей рукой дверь не открыть. Успокой тело.
+- `hints.topics.t_calm[1].s`: anc
+- `hints.topics.t_calm[1].e`: stern
+- `hints.topics.t_calm[1].t`: Сердцу — из аптечки в подсобке. Духу — из кофемашины. Ей нужны розетки и сотня. Сотня — под ёлкой, в подарке.
+- `hints.topics.t_calm[2].s`: anc
+- `hints.topics.t_calm[2].e`: smug
+- `hints.topics.t_calm[2].t`: Валидол плюс кофе — соедини в карманах. Варварство? Медицина поля боя.
+- `hints.topics.t_final[0].s`: anc
+- `hints.topics.t_final[0].e`: calm
+- `hints.topics.t_final[0].t`: Всё готово? Тогда карту — к считывателю. Он должен гореть красным, злиться — значит живой.
+- `hints.topics.t_final[1].s`: anc
+- `hints.topics.t_final[1].e`: stern
+- `hints.topics.t_final[1].t`: Зелёный глаз, снятая сигналка, свободный засов, спокойные руки — четыре печати. Проверь панель целей.
+- `hints.topics.t_final[2].s`: anc
+- `hints.topics.t_final[2].e`: smug
+- `hints.topics.t_final[2].t`: Прикладывай карту и толкай дверь. Свобода пахнет снегом и литолом.
+- `hints.topics.t_secret[0].s`: anc
+- `hints.topics.t_secret[0].e`: calm
+- `hints.topics.t_secret[0].t`: Чую реликвии рода… Три. Одна ближе, чем думаешь — в недрах твоего же стола.
+- `hints.topics.t_secret[1].s`: anc
+- `hints.topics.t_secret[1].e`: stern
+- `hints.topics.t_secret[1].t`: Вторая — в пыли под диваном, достанет только длинная лапа. Третья — в коробке на антресоли, крюк тебе в помощь.
+- `hints.topics.t_secret[2].s`: anc
+- `hints.topics.t_secret[2].e`: smug
+- `hints.topics.t_secret[2].t`: А коли соберёшь три — поройся в коробке ЕЩЁ раз. Венец ждёт наглого.
+- `idle[0].s`: lap
+- `idle[0].e`: tired
+- `idle[0].t`: Тик. Так. Часы на стене пиздят на семь минут. В свою пользу.
+- `idle[1].s`: lap
+- `idle[1].e`: worried
+- `idle[1].t`: Тишина такая, что слышно, как копир думает обо мне плохо.
+- `idle[2].s`: lap
+- `idle[2].e`: neutral
+- `idle[2].t`: Рыба сделала круг почёта. Завидую, сука, её ипотеке — аквариум-то оплачен.
+- `idle[3].s`: anc
+- `idle[3].e`: stern
+- `idle[3].t`: Не стой столбом, потомок. Столбы не выбираются из офисов.
+- `idle[4].s`: lap
+- `idle[4].e`: tired
+- `idle[4].t`: Жрать хочется. В холодильнике только чей-то «НЕ ТРОГАТЬ, БЛЯДЬ» и лёд.
+- `idle[5].s`: lap
+- `idle[5].e`: panic
+- `idle[5].t`: А если я тут до восьмого?! Буду питаться кормом для рыб и амбициями.
+- `idle[6].s`: anc
+- `idle[6].e`: calm
+- `idle[6].t`: Дыши. Осада — это терпение. И грабёж. Начни с терпения.
+- `idle[7].s`: lap
+- `idle[7].e`: neutral
+- `idle[7].t`: Снег за окном идёт вверх. Или это я уже всё, приехали.
+- `idle_calm[0].s`: lap
+- `idle_calm[0].e`: neutral
+- `idle_calm[0].t`: Спокойствие. Только спокойствие и запах литола.
+- `idle_calm[1].s`: lap
+- `idle_calm[1].e`: smug
+- `idle_calm[1].t`: Я собран, как шведский шкаф. Даже лишних деталей столько же.
+- `idle_calm[2].s`: anc
+- `idle_calm[2].e`: proud
+- `idle_calm[2].t`: Хорош. Твёрдая рука, ясный глаз. Дожимай.
+- `idle_calm[3].s`: lap
+- `idle_calm[3].e`: neutral
+- `idle_calm[3].t`: Кофе держится в организме, как последний защитник крепости.
+- `victory[0].s`: lap
+- `victory[0].e`: triumphant
+- `victory[0].t`: Дверь. ОТКРЫЛАСЬ. Настоящий, блядь, коридор! Холодный вонючий коридор СВОБОДЫ!
+- `victory[1].s`: anc
+- `victory[1].e`: proud
+- `victory[1].t`: Крепость пала на колени. Ты вышел сам — как подобает крови янычар.
+- `victory[2].s`: lap
+- `victory[2].e`: smug
+- `victory[2].t`: Записываю в резюме: «самостоятельно покинул офис». Это будет самая честная строчка.
+- `victory[3].s`: anc
+- `victory[3].e`: calm
+- `victory[3].t`: Иди, потомок. Снег, такси, оливье. Ты заслужил свой пир.
+- `victory[4].s`: lap
+- `victory[4].e`: tired
+- `victory[4].t`: С Новым годом, Лапидус. С новым, сука, счастьем.
+- `epilogues.0[0].s`: anc
+- `epilogues.0[0].e`: stern
+- `epilogues.0[0].t`: Реликвии остались в стенах. Род вздохнул… но промолчал. Вернёшься — восьмого.
+- `epilogues.0[1].s`: lap
+- `epilogues.0[1].e`: neutral
+- `epilogues.0[1].t`: Пустые руки, зато живой. Для первого января — олимпийский, блядь, результат.
+- `epilogues.1[0].s`: anc
+- `epilogues.1[0].e`: calm
+- `epilogues.1[0].t`: Одна реликвия при тебе. Искра памяти рода тлеет. Уже не позор.
+- `epilogues.1[1].s`: lap
+- `epilogues.1[1].e`: neutral
+- `epilogues.1[1].t`: Сувенир из ада. Поставлю на полку между дипломом и тоской.
+- `epilogues.2[0].s`: anc
+- `epilogues.2[0].e`: proud
+- `epilogues.2[0].t`: Две реликвии! Кровь заговорила почти в полный голос.
+- `epilogues.2[1].s`: lap
+- `epilogues.2[1].e`: smug
+- `epilogues.2[1].t`: Коллекционер офисных древностей. Открываю музей имени себя, хуле.
+- `epilogues.3[0].s`: anc
+- `epilogues.3[0].e`: proud
+- `epilogues.3[0].t`: ТРИ РЕЛИКВИИ! Ятаган, орден, феска! Род ликует сквозь века, потомок!
+- `epilogues.3[1].s`: lap
+- `epilogues.3[1].e`: triumphant
+- `epilogues.3[1].t`: Полный сет янычара-продажника. Теперь меня и на кассе в «Ленте» зауважают.
+- `epilogues.3[2].s`: anc
+- `epilogues.3[2].e`: smug
+- `epilogues.3[2].t`: Жаль, ты не докопался до венца… или?
+- `crown_epilogue[0].s`: anc
+- `crown_epilogue[0].e`: smug
+- `crown_epilogue[0].t`: …И ВЕНЕЦ! Картонный, кривой — но на твоей голове он сидит, как судьба.
+- `crown_epilogue[1].s`: lap
+- `crown_epilogue[1].e`: triumphant
+- `crown_epilogue[1].t`: Царь. Просто царь. Пойду царствовать до первой маршрутки.
+- `item_names.ruler`: Линейка
+- `item_names.handle`: Ручка-шток
+- `item_names.pointer`: Указка
+- `item_names.net`: Сачок (без ручки)
+- `item_names.longnet`: Длинный сачок
+- `item_names.card`: Пропуск Гены
+- `item_names.copy`: Ксерокопия пропуска
+- `item_names.key_toy`: Ключик-«игрушка»
+- `item_names.wrench`: Разводной ключ
+- `item_names.wheel`: Латунный маховик
+- `item_names.trikey`: Трёхгранник
+- `item_names.collector`: Латунный коллектор
+- `item_names.grease`: Смазка «Литол»
+- `item_names.hundred`: Сотня
+- `item_names.coffee`: Кофе
+- `item_names.validol`: Валидол
+- `item_names.mop`: Швабра с крюком
+- `item_names.relic_fez`: Феска
+- `item_names.relic_yatagan`: Ятаган (канцелярский)
+- `item_names.relic_badge`: Значок «Лучший продавец»
+- `item_names.crown`: Картонная корона
+- `item_desc.ruler.s`: lap
+- `item_desc.ruler.e`: neutral
+- `item_desc.ruler.t`: Тридцать сантиметров. Делений сорок, применений — одно, зато какое.
+- `item_desc.handle.s`: lap
+- `item_desc.handle.e`: neutral
+- `item_desc.handle.t`: Квадрат восемь на восемь. Ключ от подсобки в мире, где всё через жопу сделано.
+- `item_desc.pointer.s`: lap
+- `item_desc.pointer.e`: neutral
+- `item_desc.pointer.t`: Телескопическая указка. Оружие пассивной агрессии на планёрках.
+- `item_desc.net.s`: lap
+- `item_desc.net.e`: neutral
+- `item_desc.net.t`: Обод с сеткой. Ампутант. Ждёт протез.
+- `item_desc.longnet.s`: lap
+- `item_desc.longnet.e`: smug
+- `item_desc.longnet.t`: Сачок на указке. Патент не дадут, но карту со дна — достанет.
+- `item_desc.card.s`: lap
+- `item_desc.card.e`: neutral
+- `item_desc.card.t`: Пропуск Гены, №{TOK:card_number}. Пахнет аквариумом и халатностью.
+- `item_desc.copy.s`: lap
+- `item_desc.copy.e`: neutral
+- `item_desc.copy.t`: Тёплая копия пропуска. Юридически — бумажка. Духовно — трофей.
+- `item_desc.key_toy.s`: lap
+- `item_desc.key_toy.e`: neutral
+- `item_desc.key_toy.t`: Ключик с биркой. Игрушка со смыслом — редкость и на ёлке, и в жизни.
+- `item_desc.wrench.s`: lap
+- `item_desc.wrench.e`: neutral
+- `item_desc.wrench.t`: Разводной. Развожу гайки, тоску и, если надо, руками. Молча, нахуй.
+- `item_desc.wheel.s`: lap
+- `item_desc.wheel.e`: neutral
+- `item_desc.wheel.t`: Латунный маховик-«экспонат». Тяжёлый, как наследие.
+- `item_desc.trikey.s`: lap
+- `item_desc.trikey.e`: smug
+- `item_desc.trikey.t`: Трёхгранник из коллектора. Самодельный, незаконнорождённый, рабочий.
+- `item_desc.collector.s`: lap
+- `item_desc.collector.e`: neutral
+- `item_desc.collector.t`: Коллектор со стенда. Латунь, три отвода, ноль совести — снял и не жалко.
+- `item_desc.grease.s`: lap
+- `item_desc.grease.e`: neutral
+- `item_desc.grease.t`: «Литол-24». Запах гаража и деда. Лечит всё, кроме души, блядь.
+- `item_desc.hundred.s`: lap
+- `item_desc.hundred.e`: neutral
+- `item_desc.hundred.t`: Сто рублей от Санты. Курс к счастью: один к одному, охуеть выгодно.
+- `item_desc.coffee.s`: lap
+- `item_desc.coffee.e`: neutral
+- `item_desc.coffee.t`: Американо. Горячий, честный, из последней сотни.
+- `item_desc.validol.s`: lap
+- `item_desc.validol.e`: neutral
+- `item_desc.validol.t`: Валидол. Мятная таблетка «понял-принял».
+- `item_desc.mop.s`: lap
+- `item_desc.mop.e`: neutral
+- `item_desc.mop.t`: Швабра Зины, с крюком. Инв. №0001/шв. НЕ ДЛЯ ДРАК.
+- `item_desc.relic_fez.s`: lap
+- `item_desc.relic_fez.e`: smug
+- `item_desc.relic_fez.t`: Феска. Красная, с кисточкой. В ней я на 40% больше янычар.
+- `item_desc.relic_yatagan.s`: lap
+- `item_desc.relic_yatagan.e`: smug
+- `item_desc.relic_yatagan.t`: Ятаган для конвертов. Враги трепещут. Конверты — в первую очередь.
+- `item_desc.relic_badge.s`: lap
+- `item_desc.relic_badge.e`: smug
+- `item_desc.relic_badge.t`: «Лучший продавец 2017». Доказательство, что и у меня был пик.
+- `item_desc.crown.s`: lap
+- `item_desc.crown.e`: triumphant
+- `item_desc.crown.t`: Корона из картона. Власть, которой хватает ровно на этот офис.
+- `breaker_dead[0].s`: lap
+- `breaker_dead[0].e`: neutral
+- `breaker_dead[0].t`: Шестой автомат. Подпись стёрта, рычаг прикипел в «выкл». Легенда щитка. Не трогаю легенды.
+- `speaker_names.lap`: ЛАПИДУС
+- `speaker_names.anc`: ПРЕДОК
+- `glyph_names.fez`: феска
+- `glyph_names.yatagan`: ятаган
+- `glyph_names.crescent`: полумесяц
+- `glyph_names.star`: звезда
+- `glyph_names.drum`: барабан
+- `glyph_names.horseshoe`: подкова
+- `glyph_names.teapot`: чайник
+- `glyph_names.key`: ключ
+- `glyph_names.fish`: рыба
+- `glyph_names.snowflake`: снежинка
+
+## Названия зон (hover-подписи)
+- `A/hs_reader`: Считыватель
+- `A/hs_alarm`: Сигнализация
+- `A/hs_phone`: Телефон
+- `A/hs_util_shaft`: Квадратный шток
+- `A/hs_exit_sign`: Табличка EXIT
+- `A/hs_intercom`: Домофон
+- `A/hs_poster_ot`: Плакат по охране труда
+- `A/hs_red_button`: Красная кнопка
+- `A/hs_coffee_machine`: Кофемашина
+- `A/hs_ruler`: Линейка
+- `A/hs_lap_drawer`: Ящик стола
+- `A/hs_lap_drawer_pry`: Запертый ящик
+- `A/hs_extinguisher`: Огнетушитель
+- `A/hs_vent_office`: Вентрешётка
+- `A/hs_karaoke`: Караоке-список
+- `A/hs_calendar`: Календарь
+- `A/hs_wheel_wall`: Памятный маховик
+- `A/hs_pointer`: Указка
+- `A/hs_karaoke_sing`: Спеть
+- `A/hs_flipchart`: Флипчарт
+- `A/hs_tree_base`: Под ёлкой
+- `A/hs_util_door`: Дверь щитовой
+- `A/hs_util_door_go`: В щитовую
+- `A/hs_ira_drawer_out`: Открытый ящик
+- `A/hs_copier`: Копир
+- `A/hs_aquarium`: Аквариум
+- `A/hs_ira_tumba`: Кодовая тумба
+- `A/hs_aq_tumba`: Тумба аквариума
+- `A/hs_sofa_under`: Под диваном
+- `A/hs_ira_pc`: Компьютер
+- `A/hs_lap_desk`: Стол Лапидуса
+- `A/hs_kpi_board`: KPI-доска
+- `A/hs_main_door`: Главная дверь
+- `A/hs_main_door_survey`: Осмотреть дверь
+- `A/hs_ira_desk`: Стол Иры
+- `A/hs_wardrobe`: Шкаф-гардероб
+- `A/hs_table_mugs`: Журнальный столик
+- `A/hs_tree`: Ёлка
+- `A/hs_sofa`: Диван
+- `A/hs_window`: Окно
+- `B/hs_shelf_grease`: Смазка
+- `B/hs_sink_valve`: Вентиль под раковиной
+- `B/hs_vent_util`: Вентрешётка
+- `B/hs_bucket`: Ведро
+- `B/hs_mop`: Швабра
+- `B/hs_net_top`: Верх шкафа
+- `B/hs_attic`: Антресоль
+- `B/hs_box_floor`: Коробка «НГ-2019»
+- `B/hs_box_search`: Коробка (ещё раз)
+- `B/hs_net_floor`: Сачок
+- `B/hs_sink`: Раковина
+- `B/hs_panel`: Электрощиток
+- `B/hs_panel_locked`: Щиток (заперт)
+- `B/hs_boiler`: Бойлер
+- `B/hs_bench`: Стенд
+- `B/hs_workbench`: Верстак
+- `B/hs_shelf`: Стеллаж
+- `B/hs_closet`: Шкаф уборщицы
+- `B/hs_b_door_office`: Дверь в офис
+- `zoom_tree/hs_z_keytoy`: Ключик-«игрушка»
+- `zoom_tree/hs_z_santa`: Бирки Санты
+- `zoom_tree/hs_z_bin`: Корзина
+- `zoom_tree/hs_z_gift`: Подарок
+- `zoom_tree/hs_z_stand`: Крестовина
+- `zoom_tree/hs_z_balls`: Игрушки
+- `zoom_lap_drawer/hs_z_photos`: Фотки с корпоратива
+- `zoom_lap_drawer/hs_z_junk`: Хлам справа
+- `zoom_lap_drawer/hs_z_tray`: Лоток-органайзер
+- `zoom_aquarium/hs_z_glint`: Что-то блестит
+- `zoom_aquarium/hs_z_fish`: Рыбка
+- `zoom_aquarium/hs_z_weed`: Водоросли
+- `zoom_aquarium/hs_z_castle`: Замок
+- `zoom_pc/hs_z_mouse`: Мышь
+- `zoom_pc/hs_z_pencils`: Карандашница
+- `zoom_pc/hs_z_sticker`: Стикер под клавиатурой
+- `zoom_pc/hs_z_screen`: Экран
+- `zoom_drawer_keypad/hs_z_slot`: Щель шредера
+- `zoom_drawer_keypad/hs_z_keypad`: Кейпад
+- `zoom_drawer_keypad/hs_z_mini_drawer`: Ящичек
+- `zoom_alarm/hs_z_alarm_tag`: Бирка монтажника
+- `zoom_alarm/hs_z_alarm_horn`: Сирена
+- `zoom_alarm/hs_z_alarm_pad`: Панель сигнализации
+- `zoom_exit_door/hs_z_keyhole`: Скважина
+- `zoom_exit_door/hs_z_bolt`: Засов
+- `zoom_exit_door/hs_z_handle_lock`: Ручка и замок
+- `zoom_exit_door/hs_z_reader_small`: Считыватель
+- `zoom_exit_door/hs_z_alarm_go`: Панель сигнализации
+- `zoom_exit_door/hs_z_intercom2`: Домофон
+- `zoom_exit_door/hs_z_plate`: Табличка
+- `zoom_exit_door/hs_z_door_push`: Толкнуть дверь
+- `zoom_panel/hs_z_ext_switch`: Рубильник
+- `zoom_panel/hs_z_schema`: Схема
+- `zoom_panel/hs_z_breaker_row`: Автоматы
+- `zoom_bench/hs_z_reset`: СБРОС
+- `zoom_bench/hs_z_hatch`: Лючок
+- `zoom_bench/hs_z_valve_k1`: К1
+- `zoom_bench/hs_z_valve_k2`: К2
+- `zoom_bench/hs_z_valve_s`: С
+- `zoom_bench/hs_z_valve_p`: П
+- `zoom_bench/hs_z_valve_p_empty`: Голый шток «П»
+- `zoom_bench/hs_z_gauge`: Манометр
+- `zoom_bench/hs_z_collector`: Коллектор в зажиме
+- `zoom_bench/hs_z_note`: Листок-инструкция
+- `zoom_bench/hs_z_pump`: Насос
+- `zoom_workbench/hs_z_padlock`: Замочек
+- `zoom_workbench/hs_z_journal`: Журнал испытаний
+- `zoom_workbench/hs_z_vise`: Тиски
+- `zoom_workbench/hs_z_wb_drawer`: Ящик верстака
+- `zoom_attic/hs_z_tinsel`: Мишура
+- `zoom_attic/hs_z_dust`: Пыльный след
+- `zoom_attic/hs_z_box_shelf`: Коробка «НГ-2019»
+- `zoom_closet/hs_z_rag`: Тряпка
+- `zoom_closet/hs_z_hooks`: Крючки
+- `zoom_closet/hs_z_medkit`: Аптечка
+- `zoom_closet/hs_z_bottles`: Бутыли
+- `zoom_closet/hs_z_bucket2`: Ведро

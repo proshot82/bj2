@@ -16,27 +16,6 @@
    },
    "hotspots": [
     {
-     "id": "hs_util_shaft",
-     "rect": [
-      1646,
-      543,
-      46,
-      64
-     ],
-     "cursor": "act",
-     "name": "Квадратный шток",
-     "look": true,
-     "hide_on": [
-      "utility_open"
-     ],
-     "rect_day": [
-      1720,
-      420,
-      48,
-      56
-     ]
-    },
-    {
      "id": "hs_reader",
      "rect": [
       1578,
@@ -85,6 +64,27 @@
      "name": "Телефон"
     },
     {
+     "id": "hs_util_shaft",
+     "rect": [
+      1733,
+      358,
+      58,
+      74
+     ],
+     "cursor": "act",
+     "name": "Квадратный шток",
+     "look": true,
+     "hide_on": [
+      "utility_open"
+     ],
+     "rect_day": [
+      1724,
+      300,
+      52,
+      62
+     ]
+    },
+    {
      "id": "hs_exit_sign",
      "rect": [
       1504,
@@ -103,21 +103,6 @@
      ]
     },
     {
-     "id": "hs_ruler",
-     "rect": [
-      738,
-      485,
-      125,
-      50
-     ],
-     "cursor": "act",
-     "node": "take_ruler",
-     "name": "Линейка",
-     "hide_on": [
-      "done:take_ruler"
-     ]
-    },
-    {
      "id": "hs_intercom",
      "rect": [
       1440,
@@ -133,6 +118,24 @@
       280,
       48,
       110
+     ]
+    },
+    {
+     "id": "hs_poster_ot",
+     "rect": [
+      1506,
+      246,
+      94,
+      76
+     ],
+     "cursor": "zoom",
+     "doc": "doc_poster",
+     "name": "Плакат по охране труда",
+     "rect_day": [
+      1543,
+      236,
+      64,
+      58
      ]
     },
     {
@@ -163,21 +166,18 @@
      "name": "Кофемашина"
     },
     {
-     "id": "hs_poster_ot",
+     "id": "hs_ruler",
      "rect": [
-      1642,
-      278,
-      106,
-      110
-     ],
-     "cursor": "zoom",
-     "doc": "doc_poster",
-     "name": "Плакат по охране труда",
-     "rect_day": [
-      1706,
+      734,
+      490,
       186,
-      48,
-      82
+      48
+     ],
+     "cursor": "act",
+     "node": "take_ruler",
+     "name": "Линейка",
+     "hide_on": [
+      "done:take_ruler"
      ]
     },
     {
@@ -230,27 +230,6 @@
      ]
     },
     {
-     "id": "hs_pointer",
-     "rect": [
-      1752,
-      562,
-      168,
-      76
-     ],
-     "cursor": "act",
-     "node": "take_pointer",
-     "name": "Указка",
-     "hide_on": [
-      "done:take_pointer"
-     ],
-     "rect_day": [
-      1762,
-      388,
-      158,
-      74
-     ]
-    },
-    {
      "id": "hs_vent_office",
      "rect": [
       1288,
@@ -289,8 +268,8 @@
     {
      "id": "hs_wheel_wall",
      "rect": [
-      1150,
-      190,
+      994,
+      198,
       105,
       150
      ],
@@ -299,6 +278,27 @@
      "name": "Памятный маховик",
      "hide_on": [
       "done:take_wheel"
+     ]
+    },
+    {
+     "id": "hs_pointer",
+     "rect": [
+      1705,
+      581,
+      215,
+      88
+     ],
+     "cursor": "act",
+     "node": "take_pointer",
+     "name": "Указка",
+     "hide_on": [
+      "done:take_pointer"
+     ],
+     "rect_day": [
+      1770,
+      376,
+      150,
+      88
      ]
     },
     {
@@ -592,10 +592,10 @@
     {
      "id": "hs_tree",
      "rect": [
-      385,
-      145,
-      280,
-      500
+      390,
+      150,
+      250,
+      460
      ],
      "cursor": "zoom",
      "goto": "zoom_tree",
@@ -606,8 +606,8 @@
      "rect": [
       0,
       505,
-      455,
-      400
+      450,
+      330
      ],
      "cursor": "act",
      "name": "Диван",
@@ -631,10 +631,10 @@
     {
      "img": "cutouts/st_ruler_on_desk.png",
      "pos": [
-      745,
-      492
+      742,
+      498
      ],
-     "scale": 0.72,
+     "scale": 1.0,
      "z": 20,
      "hide_on": [
       "done:take_ruler"
@@ -643,24 +643,24 @@
     {
      "img": "cutouts/st_pointer_on_board.png",
      "pos": [
-      1760,
-      570
+      1712,
+      588
      ],
-     "scale": 1.0,
+     "scale": 1.3,
      "z": 20,
      "hide_on": [
       "done:take_pointer"
      ],
      "pos_day": [
-      1770,
-      395
+      1712,
+      383
      ]
     },
     {
      "img": "cutouts/st_wheel_wall.png",
      "pos": [
-      1158,
-      198
+      1002,
+      206
      ],
      "scale": 0.52,
      "z": 20,
@@ -1518,10 +1518,10 @@
     {
      "id": "hs_z_mouse",
      "rect": [
-      1120,
-      770,
-      200,
-      140
+      1630,
+      820,
+      140,
+      85
      ],
      "cursor": "act",
      "name": "Мышь",

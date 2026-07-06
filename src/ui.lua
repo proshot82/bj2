@@ -1007,6 +1007,7 @@ local function hud_buttons()
   return {
     {id = "hint", x = 1640, y = 12, w = 250, h = 48, t = T.ui.hint_btn},
     {id = "pause", x = 1560, y = 12, w = 64, h = 48, t = "II"},
+    {id = "zones", x = 1414, y = 12, w = 130, h = 48, t = "ЗОНЫ"},
   }
 end
 local function hud_draw()
@@ -1191,7 +1192,9 @@ function ui.mousepressed(x, y, btn)
   -- HUD
   for _, b in ipairs(hud_buttons()) do
     if x >= b.x and x < b.x + b.w and y >= b.y and y < b.y + b.h then
-      if b.id == "hint" then ui.hint() else menu = "pause" end
+      if b.id == "hint" then ui.hint()
+      elseif b.id == "zones" then ui.zones_toggle()
+      else menu = "pause" end
       snd("ui_click")
       return
     end
@@ -1238,8 +1241,10 @@ function ui.keypressed(key)
   if ui.widget_key(key) then return end
 end
 
+local zones_on = false
+function ui.zones_toggle() zones_on = not zones_on end
 function ui.space_down()
-  return love.keyboard.isDown("space") and not ui.dialog_active()
+  return (love.keyboard.isDown("space") or zones_on) and not ui.dialog_active()
     and not widget and not reader and not menu
 end
 
