@@ -894,13 +894,6 @@ local function menu_draw()
       lg.setColor(C.brass); lg.rectangle("line", bx, by, bw2, bh2, 12, 12)
       lg.setColor(C.text); lg.printf(lb[2], bx, by + 16, bw2, "center")
     end
-    lg.setFont(F.small)
-    local agw = F.small:getWidth(T.ui.age_gate) + 48
-    lg.setColor(0, 0, 0, 0.62)
-    lg.rectangle("fill", 960 - agw / 2, 1022, agw, 42, 8, 8)
-    lg.setColor(0.88, 0.86, 0.8)
-    lg.printf(T.ui.age_gate, 0, 1030, 1920, "center")
-    lg.setColor(1, 1, 1)
   elseif menu == "pause" or menu == "settings" then
     lg.setColor(0, 0, 0, 0.6); lg.rectangle("fill", 0, 0, 1920, 1080)
     lg.setColor(C.panel); lg.rectangle("fill", 660, 240, 600, 560, 14, 14)
