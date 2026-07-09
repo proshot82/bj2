@@ -374,30 +374,12 @@
      "name": "Под ёлкой"
     },
     {
-     "id": "hs_kpi_board",
-     "rect": [
-      1758,
-      278,
-      150,
-      200
-     ],
-     "cursor": "act",
-     "name": "KPI-доска",
-     "look": true,
-     "rect_day": [
-      1785,
-      150,
-      120,
-      320
-     ]
-    },
-    {
      "id": "hs_util_door",
      "rect": [
-      1633,
-      448,
-      152,
-      212
+      1706,
+      285,
+      92,
+      320
      ],
      "cursor": "act",
      "node": "open_utility",
@@ -415,10 +397,10 @@
     {
      "id": "hs_util_door_go",
      "rect": [
-      1633,
-      448,
-      152,
-      212
+      1706,
+      285,
+      92,
+      320
      ],
      "cursor": "move",
      "goto_room": "B",
@@ -431,6 +413,24 @@
       278,
       93,
       332
+     ]
+    },
+    {
+     "id": "hs_kpi_board",
+     "rect": [
+      1758,
+      278,
+      150,
+      200
+     ],
+     "cursor": "act",
+     "name": "KPI-доска",
+     "look": true,
+     "rect_day": [
+      1785,
+      150,
+      120,
+      320
      ]
     },
     {
@@ -813,17 +813,17 @@
     {
      "img": "cutouts/st_util_door_open.png",
      "pos": [
-      1565,
-      252
+      1697,
+      285
      ],
-     "scale": 0.56,
+     "scale": 1.03,
      "z": 15,
      "show_on": [
       "utility_open"
      ],
      "pos_day": [
-      1575,
-      258
+      1697,
+      285
      ]
     },
     {

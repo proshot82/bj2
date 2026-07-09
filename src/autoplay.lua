@@ -147,6 +147,9 @@ local function exec(s)
     click(960, 596, 1); return true
   elseif op == "continue_game" then
     click(960, 688, 1); return true
+  elseif op == "setflag" then
+    -- ТОЛЬКО для смок-рендеров: форсировать флаг состояния (utility_open/power_on)
+    E.state.flags[s.f] = (s.v ~= false); return true
   elseif op == "click_hs" then
     if E.ui.dialog_active() then dismiss_once(); return false end
     local cx, cy, h = hs_center(s.id)

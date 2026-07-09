@@ -58,11 +58,16 @@ local function gfx_manifest()
 end
 
 local AUDIO_LIST = {
-  "ambient","beep_err","beep_ok","bill","blip_anc","blip_lap","bolt_break",
+  "beep_err","beep_ok","bill","blip_anc","blip_lap","bolt_break",
   "breaker_click","coffee","creak","crunch","garland","hiss","key_turn",
   "knock","mop_hook","net_fall","paper","pickup","psh","pump","splash",
   "step_a","step_b","transition","tumbler","ui_click","utility_door",
   "valve","victory","zoom_in","zoom_out",
+}
+-- музыка 2.0.5: фоны и слои — луп (stream), стингеры — one-shot (static)
+local MUSIC_LIST = {
+  "bgm_title","bgm_night_a","bgm_night_b","bgm_day_a","bgm_day_b","bgm_epilogue",
+  "layer_nervous","layer_garland","sting_power","sting_crown","sting_solved",
 }
 
 -- ---------- selftest ----------
@@ -72,9 +77,11 @@ local function selftest()
   for p in pairs(gfx_manifest()) do
     if not love.filesystem.getInfo(p) then fail("нет файла " .. p) end
   end
-  for _, a in ipairs(AUDIO_LIST) do
-    if not love.filesystem.getInfo("assets/audio/" .. a .. ".ogg") then
-      fail("нет аудио " .. a)
+  for _, list in ipairs({AUDIO_LIST, MUSIC_LIST}) do
+    for _, a in ipairs(list) do
+      if not love.filesystem.getInfo("assets/audio/" .. a .. ".ogg") then
+        fail("нет аудио " .. a)
+      end
     end
   end
   for _, f in ipairs({"fonts/PTSans-Regular.ttf", "fonts/PTSans-Bold.ttf",
@@ -140,8 +147,11 @@ function love.load(args)
     IMG[key] = love.graphics.newImage(p)
   end
   for _, a in ipairs(AUDIO_LIST) do
+    AUD[a] = love.audio.newSource("assets/audio/" .. a .. ".ogg", "static")
+  end
+  for _, a in ipairs(MUSIC_LIST) do
     AUD[a] = love.audio.newSource("assets/audio/" .. a .. ".ogg",
-      a == "ambient" and "stream" or "static")
+      a:match("^sting_") and "static" or "stream")
   end
 
   local items = {}

@@ -28,6 +28,7 @@ local hint = {last = -1e9, topic_idx = {}}
 local toast = nil
 local idle_timer = 0
 local shake_seed = 0
+local victory_stage = nil   -- объявлен выше менеджера музыки/стингеров
 
 ui.autoplay_hooks = {}    -- заполняет autoplay
 
@@ -50,11 +51,94 @@ local function snd(name)
 end
 ui.snd = snd
 
-local function music_update()
-  local a = AUD.ambient
-  if settings.music then
-    if not a:isPlaying() then a:setLooping(true); a:setVolume(0.5); a:play() end
-  else a:stop() end
+-- ================= МУЗЫКА: BGM-менеджер 2.0.5 =================
+-- 2 канала кроссфейда (лерп ~1.5с) + 2 слоя (nervous/garland) + стингеры.
+-- Уровни зашиты в файлы пик-нормализацией (фоны -5, слои -11, стингеры -1 dBFS),
+-- в движке общий множитель MUS_MASTER. settings.music гейтит ВСЮ музыку
+-- (фоны+слои+стингеры) через лерп mus.gain; звуки snd() это не трогает.
+local MUS_MASTER = 0.85
+local BGM_FADE, LAYER_FADE, GATE_FADE = 1.5, 2.0, 0.4
+local mus = {
+  slots = {{name = nil, vol = 0, src = nil}, {name = nil, vol = 0, src = nil}},
+  cur = 0, gain = 0, ln_vol = 0, lg_vol = 0, prev = nil,
+}
+
+local function mus_apply(src, vol)
+  if not src then return end
+  if vol > 0.001 then
+    src:setLooping(true); src:setVolume(vol)
+    if not src:isPlaying() then src:play() end
+  elseif src:isPlaying() then src:stop() end
+end
+
+local function approach(v, target, dt, dur)
+  local step = dt / (dur > 0.01 and dur or 0.01)
+  if v < target then return math.min(target, v + step) end
+  if v > target then return math.max(target, v - step) end
+  return v
+end
+
+-- стингер: one-shot поверх музыки, гейтится settings.music
+local function sting(name)
+  if not settings.music then return end
+  local s = AUD[name]
+  if s then s:stop(); s:setVolume(MUS_MASTER); s:play() end
+end
+ui.sting = sting
+
+-- целевой фон: титул→title, победа→epilogue, иначе комната(A/B) + режим(день/ночь)
+local function mus_target_bgm()
+  if menu == "title" then return "bgm_title" end
+  if victory_stage then return "bgm_epilogue" end
+  local v = SC.view()
+  local room = (v and v.room) or "A"
+  local day = ST.flags.power_on
+  if room == "B" then return day and "bgm_day_b" or "bgm_night_b" end
+  return day and "bgm_day_a" or "bgm_night_a"
+end
+
+-- снимок флагов, чтобы не стрелять стингером на загрузке/старте
+local function mus_sync_flags()
+  mus.prev = {power_on = ST.flags.power_on or false,
+              crown = (ST.flags.crown or ST.inv.crown) or false}
+end
+local function mus_boot() mus_sync_flags() end
+
+local function mus_update(dt)
+  mus.gain = approach(mus.gain, settings.music and 1 or 0, dt, GATE_FADE)
+  if not mus.prev then mus_sync_flags() end
+
+  -- кроссфейд фонового трека между двумя каналами
+  local want = mus_target_bgm()
+  local cs = mus.slots[mus.cur]
+  if mus.cur == 0 or (cs and cs.name ~= want) then
+    local ni = (mus.cur == 1) and 2 or 1
+    local ns = mus.slots[ni]
+    if ns.src and ns.src:isPlaying() then ns.src:stop() end
+    ns.name, ns.vol, ns.src = want, 0, AUD[want]
+    mus.cur = ni
+  end
+  for i, s in ipairs(mus.slots) do
+    s.vol = approach(s.vol, (i == mus.cur) and 1 or 0, dt, BGM_FADE)
+    mus_apply(s.src, s.vol * mus.gain * MUS_MASTER)
+  end
+
+  -- слой «нервы»: с начала игры до calm_down; на титуле/победе молчит
+  local ln_on = menu ~= "title" and not victory_stage and not ST.flags.calm_down
+  mus.ln_vol = approach(mus.ln_vol, ln_on and 1 or 0, dt, LAYER_FADE)
+  mus_apply(AUD.layer_nervous, mus.ln_vol * mus.gain * MUS_MASTER)
+
+  -- слой «гирлянда»: при garland_on
+  local lg_on = ST.flags.garland_on and menu ~= "title" and not victory_stage
+  mus.lg_vol = approach(mus.lg_vol, lg_on and 1 or 0, dt, LAYER_FADE)
+  mus_apply(AUD.layer_garland, mus.lg_vol * mus.gain * MUS_MASTER)
+
+  -- стингеры на переходах флагов: власть и корона
+  if ST.flags.power_on and not mus.prev.power_on then sting("sting_power") end
+  mus.prev.power_on = ST.flags.power_on or false
+  local crown_now = (ST.flags.crown or ST.inv.crown) or false
+  if crown_now and not mus.prev.crown then sting("sting_crown") end
+  mus.prev.crown = crown_now
 end
 
 -- ================= тряска =================
@@ -627,10 +711,8 @@ function ui.after_fire(id)
 end
 
 -- ================= победа =================
-local victory_stage = nil
 function ui.start_victory()
   victory_stage = {i = 0, t0 = SC.time()}
-  if settings.music then AUD.ambient:stop() end
   snd("victory")
   push_lines(T.victory)
   local rn = 0
@@ -801,7 +883,7 @@ local function keypad_click(x, y)
       elseif k == "OK" then
         local ok, why = ST:try_code(widget.node, widget.buf)
         if ok then
-          snd("beep_ok"); say_node(widget.node, "do")
+          snd("beep_ok"); sting("sting_solved"); say_node(widget.node, "do")
           ui.after_fire(widget.node); ui.close_widget()
         else
           snd("beep_err"); widget.buf = ""
@@ -846,7 +928,7 @@ local function form_click(x, y)
   if b and x >= b[1] and x < b[1] + b[3] and y >= b[2] and y < b[2] + b[4] then
     local ok, why = ST:try_form(widget.no, P.tokens.depts[widget.dept_i])
     if ok then
-      snd("beep_ok"); say_node("skud_form", "do")
+      snd("beep_ok"); sting("sting_solved"); say_node("skud_form", "do")
       ui.after_fire("skud_form"); ui.close_widget()
     else
       snd("beep_err"); say_node("skud_form", "fail_code")
@@ -929,7 +1011,7 @@ function ui.bench_node(id, btn)
     push_lines({{s = "anc", e = "stern",
       t = "НЕ ТОТ вентиль. Система обиделась и всё стравила. Сначала."}})
   elseif res == "solved" then
-    snd("psh"); say_node("bench_solve", "do"); ui.after_fire("bench_solve")
+    snd("psh"); sting("sting_solved"); say_node("bench_solve", "do"); ui.after_fire("bench_solve")
   elseif res == "already" then
     say_node("bench_solve", "already")
   end
@@ -1010,7 +1092,7 @@ local function menu_click(x, y)
       if b.id == "start" then
         menu = nil; ui.new_game()
       elseif b.id == "cont" then
-        menu = nil; ui.load_save(); music_update()
+        menu = nil; ui.load_save(); mus_boot()
       elseif b.id == "settings" then
         settings_from = menu; menu = "settings"
       elseif b.id == "quit" then love.event.quit()
@@ -1024,7 +1106,6 @@ local function menu_click(x, y)
         local k = b.id:sub(5)
         settings[k] = not settings[k]
         if k == "fullscreen" then love.window.setFullscreen(settings.fullscreen) end
-        if k == "music" then music_update() end
       end
       return true
     end
@@ -1039,7 +1120,7 @@ function ui.new_game()
   hint_intro_done = false
   victory_stage = nil
   push_lines(T.opening)
-  music_update()
+  mus_boot()
 end
 
 -- ================= кнопка подсказки/паузы на экране =================
@@ -1083,6 +1164,7 @@ end
 function ui.update(dt)
   dlg_update(dt)
   idle_update(dt)
+  mus_update(dt)
 end
 
 -- «предмет в руке»: иконка выбранного предмета у курсора (курсор-предмет)
