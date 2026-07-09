@@ -21,14 +21,14 @@ A_hotspots = [
     # --- левая стабильная зона ---
     HS("hs_window", [0, 55, 345, 588], node="h_window", name="Окно",
        look=True),
-    HS("hs_sofa_under", [30, 800, 300, 130], node="relic_badge", name="Под диваном",
+    HS("hs_sofa_under", [20, 850, 320, 110], node="relic_badge", name="Под диваном",
        fail_without=["longnet"]),
-    HS("hs_sofa", [0, 505, 450, 330], name="Диван", look=True),
-    HS("hs_karaoke", [20, 670, 140, 105], doc="doc_karaoke", name="Караоке-список",
+    HS("hs_sofa", [0, 505, 420, 245], name="Диван", look=True),
+    HS("hs_karaoke", [5, 700, 140, 62], doc="doc_karaoke", name="Караоке-список",
        cursor="zoom"),
-    HS("hs_karaoke_sing", [30, 775, 220, 90], node="h_karaoke_sing",
+    HS("hs_karaoke_sing", [30, 778, 225, 66], node="h_karaoke_sing",
        name="Спеть", show_on=["read:doc_karaoke"]),
-    HS("hs_table_mugs", [235, 700, 370, 255], name="Журнальный столик", look=True),
+    HS("hs_table_mugs", [305, 745, 265, 210], name="Журнальный столик", look=True),
     HS("hs_tree", [390, 150, 250, 460], goto="zoom_tree", name="Ёлка", cursor="zoom"),
     HS("hs_tree_base", [400, 590, 240, 110], goto="zoom_tree", name="Под ёлкой",
        cursor="zoom"),
@@ -36,7 +36,7 @@ A_hotspots = [
        cursor="zoom"),
     HS("hs_flipchart", [826, 162, 122, 175], name="Флипчарт", look=True),
     HS("hs_lap_desk", [645, 478, 300, 185], name="Стол Лапидуса", look=True),
-    HS("hs_ruler", [734, 490, 186, 48], node="take_ruler", name="Линейка",
+    HS("hs_ruler", [1295, 695, 118, 100], node="take_ruler", name="Линейка",
        hide_on=["done:take_ruler"]),
     HS("hs_phone", [872, 445, 68, 58], node="h_phone", name="Телефон"),
     HS("hs_lap_drawer", [868, 514, 80, 148], goto="zoom_lap_drawer", show_on=["drawer_pried"], name="Ящик стола",
@@ -50,7 +50,8 @@ A_hotspots = [
        name="Кофемашина"),
     HS("hs_wheel_wall", [994, 198, 105, 150], node="take_wheel", name="Памятный маховик",
        hide_on=["done:take_wheel"]),
-    HS("hs_vent_office", [1288, 108, 132, 102], node="push_net", name="Вентрешётка"),
+    HS("hs_vent_office", [1263, 135, 140, 110], node="push_net", name="Вентрешётка",
+       rect_day=[1268, 145, 137, 112]),
     HS("hs_red_button", [1166, 296, 86, 86], name="Красная кнопка",
        look=True, show_on=["power_on"]),
     HS("hs_wardrobe", [1245, 180, 170, 460], name="Шкаф-гардероб", look=True),
@@ -60,15 +61,15 @@ A_hotspots = [
     HS("hs_ira_pc", [1420, 500, 185, 245], goto="zoom_pc", name="Компьютер",
        cursor="zoom",
        rect_day=[1460, 530, 235, 200]),
-    HS("hs_ira_tumba", [1345, 788, 135, 275], goto="zoom_drawer_keypad",
+    HS("hs_ira_tumba", [1345, 788, 140, 115], goto="zoom_drawer_keypad",
        name="Кодовая тумба", cursor="zoom"),
-    HS("hs_ira_drawer_out", [1120, 850, 270, 125], doc="doc_registry",
+    HS("hs_ira_drawer_out", [1350, 905, 125, 105], doc="doc_registry",
        name="Открытый ящик", show_on=["drawer_ira_open"], cursor="zoom"),
-    HS("hs_kpi_board", [1788, 222, 132, 436], name="KPI-доска", look=True,
-       rect_day=[1795, 160, 125, 272]),
-    HS("hs_pointer", [1705, 581, 215, 88], node="take_pointer", name="Указка",
+    HS("hs_kpi_board", [1758, 278, 150, 200], name="KPI-доска", look=True,
+       rect_day=[1785, 150, 120, 320]),
+    HS("hs_pointer", [1798, 385, 92, 82], node="take_pointer", name="Указка",
        hide_on=["done:take_pointer"],
-       rect_day=[1770, 376, 150, 88]),
+       rect_day=[1808, 398, 92, 80]),
     # --- правая зона: рассинхрон день/ночь, всюду rect_day ---
     HS("hs_exit_sign", [1504, 130, 100, 58], name="Табличка EXIT", look=True,
        rect_day=[1540, 126, 86, 62]),
@@ -100,17 +101,22 @@ A_hotspots = [
        rect_day=[1852, 425, 66, 190]),
 ]
 A_cutouts = [
-    CO("cutouts/st_ruler_on_desk.png", [742, 498], 1.0, z=20,
+    # линейка — оригинальный катаут (восстановлен из git 5413efe), лежит на
+    # столе Иры (правая столешница ~1240..1800 × 665..790, ночь=день)
+    CO("cutouts/st_ruler_on_desk.png", [1143, 674], 2.8, z=20,
        hide_on=["done:take_ruler"]),
-    CO("cutouts/st_pointer_on_board.png", [1712, 588], 1.3, z=20,
+    # указка (диагональная) лежит ВНУТРИ силуэта KPI-доски (ночь/день)
+    CO("cutouts/st_pointer_on_board.png", [1713, 376], 1.5, z=20,
        hide_on=["done:take_pointer"],
-       pos_day=[1712, 383]),
+       pos_day=[1723, 386]),
     CO("cutouts/st_wheel_wall.png", [1002, 206], 0.52, z=20,
        hide_on=["done:take_wheel"]),
-    CO("cutouts/st_vent_open_office.png", [1286, 108], 0.62, z=20,
-       show_on=["vents_open"]),
+    # открытая решётка ТОЧНО поверх закрытой из фона (промер грили ночь/день)
+    CO("cutouts/st_vent_open_office.png", [1241, 105], 0.88, z=20,
+       show_on=["vents_open"], pos_day=[1246, 116]),
     CO("cutouts/st_gift.png", [430, 600], 0.62, z=20, hide_on=["done:take_gift"]),
-    CO("cutouts/st_ira_drawer_open.png", [1128, 856], 0.40, z=20,
+    # ящик выдвигается ИЗ кодовой тумбы Иры (промер фронта тумбы), не лежит на полу
+    CO("cutouts/st_ira_drawer_open.png", [1233, 880], 0.70, z=20,
        show_on=["drawer_ira_open"]),
     CO("cutouts/st_garland_on.png", [368, 175], 0.6, z=30,
        show_on=["garland_on"], glow=True),
@@ -124,8 +130,12 @@ A_cutouts = [
        show_on=["power_on"], hide_on=["reader_green"], pos_day=[1648, 330]),
     CO("cutouts/st_led_reader_green.png", [1568, 325], 0.42, z=25,
        show_on=["reader_green"], pos_day=[1648, 330]),
-    CO("cutouts/st_util_door_open.png", [1618, 430], 0.50, z=15,
-       show_on=["utility_open"], pos_day=[1642, 380]),
+    # открытая дверь щитовой закрывает закрытую в фоне и показывает проём.
+    # Родной катаут (420x860, дверь распахнута) по перспективе НЕ идеально встаёт
+    # в узкий дверной слот комнаты -> запрошен ассет под перспективу (см. QA R4-7).
+    # Пока — максимально правдоподобно поверх закрытой двери.
+    CO("cutouts/st_util_door_open.png", [1565, 252], 0.56, z=15,
+       show_on=["utility_open"], pos_day=[1575, 258]),
     CO("cutouts/st_door_open_final.png", [1476, 178], 0.62, z=40,
        show_on=["victory"], pos_day=[1512, 176]),
     # идл: рыбка в аквариуме на вайде (мелкая), пар над кофе
@@ -152,7 +162,7 @@ B_hotspots = [
        cursor="zoom"),
     HS("hs_bench", [585, 380, 480, 220], goto="zoom_bench", name="Стенд",
        cursor="zoom"),
-    HS("hs_shelf_grease", [1000, 420, 120, 90], node="take_grease", name="Смазка",
+    HS("hs_shelf_grease", [1150, 428, 112, 72], node="take_grease", name="Смазка",
        hide_on=["done:take_grease"]),
     HS("hs_shelf", [1005, 190, 310, 620], name="Стеллаж", look=True),
     HS("hs_attic", [1005, 190, 305, 115], goto="zoom_attic", name="Антресоль",
@@ -163,11 +173,11 @@ B_hotspots = [
        name="Коробка (ещё раз)", show_on=["item:relic_fez"], hide_on=["item:crown"]),
     HS("hs_closet", [1310, 190, 285, 690], goto="zoom_closet", name="Шкаф уборщицы",
        cursor="zoom"),
-    HS("hs_net_top", [1325, 125, 230, 130], node="see_net", name="Верх шкафа",
+    HS("hs_net_top", [1398, 150, 122, 118], node="see_net", name="Верх шкафа",
        hide_on=["net_down"]),
     HS("hs_net_floor", [1290, 885, 240, 185], node="take_net", name="Сачок",
        show_on=["net_down"], hide_on=["done:take_net"]),
-    HS("hs_vent_util", [1400, 70, 180, 120], name="Вентрешётка", look=True),
+    HS("hs_vent_util", [1385, 50, 180, 145], name="Вентрешётка", look=True),
     HS("hs_mop", [1570, 340, 100, 230], node="take_mop", name="Швабра",
        hide_on=["done:take_mop"], doc_rmb="doc_mop_tag"),
     HS("hs_boiler", [1655, 80, 195, 440], node="h_boiler", name="Бойлер"),
@@ -177,14 +187,17 @@ B_hotspots = [
     HS("hs_bucket", [1560, 780, 135, 160], name="Ведро", look=True),
 ]
 B_cutouts = [
-    CO("cutouts/st_net_on_top.png", [1330, 130], 0.92, z=20,
+    # сачок лежит на крышке шкафа (y~205) с правдоподобным свесом за передний край
+    CO("cutouts/st_net_on_top.png", [1360, 150], 0.80, z=20,
        hide_on=["net_down"]),
     CO("cutouts/st_net_on_floor.png", [1296, 892], 0.86, z=20,
        show_on=["net_down"], hide_on=["done:take_net"]),
-    CO("cutouts/st_vent_open_util.png", [1395, 55], 1.0, z=20,
+    # открытая решётка ТОЧНО поверх закрытой грили (x1385..1560 y50..190)
+    CO("cutouts/st_vent_open_util.png", [1321, 12], 1.5, z=20,
        show_on=["vents_open"]),
     CO("cutouts/st_mop_on_hook.png", [1556, 258], 0.78, z=20, hide_on=["done:take_mop"]),
-    CO("cutouts/st_grease_on_shelf.png", [1006, 428], 0.82, z=20,
+    # банка литола стоит НА полке стеллажа (полка 4, y~490), в стороне от инструментов
+    CO("cutouts/st_grease_on_shelf.png", [1134, 415], 0.82, z=20,
        hide_on=["done:take_grease"]),
     CO("cutouts/st_box_on_floor.png", [1012, 872], 0.72, z=20,
        show_on=["box_down"]),
@@ -241,7 +254,7 @@ zooms["zoom_aquarium"] = {"room": "A", "hotspots": [
 ]}
 
 zooms["zoom_pc"] = {"room": "A", "hotspots": [
-    HS("hs_z_screen", [390, 110, 645, 555], node="pc_unlock", name="Экран",
+    HS("hs_z_screen", [520, 160, 820, 470], node="pc_unlock", name="Экран",
        widget="pc", also_nodes=["skud_form"],
        pc_docs=["doc_chat", "doc_order", "doc_about", "doc_dict",
                 "doc_skud_blank"]),

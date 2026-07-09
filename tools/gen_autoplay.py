@@ -11,7 +11,21 @@ import json, sys
 
 S = json.load(open("design/scene.json", encoding="utf-8"))
 P = json.load(open("design/puzzles.json", encoding="utf-8"))
+TXT = json.load(open("design/texts.json", encoding="utf-8"))
 NODES = {n["id"]: n for n in P["nodes"]}
+ITEMS = set(TXT["item_names"].keys())
+
+# Механика «использовать предмет на объект» (раунд 4): узел-ДЕЙСТВИЕ,
+# требующий предмет, срабатывает только если предмет ВЫБРАН в карманах.
+# Возвращает предмет, который надо выбрать перед кликом, либо None.
+def item_gated(nid):
+    n = NODES.get(nid)
+    if not n or n["type"] != "action":
+        return None
+    for need in n["needs"]:
+        if need in ITEMS:
+            return need
+    return None
 
 # ---------- карты ----------
 site = {}          # node -> (view, hs_id)  (только прямые клики)
@@ -84,6 +98,9 @@ def goto_view(v):
 def node(n, btn=1):
     v, hs = need(n)
     goto_view(v)
+    gi = item_gated(n) if btn == 1 else None
+    if gi:
+        add(op="click_item", id=gi)   # выбрать предмет (механика раунда 4)
     add(op="click_hs", id=hs, btn=btn)
 
 def neg(tag):
@@ -92,9 +109,11 @@ def neg(tag):
 # ---------- S0: титул → интро ----------
 add(op="wait", s=0.6)
 shot("ap_00_title")
+shot("round4_01_title")
 add(op="start_game"); cur = "A"
 dismiss()
 shot("ap_01_room_a_night")
+shot("round4_02_room_a_night")
 
 # ---------- S1: дверь — осмотр и ранние негативы ----------
 node("survey_door"); dismiss()
@@ -131,6 +150,7 @@ node("h_karaoke_sing"); dismiss()            # гэг «спеть»
 node("take_pointer"); dismiss()
 to_room("B")
 shot("ap_04_room_b")
+shot("round4_06_room_b")
 node("see_net"); dismiss()
 node("push_net"); dismiss()                  # вентиляция из офиса (A)
 node("take_net"); dismiss()
@@ -161,6 +181,7 @@ add(op="assert_item", id="hundred")
 
 # ---------- S6: ПК — негатив, код, доки ----------
 to_zoom("zoom_pc")
+shot("round4_03_zoom_pc_saver")              # скринсейвер (до разблокировки)
 add(op="click_hs", id="hs_z_screen")         # кейпад
 add(op="assert_widget", kind="keypad")
 add(op="code", node="pc_unlock", value="0000"); dismiss(); neg("pc_code_0000")
@@ -179,6 +200,7 @@ add(op="click", x=1700, y=900, btn=2)        # закрыть виджет
 to_zoom("zoom_drawer_keypad")
 add(op="click_hs", id="hs_z_keypad")
 add(op="assert_widget", kind="keypad")
+shot("round4_05_keypad")                      # движковый кейпад с цифрами
 add(op="code", node="ira_code", value="1111"); dismiss(); neg("ira_code_1111")
 add(op="code", node="ira_code"); dismiss()
 dismiss(); add(op="esc"); cur = "A"
@@ -192,6 +214,7 @@ add(op="click_hs", id="hs_z_screen")
 add(op="assert_widget", kind="pc")
 add(op="click", x=700, y=170 + 5 * 62 + 26)  # пункт 6: ФОРМА
 add(op="assert_widget", kind="form")
+shot("round4_04_form_skud")                   # форма СКУД
 add(op="form", no="000000"); dismiss(); neg("form_000000")
 add(op="assert_not_flag", f="card_active")
 add(op="assert_widget", kind="form")         # форма жива, поле сброшено
@@ -271,6 +294,7 @@ add(op="assert_flag", f="calm_down")
 # ---------- S15: смазка + засов ----------
 node("take_grease"); dismiss()
 to_zoom("zoom_exit_door")
+add(op="click_item", id="grease")     # выбрать смазку и применить на засов (нужен ещё разводник в инв.)
 add(op="click_hs", id="hs_z_bolt")
 add(op="wait", s=0.7); dismiss()
 add(op="assert_flag", f="bolt_free")

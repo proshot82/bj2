@@ -20,6 +20,11 @@ function scenes.init(scene_json, state, images, texts)
 end
 
 function scenes.set_letterbox(lb) LB = lb end
+-- мышь в МИРОВЫХ координатах (для индикатора «предмет в руке»)
+function scenes.mouse_world()
+  local mx, my = love.mouse.getPosition()
+  return (mx - LB.ox) / LB.sx, (my - LB.oy) / LB.sy
+end
 function scenes.view() return view end
 function scenes.mode() return ST.flags.power_on and "day" or "night" end
 
@@ -113,16 +118,25 @@ local function draw_cutout(c)
   lg.setColor(1, 1, 1, 1)
 end
 
--- снег за окном офиса (ночь и день)
+-- снег СТРОГО в границах стёкол окна офиса: две створки (промер по
+-- room_office_night/day), рамы/подоконник/фикус исключены.
+-- Прямоугольники стёкол в МИРОВЫХ координатах {x, y, w, h}:
+local SNOW_PANES = {
+  {60, 100, 108, 370},   -- левая створка:  x60..168,  y100..470
+  {208, 100, 118, 330},  -- правая створка: x208..326, y100..430 (выше фикуса)
+}
 local function draw_snow()
-  -- scissor в ЭКРАННЫХ координатах: учитываем letterbox
-  lg.setScissor(LB.ox + 6 * LB.sx, LB.oy + 64 * LB.sy, 320 * LB.sx, 436 * LB.sy)
   lg.setColor(1, 1, 1, 0.85)
-  for _, f in ipairs(snow) do
-    lg.circle("fill", f.x, f.y, 2.1)
+  for _, p in ipairs(SNOW_PANES) do
+    -- scissor в ЭКРАННЫХ координатах: пересчёт из мировых через letterbox
+    lg.setScissor(LB.ox + p[1] * LB.sx, LB.oy + p[2] * LB.sy,
+                  p[3] * LB.sx, p[4] * LB.sy)
+    for _, f in ipairs(snow) do
+      lg.circle("fill", f.x, f.y, 2.1)
+    end
   end
-  lg.setColor(1, 1, 1, 1)
   lg.setScissor()
+  lg.setColor(1, 1, 1, 1)
 end
 
 function scenes.draw(highlight)
@@ -319,19 +333,23 @@ function scenes.draw_zoom_engine(zid)
     lg.setColor(1, 1, 1, 1)
   elseif zid == "zoom_pc" then
     if not ST.flags.pc_on then
-      -- скринсейвер DVD-style
-      -- экран монитора в арте зума: 1090..1830 x 130..800
-      local w, h = 460, 110
-      local x = 1092 + math.abs(((t_global * 120) % (2 * (736 - w))) - (736 - w))
-      local y = 132 + math.abs(((t_global * 88) % (2 * (666 - h))) - (666 - h))
+      -- скринсейвер: экран монитора промерен по zoom_pc.png (координаты зума
+      -- 1920x1080) = 531..1322 x 172..613. Бокс ТОЧНО в экран.
+      local SX, SY, SW, SH = 531, 172, 791, 441
       lg.setColor(0.05, 0.07, 0.13)
-      lg.rectangle("fill", 1092, 132, 736, 666)
-      lg.setColor(0.83, 0.68, 0.35)
+      lg.rectangle("fill", SX, SY, SW, SH)
+      -- лёгкий DVD-дрейф текстового блока СТРОГО внутри экрана (не перекрывает края)
+      local TW, TH = 660, 176
+      local rx, ry = SW - TW - 40, SH - TH - 40
+      local x = SX + 20 + math.abs(((t_global * 40) % (2 * rx)) - rx)
+      local y = SY + 20 + math.abs(((t_global * 30) % (2 * ry)) - ry)
+      lg.setColor(0.87, 0.72, 0.37)
       lg.setFont(FontS.h2)
-      lg.printf("У КОГО СТОИТ «ВАЛТЕК» —", x, y + 8, w, "center")
-      lg.printf("У ТОГО СТОИТ НАВЕК", x, y + 46, w, "center")
+      lg.printf("У КОГО СТОИТ «ВАЛТЕК» —", x, y, TW, "center")
+      lg.printf("У ТОГО СТОИТ НАВЕК", x, y + 62, TW, "center")
       lg.setFont(FontS.small)
-      lg.printf("нажми, если смелый", x, y + 84, w, "center")
+      lg.setColor(0.74, 0.80, 0.88)
+      lg.printf("нажми, если смелый", x, y + 134, TW, "center")
       lg.setColor(1, 1, 1, 1)
     end
   end

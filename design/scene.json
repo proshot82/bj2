@@ -154,6 +154,27 @@
      ]
     },
     {
+     "id": "hs_pointer",
+     "rect": [
+      1798,
+      385,
+      92,
+      82
+     ],
+     "cursor": "act",
+     "node": "take_pointer",
+     "name": "Указка",
+     "hide_on": [
+      "done:take_pointer"
+     ],
+     "rect_day": [
+      1808,
+      398,
+      92,
+      80
+     ]
+    },
+    {
      "id": "hs_coffee_machine",
      "rect": [
       1176,
@@ -166,12 +187,24 @@
      "name": "Кофемашина"
     },
     {
+     "id": "hs_karaoke",
+     "rect": [
+      5,
+      700,
+      140,
+      62
+     ],
+     "cursor": "zoom",
+     "doc": "doc_karaoke",
+     "name": "Караоке-список"
+    },
+    {
      "id": "hs_ruler",
      "rect": [
-      734,
-      490,
-      186,
-      48
+      1295,
+      695,
+      118,
+      100
      ],
      "cursor": "act",
      "node": "take_ruler",
@@ -230,28 +263,19 @@
      ]
     },
     {
-     "id": "hs_vent_office",
+     "id": "hs_ira_drawer_out",
      "rect": [
-      1288,
-      108,
-      132,
-      102
-     ],
-     "cursor": "act",
-     "node": "push_net",
-     "name": "Вентрешётка"
-    },
-    {
-     "id": "hs_karaoke",
-     "rect": [
-      20,
-      670,
-      140,
+      1350,
+      905,
+      125,
       105
      ],
      "cursor": "zoom",
-     "doc": "doc_karaoke",
-     "name": "Караоке-список"
+     "doc": "doc_registry",
+     "name": "Открытый ящик",
+     "show_on": [
+      "drawer_ira_open"
+     ]
     },
     {
      "id": "hs_calendar",
@@ -264,6 +288,39 @@
      "cursor": "zoom",
      "doc": "doc_calendar",
      "name": "Календарь"
+    },
+    {
+     "id": "hs_karaoke_sing",
+     "rect": [
+      30,
+      778,
+      225,
+      66
+     ],
+     "cursor": "act",
+     "node": "h_karaoke_sing",
+     "name": "Спеть",
+     "show_on": [
+      "read:doc_karaoke"
+     ]
+    },
+    {
+     "id": "hs_vent_office",
+     "rect": [
+      1263,
+      135,
+      140,
+      110
+     ],
+     "cursor": "act",
+     "node": "push_net",
+     "name": "Вентрешётка",
+     "rect_day": [
+      1268,
+      145,
+      137,
+      112
+     ]
     },
     {
      "id": "hs_wheel_wall",
@@ -281,40 +338,16 @@
      ]
     },
     {
-     "id": "hs_pointer",
+     "id": "hs_ira_tumba",
      "rect": [
-      1705,
-      581,
-      215,
-      88
+      1345,
+      788,
+      140,
+      115
      ],
-     "cursor": "act",
-     "node": "take_pointer",
-     "name": "Указка",
-     "hide_on": [
-      "done:take_pointer"
-     ],
-     "rect_day": [
-      1770,
-      376,
-      150,
-      88
-     ]
-    },
-    {
-     "id": "hs_karaoke_sing",
-     "rect": [
-      30,
-      775,
-      220,
-      90
-     ],
-     "cursor": "act",
-     "node": "h_karaoke_sing",
-     "name": "Спеть",
-     "show_on": [
-      "read:doc_karaoke"
-     ]
+     "cursor": "zoom",
+     "goto": "zoom_drawer_keypad",
+     "name": "Кодовая тумба"
     },
     {
      "id": "hs_flipchart",
@@ -339,6 +372,24 @@
      "cursor": "zoom",
      "goto": "zoom_tree",
      "name": "Под ёлкой"
+    },
+    {
+     "id": "hs_kpi_board",
+     "rect": [
+      1758,
+      278,
+      150,
+      200
+     ],
+     "cursor": "act",
+     "name": "KPI-доска",
+     "look": true,
+     "rect_day": [
+      1785,
+      150,
+      120,
+      320
+     ]
     },
     {
      "id": "hs_util_door",
@@ -383,21 +434,6 @@
      ]
     },
     {
-     "id": "hs_ira_drawer_out",
-     "rect": [
-      1120,
-      850,
-      270,
-      125
-     ],
-     "cursor": "zoom",
-     "doc": "doc_registry",
-     "name": "Открытый ящик",
-     "show_on": [
-      "drawer_ira_open"
-     ]
-    },
-    {
      "id": "hs_copier",
      "rect": [
       1362,
@@ -413,6 +449,21 @@
      ]
     },
     {
+     "id": "hs_sofa_under",
+     "rect": [
+      20,
+      850,
+      320,
+      110
+     ],
+     "cursor": "act",
+     "node": "relic_badge",
+     "name": "Под диваном",
+     "fail_without": [
+      "longnet"
+     ]
+    },
+    {
      "id": "hs_aquarium",
      "rect": [
       935,
@@ -425,18 +476,6 @@
      "name": "Аквариум"
     },
     {
-     "id": "hs_ira_tumba",
-     "rect": [
-      1345,
-      788,
-      135,
-      275
-     ],
-     "cursor": "zoom",
-     "goto": "zoom_drawer_keypad",
-     "name": "Кодовая тумба"
-    },
-    {
      "id": "hs_aq_tumba",
      "rect": [
       930,
@@ -447,21 +486,6 @@
      "cursor": "act",
      "name": "Тумба аквариума",
      "look": true
-    },
-    {
-     "id": "hs_sofa_under",
-     "rect": [
-      30,
-      800,
-      300,
-      130
-     ],
-     "cursor": "act",
-     "node": "relic_badge",
-     "name": "Под диваном",
-     "fail_without": [
-      "longnet"
-     ]
     },
     {
      "id": "hs_ira_pc",
@@ -494,22 +518,16 @@
      "look": true
     },
     {
-     "id": "hs_kpi_board",
+     "id": "hs_table_mugs",
      "rect": [
-      1788,
-      222,
-      132,
-      436
+      305,
+      745,
+      265,
+      210
      ],
      "cursor": "act",
-     "name": "KPI-доска",
-     "look": true,
-     "rect_day": [
-      1795,
-      160,
-      125,
-      272
-     ]
+     "name": "Журнальный столик",
+     "look": true
     },
     {
      "id": "hs_main_door",
@@ -578,15 +596,15 @@
      "look": true
     },
     {
-     "id": "hs_table_mugs",
+     "id": "hs_sofa",
      "rect": [
-      235,
-      700,
-      370,
-      255
+      0,
+      505,
+      420,
+      245
      ],
      "cursor": "act",
-     "name": "Журнальный столик",
+     "name": "Диван",
      "look": true
     },
     {
@@ -600,18 +618,6 @@
      "cursor": "zoom",
      "goto": "zoom_tree",
      "name": "Ёлка"
-    },
-    {
-     "id": "hs_sofa",
-     "rect": [
-      0,
-      505,
-      450,
-      330
-     ],
-     "cursor": "act",
-     "name": "Диван",
-     "look": true
     },
     {
      "id": "hs_window",
@@ -631,10 +637,10 @@
     {
      "img": "cutouts/st_ruler_on_desk.png",
      "pos": [
-      742,
-      498
+      1143,
+      674
      ],
-     "scale": 1.0,
+     "scale": 2.8,
      "z": 20,
      "hide_on": [
       "done:take_ruler"
@@ -643,17 +649,17 @@
     {
      "img": "cutouts/st_pointer_on_board.png",
      "pos": [
-      1712,
-      588
+      1713,
+      376
      ],
-     "scale": 1.3,
+     "scale": 1.5,
      "z": 20,
      "hide_on": [
       "done:take_pointer"
      ],
      "pos_day": [
-      1712,
-      383
+      1723,
+      386
      ]
     },
     {
@@ -671,13 +677,17 @@
     {
      "img": "cutouts/st_vent_open_office.png",
      "pos": [
-      1286,
-      108
+      1241,
+      105
      ],
-     "scale": 0.62,
+     "scale": 0.88,
      "z": 20,
      "show_on": [
       "vents_open"
+     ],
+     "pos_day": [
+      1246,
+      116
      ]
     },
     {
@@ -695,10 +705,10 @@
     {
      "img": "cutouts/st_ira_drawer_open.png",
      "pos": [
-      1128,
-      856
+      1233,
+      880
      ],
-     "scale": 0.4,
+     "scale": 0.7,
      "z": 20,
      "show_on": [
       "drawer_ira_open"
@@ -803,17 +813,17 @@
     {
      "img": "cutouts/st_util_door_open.png",
      "pos": [
-      1618,
-      430
+      1565,
+      252
      ],
-     "scale": 0.5,
+     "scale": 0.56,
      "z": 15,
      "show_on": [
       "utility_open"
      ],
      "pos_day": [
-      1642,
-      380
+      1575,
+      258
      ]
     },
     {
@@ -893,16 +903,31 @@
     {
      "id": "hs_shelf_grease",
      "rect": [
-      1000,
-      420,
-      120,
-      90
+      1150,
+      428,
+      112,
+      72
      ],
      "cursor": "act",
      "node": "take_grease",
      "name": "Смазка",
      "hide_on": [
       "done:take_grease"
+     ]
+    },
+    {
+     "id": "hs_net_top",
+     "rect": [
+      1398,
+      150,
+      122,
+      118
+     ],
+     "cursor": "act",
+     "node": "see_net",
+     "name": "Верх шкафа",
+     "hide_on": [
+      "net_down"
      ]
     },
     {
@@ -916,18 +941,6 @@
      "cursor": "act",
      "node": "h_sink_valve",
      "name": "Вентиль под раковиной"
-    },
-    {
-     "id": "hs_vent_util",
-     "rect": [
-      1400,
-      70,
-      180,
-      120
-     ],
-     "cursor": "act",
-     "name": "Вентрешётка",
-     "look": true
     },
     {
      "id": "hs_bucket",
@@ -958,19 +971,16 @@
      "doc_rmb": "doc_mop_tag"
     },
     {
-     "id": "hs_net_top",
+     "id": "hs_vent_util",
      "rect": [
-      1325,
-      125,
-      230,
-      130
+      1385,
+      50,
+      180,
+      145
      ],
      "cursor": "act",
-     "node": "see_net",
-     "name": "Верх шкафа",
-     "hide_on": [
-      "net_down"
-     ]
+     "name": "Вентрешётка",
+     "look": true
     },
     {
      "id": "hs_attic",
@@ -1158,10 +1168,10 @@
     {
      "img": "cutouts/st_net_on_top.png",
      "pos": [
-      1330,
-      130
+      1360,
+      150
      ],
-     "scale": 0.92,
+     "scale": 0.8,
      "z": 20,
      "hide_on": [
       "net_down"
@@ -1185,10 +1195,10 @@
     {
      "img": "cutouts/st_vent_open_util.png",
      "pos": [
-      1395,
-      55
+      1321,
+      12
      ],
-     "scale": 1.0,
+     "scale": 1.5,
      "z": 20,
      "show_on": [
       "vents_open"
@@ -1209,8 +1219,8 @@
     {
      "img": "cutouts/st_grease_on_shelf.png",
      "pos": [
-      1006,
-      428
+      1134,
+      415
      ],
      "scale": 0.82,
      "z": 20,
@@ -1554,10 +1564,10 @@
     {
      "id": "hs_z_screen",
      "rect": [
-      390,
-      110,
-      645,
-      555
+      520,
+      160,
+      820,
+      470
      ],
      "cursor": "act",
      "node": "pc_unlock",

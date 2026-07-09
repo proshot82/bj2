@@ -49,7 +49,8 @@ local KEYPOS = {}
 do
   local keys = {"1","2","3","4","5","6","7","8","9","C","0","OK"}
   for i, k in ipairs(keys) do
-    KEYPOS[k] = {760 + ((i - 1) % 3) * 140 + 65, 300 + math.floor((i - 1) / 3) * 106 + 48}
+    -- центр кнопки кейпада = keypad_geom(770,360,120,88): шаг 130/98, центр +60/+44
+    KEYPOS[k] = {770 + ((i - 1) % 3) * 130 + 60, 360 + math.floor((i - 1) / 3) * 98 + 44}
   end
 end
 local function keypad_type(code)

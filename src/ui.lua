@@ -678,9 +678,11 @@ end
 function ui.widget_kind() return widget and widget.kind end
 function ui.close_widget() widget = nil end
 
+-- Кейпад — самодостаточная движковая панель по центру экрана (общая для
+-- всех кодовых замков; арт зума под ней перекрыт). Раунд 4: крупные цифры.
+-- Сетка 3x4: gx,gy — левый-верх первой кнопки; шаг = bw+10 / bh+10.
 local function keypad_geom()
-  local x, y = 760, 300
-  return x, y, 130, 96
+  return 770, 360, 120, 88
 end
 
 local function widget_draw()
@@ -689,22 +691,34 @@ local function widget_draw()
   lg.setColor(0, 0, 0, 0.45); lg.rectangle("fill", 0, 0, 1920, 1080)
   if w.kind == "keypad" then
     local x, y, bw, bh = keypad_geom()
-    lg.setColor(C.panel); lg.rectangle("fill", x - 30, y - 120, 3 * bw + 80, 4 * bh + 220, 14, 14)
-    lg.setColor(C.panel_line); lg.rectangle("line", x - 30, y - 120, 3 * bw + 80, 4 * bh + 220, 14, 14)
+    local pw, ph = 3 * bw + 80, 4 * bh + 250
+    local px, py = x - 40, y - 152
+    lg.setColor(C.panel); lg.rectangle("fill", px, py, pw, ph, 16, 16)
+    lg.setColor(C.panel_line); lg.setLineWidth(2)
+    lg.rectangle("line", px, py, pw, ph, 16, 16); lg.setLineWidth(1)
+    lg.setFont(F.badge); lg.setColor(C.brass)
+    lg.printf("ВВЕДИТЕ КОД", px, py + 18, pw, "center")
+    -- табло введённого кода (зелёные крупные символы)
+    lg.setColor(0.05, 0.08, 0.06); lg.rectangle("fill", x, y - 100, 3 * bw, 62, 8, 8)
+    lg.setColor(C.ok); lg.setLineWidth(2)
+    lg.rectangle("line", x, y - 100, 3 * bw, 62, 8, 8); lg.setLineWidth(1)
     lg.setFont(F.h2); lg.setColor(C.ok)
     local shown = w.buf .. string.rep("_", 4 - #w.buf)
-    lg.printf(shown:gsub(".", "%1 "), x - 30, y - 96, 3 * bw + 80, "center")
+    lg.printf((shown:gsub(".", "%1 ")), x, y - 94, 3 * bw, "center")
+    -- клавиши: КРУПНЫЕ цифры, C/OK выделены цветом
     local keys = {"1","2","3","4","5","6","7","8","9","C","0","OK"}
     lg.setFont(F.h2)
+    local fh = F.h2:getHeight()
     for i, k in ipairs(keys) do
       local kx = x + ((i - 1) % 3) * (bw + 10)
       local ky = y + math.floor((i - 1) / 3) * (bh + 10)
-      lg.setColor(0.16, 0.17, 0.22)
+      local spec = (k == "C" or k == "OK")
+      lg.setColor(spec and 0.22 or 0.17, spec and 0.19 or 0.18, 0.24)
       lg.rectangle("fill", kx, ky, bw, bh, 10, 10)
-      lg.setColor(C.panel_line)
-      lg.rectangle("line", kx, ky, bw, bh, 10, 10)
-      lg.setColor(C.text)
-      lg.printf(k, kx, ky + 26, bw, "center")
+      lg.setColor(C.panel_line); lg.setLineWidth(2)
+      lg.rectangle("line", kx, ky, bw, bh, 10, 10); lg.setLineWidth(1)
+      lg.setColor(k == "OK" and C.ok or (k == "C" and C.bad or C.text))
+      lg.printf(k, kx, ky + (bh - fh) / 2, bw, "center")
     end
     lg.setColor(1, 1, 1)
   elseif w.kind == "pc" then
@@ -732,24 +746,46 @@ local function widget_draw()
     lg.setColor(1, 1, 1)
   elseif w.kind == "form" then
     local x, y = 660, 280
-    lg.setColor(C.panel); lg.rectangle("fill", x, y, 600, 420, 14, 14)
-    lg.setColor(C.panel_line); lg.rectangle("line", x, y, 600, 420, 14, 14)
+    lg.setColor(C.panel); lg.rectangle("fill", x, y, 600, 440, 14, 14)
+    lg.setColor(C.panel_line); lg.rectangle("line", x, y, 600, 440, 14, 14)
     lg.setFont(F.h2); lg.setColor(C.brass)
-    lg.printf("ФОРМА СКУД-2", x, y + 18, 600, "center")
-    lg.setFont(F.dlg)
-    lg.setColor(w.field == 1 and C.ok or C.text)
-    lg.print(T.ui.form_card_no .. ": " .. w.no ..
-      string.rep("_", 6 - #w.no), x + 60, y + 100)
-    local depts = P.tokens.depts
-    lg.setColor(w.field == 2 and C.ok or C.text)
-    lg.print(T.ui.form_dept .. ":  ◀ " .. depts[w.dept_i] .. " ▶", x + 60, y + 170)
+    lg.printf("ФОРМА СКУД-2", x, y + 16, 600, "center")
+    -- поле «№ карты» (кликабельно; активное поле — яркая рамка)
+    local f1 = (w.field == 1)
+    lg.setFont(F.small); lg.setColor(C.text)
+    lg.print(T.ui.form_card_no .. ":", x + 40, y + 96)
+    lg.setColor(0.10, 0.12, 0.16); lg.rectangle("fill", x + 210, y + 84, 330, 52, 8, 8)
+    lg.setColor(f1 and C.ok or C.panel_line); lg.setLineWidth(f1 and 3 or 1)
+    lg.rectangle("line", x + 210, y + 84, 330, 52, 8, 8); lg.setLineWidth(1)
+    lg.setFont(F.dlg); lg.setColor(C.text)
+    lg.print(w.no .. string.rep("_", 6 - #w.no), x + 228, y + 90)
+    -- поле «Отдел» (◀ ▶, клик по половинам меняет)
+    local f2 = (w.field == 2)
+    lg.setFont(F.small); lg.setColor(C.text)
+    lg.print(T.ui.form_dept .. ":", x + 40, y + 172)
+    lg.setColor(0.10, 0.12, 0.16); lg.rectangle("fill", x + 210, y + 160, 330, 52, 8, 8)
+    lg.setColor(f2 and C.ok or C.panel_line); lg.setLineWidth(f2 and 3 or 1)
+    lg.rectangle("line", x + 210, y + 160, 330, 52, 8, 8); lg.setLineWidth(1)
+    lg.setFont(F.dlg); lg.setColor(C.text)
+    lg.printf(P.tokens.depts[w.dept_i], x + 210, y + 166, 330, "center")
+    -- стрелки ◀ ▶ — векторные (глифов треугольников нет в шрифте)
+    lg.setColor(C.brass)
+    lg.polygon("fill", x + 234, y + 186, x + 252, y + 172, x + 252, y + 200)
+    lg.polygon("fill", x + 516, y + 186, x + 498, y + 172, x + 498, y + 200)
+    -- подсказка ввода
     lg.setFont(F.small); lg.setColor(C.dim)
-    lg.print("[Tab] поле · [←→] отдел · цифры — номер", x + 60, y + 240)
-    lg.setColor(0.16, 0.4, 0.2)
-    lg.rectangle("fill", x + 190, y + 310, 220, 64, 10, 10)
-    lg.setColor(C.ok); lg.rectangle("line", x + 190, y + 310, 220, 64, 10, 10)
-    lg.setFont(F.h2); lg.setColor(C.text)
-    lg.printf(T.ui.form_send, x + 190, y + 324, 220, "center")
+    lg.printf("Клик по полю — выбрать.  Цифры — с клавиатуры.  Tab — след. поле.",
+      x + 40, y + 234, 520, "left")
+    -- кнопка ОТПРАВИТЬ: ширина под текст (getWidth) + центрирование
+    lg.setFont(F.h2)
+    local label = T.ui.form_send
+    local bw = F.h2:getWidth(label) + 90
+    local bx, by = x + (600 - bw) / 2, y + 322
+    w._send = {bx, by, bw, 68}
+    lg.setColor(0.16, 0.4, 0.2); lg.rectangle("fill", bx, by, bw, 68, 10, 10)
+    lg.setColor(C.ok); lg.setLineWidth(2)
+    lg.rectangle("line", bx, by, bw, 68, 10, 10); lg.setLineWidth(1)
+    lg.setColor(C.text); lg.printf(label, bx, by + 13, bw, "center")
     lg.setColor(1, 1, 1)
   end
 end
@@ -806,7 +842,8 @@ end
 
 local function form_click(x, y)
   local wx, wy = 660, 280
-  if x >= wx + 190 and x < wx + 410 and y >= wy + 310 and y < wy + 374 then
+  local b = widget._send
+  if b and x >= b[1] and x < b[1] + b[3] and y >= b[2] and y < b[2] + b[4] then
     local ok, why = ST:try_form(widget.no, P.tokens.depts[widget.dept_i])
     if ok then
       snd("beep_ok"); say_node("skud_form", "do")
@@ -817,11 +854,14 @@ local function form_click(x, y)
     end
     return true
   end
-  if y >= wy + 90 and y < wy + 140 then widget.field = 1 end
-  if y >= wy + 160 and y < wy + 210 then
+  -- клик по полю «№ карты» активирует его (цифры вводятся с клавиатуры)
+  if x >= wx + 210 and x < wx + 540 and y >= wy + 84 and y < wy + 136 then
+    widget.field = 1; snd("ui_click")
+  -- клик по полю «Отдел»: левая/правая половина = меняет ◀ / ▶
+  elseif x >= wx + 210 and x < wx + 540 and y >= wy + 160 and y < wy + 212 then
     widget.field = 2
     local depts = P.tokens.depts
-    if x < wx + 300 then widget.dept_i = (widget.dept_i - 2) % #depts + 1
+    if x < wx + 375 then widget.dept_i = (widget.dept_i - 2) % #depts + 1
     else widget.dept_i = widget.dept_i % #depts + 1 end
     snd("ui_click")
   end
@@ -1045,11 +1085,27 @@ function ui.update(dt)
   idle_update(dt)
 end
 
+-- «предмет в руке»: иконка выбранного предмета у курсора (курсор-предмет)
+local function held_item_draw()
+  if not inv.selected then return end
+  if widget or reader or menu or ui.dialog_active() then return end
+  local ic = IMG["icons/ic_" .. inv.selected:gsub("^relic_", "") .. ".png"]
+  if not ic then return end
+  local mx, my = SC.mouse_world()
+  local s = 48 / ic:getWidth()
+  lg.setColor(0, 0, 0, 0.35)
+  lg.draw(ic, mx + 20, my + 10, 0, s, s)
+  lg.setColor(1, 1, 1, 0.95)
+  lg.draw(ic, mx + 18, my + 8, 0, s, s)
+  lg.setColor(1, 1, 1, 1)
+end
+
 function ui.draw_overlays()
   if not (victory_stage and not ui.dialog_active()) then
     goals_draw()
     inv_draw()
     hud_draw()
+    held_item_draw()
   end
   widget_draw()
   reader_draw()
@@ -1077,6 +1133,41 @@ local function fire_herring(node)
   end
 end
 
+-- === механика «использовать выбранный предмет на объект» (раунд 4) ===
+-- Применяет предмет item к хотспоту h. Узел срабатывает ТОЛЬКО если предмет
+-- входит в его требования и остальные условия выполнены; иначе — «не подходит»
+-- или намёк-fail (если предмет верный, но чего-то ещё не хватает).
+function ui.use_item_on(item, h)
+  idle_timer = 0
+  local node = h.node
+  local n = node and ST.nodes[node]
+  if n and not n.herring then
+    local matches = false
+    for _, it in ipairs(ST:item_needs(node)) do
+      if it == item then matches = true; break end
+    end
+    if matches and not ST.done[node] then
+      if select(1, ST:can_fire(node)) then
+        if select(1, ST:fire(node)) then
+          say_node(node, "do"); ui.after_fire(node)
+          inv.selected = nil
+        end
+      else
+        -- предмет верный, но не хватает другого предмета/флага — намёк
+        say_node(node, "fail")
+        if not (T.nodes[node] and T.nodes[node].fail) then
+          push_lines({{s = "lap", e = "neutral",
+            t = "Верно мыслю, но чего-то ещё не хватает."}})
+        end
+      end
+      return
+    end
+    if ST.done[node] then say_node(node, "already"); return end
+  end
+  -- предмет к этому объекту не подходит
+  push_lines({T.item_wrong[love.math.random(#T.item_wrong)]})
+end
+
 -- Клик мира: хотспот → действие
 local function world_click(x, y, btn)
   local h = SC.hit(x, y)
@@ -1094,6 +1185,8 @@ local function world_click(x, y, btn)
     return
   end
   -- ЛКМ
+  -- если выбран предмет — клик по объекту ПРИМЕНЯЕТ его (не навигация/осмотр)
+  if inv.selected then ui.use_item_on(inv.selected, h); return end
   if h.goto_room then
     snd("transition"); SC.goto_room(h.goto_room); ui.save_auto(); return
   end
@@ -1125,11 +1218,9 @@ local function world_click(x, y, btn)
     return
   end
   if h.widget == "bolt" then
-    local ok, why = ST:can_fire("bolt_free")
+    -- засову нужен предмет (литол + разводник): обычный клик — только намёк,
+    -- само применение идёт через выбранный предмет (ui.use_item_on)
     if ST.done.bolt_free then say_node("bolt_free", "already")
-    elseif ok then
-      ST:fire("bolt_free"); say_node("bolt_free", "do")
-      ui.after_fire("bolt_free")
     else say_node("bolt_free", "fail") end
     return
   end
@@ -1138,6 +1229,18 @@ local function world_click(x, y, btn)
     local n = ST.nodes[h.node]
     if n.herring then
       fire_herring(h.node)
+      maybe_nervous()
+      return
+    end
+    -- узел-ДЕЙСТВИЕ, требующий предмет, НЕ срабатывает от простого клика:
+    -- нужен выбранный в карманах предмет (ui.use_item_on). Клик — намёк.
+    if n.type == "action" and #ST:item_needs(h.node) > 0
+       and not ST.done[h.node] then
+      say_node(h.node, "fail")
+      if not (T.nodes[h.node] and T.nodes[h.node].fail) then
+        push_lines({{s = "lap", e = "neutral",
+          t = "Тут нужен подходящий предмет. Возьми его в карманах и примени."}})
+      end
       maybe_nervous()
       return
     end
@@ -1201,11 +1304,14 @@ function ui.mousepressed(x, y, btn)
   end
   if inv_click(x, y, btn) then return end
   if btn == 1 then
-    if inv.selected then inv.selected = nil end
+    -- выбор предмета НЕ сбрасывается до клика по миру: world_click применит
+    -- его к объекту (механика «использовать предмет на объект», раунд 4)
     world_click(x, y, 1)
     return
   end
   if btn == 2 then
+    -- ПКМ снимает выбор предмета
+    if inv.selected then inv.selected = nil; snd("ui_click"); return end
     local h = SC.hit(x, y)
     if h and (h.bench or h.doc_rmb or (h.look and T.looks[h.id])) then
       world_click(x, y, 2)
@@ -1228,6 +1334,7 @@ function ui.keypressed(key)
     if reader then reader = nil
     elseif widget then ui.close_widget(); snd("zoom_out")
     elseif ui.dialog_active() then dlg_click()
+    elseif inv.selected then inv.selected = nil; snd("ui_click")
     elseif SC.view().kind == "zoom" then snd("zoom_out"); SC.leave_zoom()
     elseif menu == "pause" then menu = nil
     elseif menu == "settings" then menu = settings_from or "pause"

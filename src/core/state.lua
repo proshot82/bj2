@@ -43,6 +43,18 @@ function M:need_ok(need)
   return self.flags[need] == true
 end
 
+-- список требований-ПРЕДМЕТОВ узла (механика «использовать предмет на объект»,
+-- раунд 4): возвращает те needs, что являются предметами инвентаря.
+function M:item_needs(id)
+  local n = self.nodes[id]
+  local out = {}
+  if not n then return out end
+  for _, need in ipairs(n.needs) do
+    if self.items_set[need] then out[#out + 1] = need end
+  end
+  return out
+end
+
 function M:can_fire(id)
   local n = self.nodes[id]
   if not n then return false, "unknown" end
