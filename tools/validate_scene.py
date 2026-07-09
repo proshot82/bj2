@@ -253,3 +253,42 @@ print(f"хотспотов={len(spots)} катаутов={len(cutouts)} репл
 if ERR:
     print("GATE2 FAIL:"); [print(" -", e) for e in ERR]; sys.exit(1)
 print("GATE2 PASS")
+
+
+# ---------- WARN: silhouette-отчёт по всем зонам (урок №1-2, LESSONS.md) ----------
+def _warn_silhouettes():
+    import numpy as _np
+    from PIL import Image as _Im
+    sc = json.load(open("design/scene.json", encoding="utf-8"))
+    warns = []
+    for room, arts in (("A", ("room_office_night.png", "room_office_day.png")),
+                       ("B", ("room_utility_night.png", "room_utility_day.png"))):
+        cuts = []
+        for c in sc["rooms"][room]["cutouts"]:
+            try:
+                im = _Im.open("assets/gfx/" + c["img"]); s0 = c.get("scale", 1.0)
+                cuts.append((c["pos"][0], c["pos"][1],
+                             c["pos"][0] + im.width * s0, c["pos"][1] + im.height * s0))
+            except Exception: pass
+        for mode, art_name in (("night", arts[0]), ("day", arts[1])):
+            a = _np.asarray(_Im.open("assets/gfx/rooms/" + art_name).convert("L"), float) / 255.0
+            for h in sc["rooms"][room]["hotspots"]:
+                r = h.get("rect_day") if (mode == "day" and h.get("rect_day")) else h["rect"]
+                x0, y0, x1, y1 = r[0], r[1], min(r[0]+r[2],1920), min(r[1]+r[3],1080)
+                if x1 <= x0 or y1 <= y0:
+                    warns.append(f"{room}/{h['id']} ({mode}): зона вне канваса"); continue
+                if any(not (x1 <= c0 or x0 >= c2 or y1 <= c1 or y0 >= c3)
+                       for c0, c1, c2, c3 in cuts):
+                    continue  # объект — катаут, на голом арте его нет
+                z = a[y0:y1, x0:x1]
+                p = 40
+                rx0, ry0 = max(x0-p,0), max(y0-p,0)
+                ring = a[ry0:min(y1+p,1080), rx0:min(x1+p,1920)].copy()
+                ring[y0-ry0:y1-ry0, x0-rx0:x1-rx0] = _np.nan
+                d = abs(float(_np.nanmean(ring)) - float(z.mean()))
+                if d < 0.015 and float(z.std()) < 0.02:
+                    warns.append(f"{room}/{h['id']} ({mode}): плоская зона (dL={d:.3f}, std={z.std():.3f})")
+    if warns:
+        print(f"[WARN] silhouette: подозрительных зон {len(warns)} (не гейт, глянуть verify-лист):")
+        for w in warns[:12]: print("   -", w)
+_warn_silhouettes()

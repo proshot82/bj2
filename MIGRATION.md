@@ -53,6 +53,8 @@ python3 tools/gates.py                         # пиксельные гейты
 luajit tools/fuzz_state.lua                    # 3×25000 + анти-софтлок
 luajit tools/trace_solver.lua && python3 tools/clue_audit.py
 python3 tools/gen_walkthrough.py               # спойлеры → docs/ (не в чат!)
+python3 tools/gen_verify_sheets.py             # verify-листы зон → смотреть глазами
+xvfb-run -a -s "-screen 0 1536x864x24" love . --autoplay work/ap_smoke.json  # смок в «кривом» разрешении (letterbox)
 ```
 
 Упаковка: см. `docs/BUILDLOG.md`, раздел «Фаза 6» (fuse exe, DLL,
