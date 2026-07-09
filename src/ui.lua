@@ -280,15 +280,21 @@ local function tok(k)
 end
 
 local function ans_line(k)
-  if k == "bench_printed_ru" then return P.answers.bench_printed_ru end
-  if k == "bench_seq_ru" then return P.answers.bench_seq_ru end
+  -- bench_printed_ru / bench_seq_ru приходят из gen_puzzles СПИСКАМИ шагов;
+  -- склеиваем в строку-процедуру (разделитель « → », как исходно ждал код —
+  -- иначе gsub-замена получает таблицу и читалка листка стенда падает).
+  if k == "bench_printed_ru" then
+    return table.concat(P.answers.bench_printed_ru, " → ")
+  end
+  if k == "bench_seq_ru" then
+    return table.concat(P.answers.bench_seq_ru, " → ")
+  end
   if k == "bench_fix_ru" then
-    local i = P.answers.bench_fix_idx
-    local pr = {}
-    for w in P.answers.bench_printed_ru:gmatch("[^%s→]+") do pr[#pr + 1] = w end
-    local rt = {}
-    for w in P.answers.bench_seq_ru:gmatch("[^%s→]+") do rt[#rt + 1] = w end
-    return ("шаг %d: не «%s», а «%s»"):format(i, pr[i] or "?", rt[i] or "?")
+    local i0 = P.answers.bench_fix_idx          -- 0-based индекс шага-опечатки
+    local pr = P.answers.bench_printed_ru
+    local rt = P.answers.bench_seq_ru
+    return ("шаг %d: не «%s», а «%s»"):format(
+      i0 + 1, pr[i0 + 1] or "?", rt[i0 + 1] or "?")
   end
   return "?"
 end

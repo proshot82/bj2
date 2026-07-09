@@ -22,14 +22,14 @@ local function gfx_manifest()
   for _, room in pairs(S.rooms) do
     add(room.bg.night); add(room.bg.day)
     for _, c in ipairs(room.cutouts) do
-      add(c.img)
+      add(c.img); add(c.img_day)
       for _, fr in ipairs(c.frames or {}) do add(fr) end
     end
   end
   for _, z in pairs(S.zooms) do
     add(z.bg)
     for _, c in ipairs(z.cutouts) do
-      add(c.img)
+      add(c.img); add(c.img_day)
       for _, fr in ipairs(c.frames or {}) do add(fr) end
     end
   end

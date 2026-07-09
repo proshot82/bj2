@@ -98,6 +98,10 @@ end
 
 local function draw_cutout(c)
   local img = IMG[c.img]
+  -- дневной вариант катаута (напр. открытая дверь щитовой): своя картинка
+  if scenes.mode() == "day" and c.img_day and IMG[c.img_day] then
+    img = IMG[c.img_day]
+  end
   local p = pick_pos(c)
   local a = 1
   if c.idle and c.frames then

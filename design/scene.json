@@ -821,9 +821,10 @@
      "show_on": [
       "utility_open"
      ],
+     "img_day": "cutouts/st_util_door_open_day.png",
      "pos_day": [
-      1697,
-      285
+      1695,
+      287
      ]
     },
     {
