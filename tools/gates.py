@@ -65,14 +65,19 @@ for shot, box, tcol, label in checks:
         err(f"WCAG: {label} {c:.1f}:1 < 7:1")
 
 # ---------- 3) яркость ночных кадров ----------
-for shot, label in [("ap_01_room_a_night", "комната A ночь"),
-                    ("ap_04_room_b", "комната B ночь")]:
+# Комната A: канон «читаемость прежде атмосферы», порог 45%.
+# Комната B (подсобка): решение автора (раунд 7) — тёмная ночная подсобка;
+# гейт 45% ОТКЛЮЧЁН, оставлен мягкий пол 8% (защита от полностью чёрного кадра)
+# и предупреждение-репорт. Читаемость зон держит силуэт-гейт [4] ниже.
+BRIGHT = [("ap_01_room_a_night", "комната A ночь", 0.45, True),
+          ("ap_04_room_b", "комната B ночь (тёмная, раунд 7)", 0.08, False)]
+for shot, label, thr, hard in BRIGHT:
     a = np.array(Image.open(f"work/shots/{shot}.png").convert("L")).astype(float)
     mean = a.mean() / 255.0
-    status = "OK" if mean >= 0.45 else "FAIL"
-    print(f"[3] {label}: средняя яркость {mean*100:.0f}% {status}")
-    if mean < 0.45:
-        err(f"яркость: {label} {mean*100:.0f}% < 45%")
+    status = "OK" if mean >= thr else ("FAIL" if hard else "WARN")
+    print(f"[3] {label}: средняя яркость {mean*100:.0f}% (порог {thr*100:.0f}%) {status}")
+    if mean < thr and hard:
+        err(f"яркость: {label} {mean*100:.0f}% < {thr*100:.0f}%")
 
 # ---------- 4) силуэты интерактива (ночь A и B) ----------
 S = json.load(open("design/scene.json", encoding="utf-8"))

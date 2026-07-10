@@ -144,7 +144,7 @@
 - `nodes.see_net.already[0].t`: Сачок лежит и насмехается надо мной своим молчанием.
 - `nodes.take_pointer.do[0].s`: lap
 - `nodes.take_pointer.do[0].e`: neutral
-- `nodes.take_pointer.do[0].t`: Телескопическая указка. Ей Ира тычет в графики, а графики сжимаются от страха и симулируют рост.
+- `nodes.take_pointer.do[0].t`: Магнитная указка на выдвижной штанге. Ей Ира тычет в графики, а графики сжимаются от страха и симулируют рост.
 - `nodes.take_pointer.already[0].s`: lap
 - `nodes.take_pointer.already[0].e`: neutral
 - `nodes.take_pointer.already[0].t`: Указка при мне. Метрики могут выдохнуть.
@@ -1019,7 +1019,7 @@
 - `crown_epilogue[1].t`: Я Царь. Просто Царь Лапидус. Пойду властвовать на автобусной остановке.
 - `item_names.ruler`: Линейка
 - `item_names.handle`: Ручка-шток
-- `item_names.pointer`: Указка
+- `item_names.pointer`: Магнитная указка
 - `item_names.net`: Сачок (без ручки)
 - `item_names.longnet`: Длинный сачок
 - `item_names.card`: Пропуск Гены
@@ -1046,7 +1046,7 @@
 - `item_desc.handle.t`: Квадратный штырь. Без него дверь в подсобку — просто синяя стена.
 - `item_desc.pointer.s`: lap
 - `item_desc.pointer.e`: neutral
-- `item_desc.pointer.t`: Раздвижная указка. Символ власти на презентациях, которые никто не слушает.
+- `item_desc.pointer.t`: Магнитная раздвижная указка. Символ власти на презентациях, которые никто не слушает. Наконечник намагничен — прилипает к доскам и, если повезёт, к металлу.
 - `item_desc.net.s`: lap
 - `item_desc.net.e`: neutral
 - `item_desc.net.t`: Сачок-инвалид. Ждет пересадки ручки.
@@ -1135,7 +1135,7 @@
 - `A/hs_karaoke`: Караоке-список
 - `A/hs_calendar`: Календарь
 - `A/hs_wheel_wall`: Памятный маховик
-- `A/hs_pointer`: Указка
+- `A/hs_pointer`: Магнитная указка
 - `A/hs_karaoke_sing`: Спеть
 - `A/hs_flipchart`: Флипчарт
 - `A/hs_tree_base`: Под ёлкой

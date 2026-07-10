@@ -103,6 +103,14 @@ local function draw_cutout(c)
     img = IMG[c.img_day]
   end
   local p = pick_pos(c)
+  -- (раунд 7) программная мягкая тень-эллипс под катаутом (напр. банка смазки)
+  if c.shadow then
+    local iw, ih = img:getDimensions()
+    lg.setColor(0, 0, 0, 0.26)
+    lg.ellipse("fill", p[1] + iw * c.scale * 0.47, p[2] + ih * c.scale * 0.82,
+               iw * c.scale * 0.24, iw * c.scale * 0.07)
+    lg.setColor(1, 1, 1, 1)
+  end
   local a = 1
   if c.idle and c.frames then
     local period = (c.idle == "steam") and 0.5 or 0.62

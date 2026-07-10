@@ -36,7 +36,7 @@ A_hotspots = [
        cursor="zoom"),
     HS("hs_flipchart", [826, 162, 122, 175], name="Флипчарт", look=True),
     HS("hs_lap_desk", [645, 478, 300, 185], name="Стол Лапидуса", look=True),
-    HS("hs_ruler", [1295, 695, 118, 100], node="take_ruler", name="Линейка",
+    HS("hs_ruler", [1238, 706, 96, 62], node="take_ruler", name="Линейка",
        hide_on=["done:take_ruler"]),
     HS("hs_phone", [872, 445, 68, 58], node="h_phone", name="Телефон"),
     HS("hs_lap_drawer", [868, 514, 80, 148], goto="zoom_lap_drawer", show_on=["drawer_pried"], name="Ящик стола",
@@ -63,13 +63,11 @@ A_hotspots = [
        rect_day=[1460, 530, 235, 200]),
     HS("hs_ira_tumba", [1345, 788, 140, 115], goto="zoom_drawer_keypad",
        name="Кодовая тумба", cursor="zoom"),
-    HS("hs_ira_drawer_out", [1350, 905, 125, 105], doc="doc_registry",
-       name="Открытый ящик", show_on=["drawer_ira_open"], cursor="zoom"),
     HS("hs_kpi_board", [1758, 278, 150, 200], name="KPI-доска", look=True,
        rect_day=[1785, 150, 120, 320]),
-    HS("hs_pointer", [1798, 385, 92, 82], node="take_pointer", name="Указка",
+    HS("hs_pointer", [1802, 348, 78, 68], node="take_pointer", name="Магнитная указка",
        hide_on=["done:take_pointer"],
-       rect_day=[1808, 398, 92, 80]),
+       rect_day=[1814, 274, 78, 68]),
     # --- правая зона: рассинхрон день/ночь, всюду rect_day ---
     HS("hs_exit_sign", [1504, 130, 100, 58], name="Табличка EXIT", look=True,
        rect_day=[1540, 126, 86, 62]),
@@ -103,23 +101,32 @@ A_hotspots = [
 A_cutouts = [
     # линейка — оригинальный катаут (восстановлен из git 5413efe), лежит на
     # столе Иры (правая столешница ~1240..1800 × 665..790, ночь=день)
-    CO("cutouts/st_ruler_on_desk.png", [1143, 674], 2.8, z=20,
+    # (раунд 7) линейка меньше (×0.6 от 2.8) и на СВОБОДНОЙ части столешницы
+    # Иры слева от факса (промер занятых колонок), не задевает принтер/клаву
+    CO("cutouts/st_ruler_on_desk.png", [1150, 702], 1.68, z=20,
        hide_on=["done:take_ruler"]),
     # указка (диагональная) лежит ВНУТРИ силуэта KPI-доски (ночь/день)
-    CO("cutouts/st_pointer_on_board.png", [1713, 376], 1.5, z=20,
+    # (раунд 7) магнитная указка ВПЛОТНУЮ внутри силуэта KPI-доски
+    # (ночь щит x1758..1908, день x1785..1905) — прилегает к поверхности
+    CO("cutouts/st_pointer_on_board.png", [1716, 336], 1.5, z=20,
        hide_on=["done:take_pointer"],
-       pos_day=[1723, 386]),
+       pos_day=[1728, 262]),
     CO("cutouts/st_wheel_wall.png", [1002, 206], 0.52, z=20,
        hide_on=["done:take_wheel"]),
     # открытая решётка ТОЧНО поверх закрытой из фона (промер грили ночь/день)
-    CO("cutouts/st_vent_open_office.png", [1241, 105], 0.88, z=20,
-       show_on=["vents_open"], pos_day=[1246, 116]),
+    # (раунд 7) катаут цветокорректирован под фон (ночь/день), высота ×0.75;
+    # посажен так, чтобы ПОЛНОСТЬЮ накрыть закрытую грилю и не лезть на шкаф
+    CO("cutouts/st_vent_open_office.png", [1252, 120], 0.85, z=20,
+       show_on=["vents_open"],
+       img_day="cutouts/st_vent_open_office_day.png", pos_day=[1254, 128]),
     CO("cutouts/st_gift.png", [430, 600], 0.62, z=20, hide_on=["done:take_gift"]),
-    # ящик выдвигается ИЗ кодовой тумбы Иры (промер фронта тумбы), не лежит на полу
-    CO("cutouts/st_ira_drawer_open.png", [1233, 880], 0.70, z=20,
-       show_on=["drawer_ira_open"]),
-    CO("cutouts/st_garland_on.png", [368, 175], 0.6, z=30,
-       show_on=["garland_on"], glow=True),
+    # (раунд 7) открытый ящик Иры перенесён В ЗУМ тумбы (zoom_drawer_keypad):
+    # на вайде тумба остаётся ЗАКРЫТОЙ (см. zoom cutouts + hs_ira_drawer_out там)
+    # (раунд 7) процедурная гирлянда по силуэту ёлки (tools/gen_garland.py):
+    # нити+лампочки glow, обрезаны маской ёлки; ночь ярче, день бледнее (img_day)
+    CO("cutouts/st_garland_on.png", [360, 150], 1.0, z=30,
+       show_on=["garland_on"], glow=True,
+       img_day="cutouts/st_garland_on_day.png"),
     CO("cutouts/st_led_alarm_on.png", [1673, 382], 0.34, z=25,
        hide_on=["alarm_off"], pos_day=[1731, 328]),
     CO("cutouts/st_led_alarm_off.png", [1673, 382], 0.34, z=25,
@@ -167,7 +174,7 @@ B_hotspots = [
        cursor="zoom"),
     HS("hs_bench", [585, 380, 480, 220], goto="zoom_bench", name="Стенд",
        cursor="zoom"),
-    HS("hs_shelf_grease", [1150, 428, 112, 72], node="take_grease", name="Смазка",
+    HS("hs_shelf_grease", [1150, 452, 112, 66], node="take_grease", name="Смазка",
        hide_on=["done:take_grease"]),
     HS("hs_shelf", [1005, 190, 310, 620], name="Стеллаж", look=True),
     HS("hs_attic", [1005, 190, 305, 115], goto="zoom_attic", name="Антресоль",
@@ -198,12 +205,14 @@ B_cutouts = [
     CO("cutouts/st_net_on_floor.png", [1296, 892], 0.86, z=20,
        show_on=["net_down"], hide_on=["done:take_net"]),
     # открытая решётка ТОЧНО поверх закрытой грили (x1385..1560 y50..190)
-    CO("cutouts/st_vent_open_util.png", [1321, 12], 1.5, z=20,
-       show_on=["vents_open"]),
+    # (раунд 7) цветокоррекция под фон подсобки (тёмная ночь / тёплый день)
+    CO("cutouts/st_vent_open_util.png", [1376, 46], 1.0, z=20,
+       show_on=["vents_open"], img_day="cutouts/st_vent_open_util_day.png"),
     CO("cutouts/st_mop_on_hook.png", [1556, 258], 0.78, z=20, hide_on=["done:take_mop"]),
-    # банка литола стоит НА полке стеллажа (полка 4, y~490), в стороне от инструментов
-    CO("cutouts/st_grease_on_shelf.png", [1134, 415], 0.82, z=20,
-       hide_on=["done:take_grease"]),
+    # (раунд 7) банка литола стоит НА полке (низ на линию полки y~515),
+    # программная тень-эллипс под ней (shadow)
+    CO("cutouts/st_grease_on_shelf.png", [1134, 440], 0.82, z=20,
+       shadow=True, hide_on=["done:take_grease"]),
     CO("cutouts/st_box_on_floor.png", [1012, 872], 0.72, z=20,
        show_on=["box_down"]),
 ]
@@ -273,8 +282,15 @@ zooms["zoom_drawer_keypad"] = {"room": "A", "hotspots": [
     HS("hs_z_keypad", [505, 195, 200, 310], node="ira_code", name="Кейпад",
        widget="keypad", widget_len=4),
     HS("hs_z_slot", [1075, 82, 330, 66], name="Щель шредера", look=True),
-    HS("hs_z_mini_drawer", [865, 175, 310, 260], name="Ящичек", look=True),
-], "cutouts": []}
+    HS("hs_z_mini_drawer", [865, 175, 310, 260], name="Ящичек", look=True,
+       hide_on=["drawer_ira_open"]),
+    # (раунд 7) открытый ящик Иры виден ТОЛЬКО здесь, в зуме тумбы
+    HS("hs_ira_drawer_out", [560, 610, 640, 250], doc="doc_registry",
+       name="Открытый ящик", show_on=["drawer_ira_open"], cursor="zoom"),
+], "cutouts": [
+    CO("cutouts/st_ira_drawer_open.png", [560, 604], 1.36, z=20,
+       show_on=["drawer_ira_open"]),
+]}
 
 zooms["zoom_alarm"] = {"room": "A", "hotspots": [
     HS("hs_z_alarm_pad", [615, 280, 240, 580], node="alarm_off",
@@ -383,13 +399,14 @@ zooms["zoom_bench"] = {"room": "B", "hotspots": [
 zooms["zoom_workbench"] = {"room": "B", "hotspots": [
     HS("hs_z_journal", [520, 220, 320, 150], doc="doc_journal",
        name="Журнал испытаний", cursor="zoom"),
-    HS("hs_z_padlock", [455, 425, 130, 130], node="open_workbench",
+    HS("hs_z_padlock", [628, 590, 100, 120], node="open_workbench",
        name="Замочек", hide_on=["wb_open"]),
     HS("hs_z_wb_drawer", [300, 430, 440, 200], node="take_wrench",
        name="Ящик верстака", show_on=["wb_open"], hide_on=["done:take_wrench"]),
     HS("hs_z_vise", [1400, 370, 210, 300], name="Тиски", look=True),
 ], "cutouts": [
-    CO("cutouts/st_padlock_zoom.png", [478, 438], 0.42, z=20,
+    # (раунд 7) навесной замок повешен на ПЕТЛЮ ящика верстака (промер зума)
+    CO("cutouts/st_padlock_zoom.png", [622, 584], 0.42, z=20,
        hide_on=["wb_open"]),
     CO("cutouts/st_wb_drawer_open.png", [335, 452], 1.0, z=18,
        show_on=["wb_open"]),
@@ -404,7 +421,8 @@ zooms["zoom_attic"] = {"room": "B", "hotspots": [
     HS("hs_z_dust", [300, 320, 700, 200], name="Пыльный след", look=True,
        show_on=["box_down"]),
 ], "cutouts": [
-    CO("cutouts/st_box_on_floor.png", [510, 330], 0.86, z=20,
+    # (раунд 7) коробка крупнее и посажена на пыльный след полки (промер зума)
+    CO("cutouts/st_box_on_floor.png", [402, 302], 1.3, z=20,
        hide_on=["box_down"]),
 ]}
 

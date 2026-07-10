@@ -251,7 +251,7 @@ add(op="assert_widget", kind="keypad")
 shot("widget_keypad_tumba")
 add(op="code", node="ira_code"); dismiss()
 add(op="assert_flag", f="drawer_ira_open")
-to_room("A")
+# (раунд 7) открытый ящик Иры — в зуме тумбы; клик БЕЗ выхода в комнату
 add(op="click_hs", id="hs_ira_drawer_out")
 add(op="wait", s=0.15)
 shot("doc_reestr", doc="doc_registry")

@@ -203,8 +203,8 @@ add(op="assert_widget", kind="keypad")
 shot("round4_05_keypad")                      # движковый кейпад с цифрами
 add(op="code", node="ira_code", value="1111"); dismiss(); neg("ira_code_1111")
 add(op="code", node="ira_code"); dismiss()
-dismiss(); add(op="esc"); cur = "A"
-add(op="click_hs", id="hs_ira_drawer_out")   # реестр (читалка)
+dismiss()                                    # (раунд 7) остаёмся в зуме тумбы
+add(op="click_hs", id="hs_ira_drawer_out")   # реестр — теперь В ЗУМЕ тумбы
 shot("ap_07_registry_gag")
 add(op="close_reader")
 

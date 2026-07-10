@@ -85,6 +85,27 @@
      ]
     },
     {
+     "id": "hs_pointer",
+     "rect": [
+      1802,
+      348,
+      78,
+      68
+     ],
+     "cursor": "act",
+     "node": "take_pointer",
+     "name": "Магнитная указка",
+     "hide_on": [
+      "done:take_pointer"
+     ],
+     "rect_day": [
+      1814,
+      274,
+      78,
+      68
+     ]
+    },
+    {
      "id": "hs_exit_sign",
      "rect": [
       1504,
@@ -100,6 +121,21 @@
       126,
       86,
       62
+     ]
+    },
+    {
+     "id": "hs_ruler",
+     "rect": [
+      1238,
+      706,
+      96,
+      62
+     ],
+     "cursor": "act",
+     "node": "take_ruler",
+     "name": "Линейка",
+     "hide_on": [
+      "done:take_ruler"
      ]
     },
     {
@@ -154,27 +190,6 @@
      ]
     },
     {
-     "id": "hs_pointer",
-     "rect": [
-      1798,
-      385,
-      92,
-      82
-     ],
-     "cursor": "act",
-     "node": "take_pointer",
-     "name": "Указка",
-     "hide_on": [
-      "done:take_pointer"
-     ],
-     "rect_day": [
-      1808,
-      398,
-      92,
-      80
-     ]
-    },
-    {
      "id": "hs_coffee_machine",
      "rect": [
       1176,
@@ -197,21 +212,6 @@
      "cursor": "zoom",
      "doc": "doc_karaoke",
      "name": "Караоке-список"
-    },
-    {
-     "id": "hs_ruler",
-     "rect": [
-      1295,
-      695,
-      118,
-      100
-     ],
-     "cursor": "act",
-     "node": "take_ruler",
-     "name": "Линейка",
-     "hide_on": [
-      "done:take_ruler"
-     ]
     },
     {
      "id": "hs_lap_drawer",
@@ -260,21 +260,6 @@
       425,
       66,
       190
-     ]
-    },
-    {
-     "id": "hs_ira_drawer_out",
-     "rect": [
-      1350,
-      905,
-      125,
-      105
-     ],
-     "cursor": "zoom",
-     "doc": "doc_registry",
-     "name": "Открытый ящик",
-     "show_on": [
-      "drawer_ira_open"
      ]
     },
     {
@@ -637,10 +622,10 @@
     {
      "img": "cutouts/st_ruler_on_desk.png",
      "pos": [
-      1143,
-      674
+      1150,
+      702
      ],
-     "scale": 2.8,
+     "scale": 1.68,
      "z": 20,
      "hide_on": [
       "done:take_ruler"
@@ -649,8 +634,8 @@
     {
      "img": "cutouts/st_pointer_on_board.png",
      "pos": [
-      1713,
-      376
+      1716,
+      336
      ],
      "scale": 1.5,
      "z": 20,
@@ -658,8 +643,8 @@
       "done:take_pointer"
      ],
      "pos_day": [
-      1723,
-      386
+      1728,
+      262
      ]
     },
     {
@@ -677,17 +662,18 @@
     {
      "img": "cutouts/st_vent_open_office.png",
      "pos": [
-      1241,
-      105
+      1252,
+      120
      ],
-     "scale": 0.88,
+     "scale": 0.85,
      "z": 20,
      "show_on": [
       "vents_open"
      ],
+     "img_day": "cutouts/st_vent_open_office_day.png",
      "pos_day": [
-      1246,
-      116
+      1254,
+      128
      ]
     },
     {
@@ -703,29 +689,18 @@
      ]
     },
     {
-     "img": "cutouts/st_ira_drawer_open.png",
-     "pos": [
-      1233,
-      880
-     ],
-     "scale": 0.7,
-     "z": 20,
-     "show_on": [
-      "drawer_ira_open"
-     ]
-    },
-    {
      "img": "cutouts/st_garland_on.png",
      "pos": [
-      368,
-      175
+      360,
+      150
      ],
-     "scale": 0.6,
+     "scale": 1.0,
      "z": 30,
      "show_on": [
       "garland_on"
      ],
-     "glow": true
+     "glow": true,
+     "img_day": "cutouts/st_garland_on_day.png"
     },
     {
      "img": "cutouts/st_led_alarm_on.png",
@@ -905,9 +880,9 @@
      "id": "hs_shelf_grease",
      "rect": [
       1150,
-      428,
+      452,
       112,
-      72
+      66
      ],
      "cursor": "act",
      "node": "take_grease",
@@ -1196,14 +1171,15 @@
     {
      "img": "cutouts/st_vent_open_util.png",
      "pos": [
-      1321,
-      12
+      1376,
+      46
      ],
-     "scale": 1.5,
+     "scale": 1.0,
      "z": 20,
      "show_on": [
       "vents_open"
-     ]
+     ],
+     "img_day": "cutouts/st_vent_open_util_day.png"
     },
     {
      "img": "cutouts/st_mop_on_hook.png",
@@ -1221,10 +1197,11 @@
      "img": "cutouts/st_grease_on_shelf.png",
      "pos": [
       1134,
-      415
+      440
      ],
      "scale": 0.82,
      "z": 20,
+     "shadow": true,
      "hide_on": [
       "done:take_grease"
      ]
@@ -1628,10 +1605,41 @@
      ],
      "cursor": "act",
      "name": "Ящичек",
-     "look": true
+     "look": true,
+     "hide_on": [
+      "drawer_ira_open"
+     ]
+    },
+    {
+     "id": "hs_ira_drawer_out",
+     "rect": [
+      560,
+      610,
+      640,
+      250
+     ],
+     "cursor": "zoom",
+     "doc": "doc_registry",
+     "name": "Открытый ящик",
+     "show_on": [
+      "drawer_ira_open"
+     ]
     }
    ],
-   "cutouts": [],
+   "cutouts": [
+    {
+     "img": "cutouts/st_ira_drawer_open.png",
+     "pos": [
+      560,
+      604
+     ],
+     "scale": 1.36,
+     "z": 20,
+     "show_on": [
+      "drawer_ira_open"
+     ]
+    }
+   ],
    "bg": "zooms/zoom_drawer_keypad.png"
   },
   "zoom_alarm": {
@@ -2315,10 +2323,10 @@
     {
      "id": "hs_z_padlock",
      "rect": [
-      455,
-      425,
-      130,
-      130
+      628,
+      590,
+      100,
+      120
      ],
      "cursor": "act",
      "node": "open_workbench",
@@ -2374,8 +2382,8 @@
     {
      "img": "cutouts/st_padlock_zoom.png",
      "pos": [
-      478,
-      438
+      622,
+      584
      ],
      "scale": 0.42,
      "z": 20,
@@ -2464,10 +2472,10 @@
     {
      "img": "cutouts/st_box_on_floor.png",
      "pos": [
-      510,
-      330
+      402,
+      302
      ],
-     "scale": 0.86,
+     "scale": 1.3,
      "z": 20,
      "hide_on": [
       "box_down"
