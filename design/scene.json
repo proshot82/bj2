@@ -87,9 +87,9 @@
     {
      "id": "hs_pointer",
      "rect": [
-      1802,
-      348,
-      78,
+      1795,
+      266,
+      68,
       68
      ],
      "cursor": "act",
@@ -99,9 +99,9 @@
       "done:take_pointer"
      ],
      "rect_day": [
-      1814,
-      274,
-      78,
+      1808,
+      256,
+      68,
       68
      ]
     },
@@ -634,17 +634,17 @@
     {
      "img": "cutouts/st_pointer_on_board.png",
      "pos": [
-      1716,
-      336
+      1721,
+      260
      ],
-     "scale": 1.5,
+     "scale": 1.35,
      "z": 20,
      "hide_on": [
       "done:take_pointer"
      ],
      "pos_day": [
-      1728,
-      262
+      1737,
+      248
      ]
     },
     {
@@ -714,8 +714,8 @@
       "alarm_off"
      ],
      "pos_day": [
-      1731,
-      328
+      1739,
+      378
      ]
     },
     {
@@ -730,8 +730,8 @@
       "alarm_off"
      ],
      "pos_day": [
-      1731,
-      328
+      1739,
+      378
      ]
     },
     {
@@ -746,8 +746,8 @@
       "power_on"
      ],
      "pos_day": [
-      1648,
-      330
+      1652,
+      349
      ]
     },
     {
@@ -765,8 +765,8 @@
       "reader_green"
      ],
      "pos_day": [
-      1648,
-      330
+      1652,
+      349
      ]
     },
     {
@@ -781,8 +781,8 @@
       "reader_green"
      ],
      "pos_day": [
-      1648,
-      330
+      1652,
+      349
      ]
     },
     {
@@ -835,8 +835,8 @@
     {
      "img": "cutouts/st_steam_a.png",
      "pos": [
-      1199,
-      380
+      1186,
+      378
      ],
      "scale": 0.42,
      "z": 22,
@@ -892,26 +892,10 @@
      ]
     },
     {
-     "id": "hs_mop",
-     "rect": [
-      1555,
-      332,
-      72,
-      180
-     ],
-     "cursor": "act",
-     "node": "take_mop",
-     "name": "Швабра",
-     "hide_on": [
-      "done:take_mop"
-     ],
-     "doc_rmb": "doc_mop_tag"
-    },
-    {
      "id": "hs_net_top",
      "rect": [
       1398,
-      138,
+      108,
       122,
       120
      ],
@@ -1145,7 +1129,7 @@
      "img": "cutouts/st_net_on_top.png",
      "pos": [
       1360,
-      133
+      103
      ],
      "scale": 0.8,
      "z": 20,
@@ -1180,18 +1164,6 @@
       "vents_open"
      ],
      "img_day": "cutouts/st_vent_open_util_day.png"
-    },
-    {
-     "img": "cutouts/st_mop_on_hook.png",
-     "pos": [
-      1512,
-      258
-     ],
-     "scale": 0.78,
-     "z": 20,
-     "hide_on": [
-      "done:take_mop"
-     ]
     },
     {
      "img": "cutouts/st_grease_on_shelf.png",
@@ -2455,10 +2427,10 @@
     {
      "id": "hs_z_box_shelf",
      "rect": [
-      380,
-      300,
+      400,
+      235,
       560,
-      260
+      360
      ],
      "cursor": "act",
      "node": "box_down",
@@ -2470,12 +2442,12 @@
    ],
    "cutouts": [
     {
-     "img": "cutouts/st_box_on_floor.png",
+     "img": "cutouts/st_box_attic.png",
      "pos": [
-      402,
-      302
+      378,
+      238
      ],
-     "scale": 1.3,
+     "scale": 0.62,
      "z": 20,
      "hide_on": [
       "box_down"
@@ -2510,6 +2482,22 @@
      "cursor": "act",
      "name": "Крючки",
      "look": true
+    },
+    {
+     "id": "hs_mop",
+     "rect": [
+      845,
+      120,
+      140,
+      410
+     ],
+     "cursor": "act",
+     "node": "take_mop",
+     "name": "Швабра",
+     "hide_on": [
+      "done:take_mop"
+     ],
+     "doc_rmb": "doc_mop_tag"
     },
     {
      "id": "hs_z_medkit",
@@ -2551,7 +2539,20 @@
      "look": true
     }
    ],
-   "cutouts": [],
+   "cutouts": [
+    {
+     "img": "cutouts/st_mop_on_hook.png",
+     "pos": [
+      763,
+      50
+     ],
+     "scale": 1.5,
+     "z": 20,
+     "hide_on": [
+      "done:take_mop"
+     ]
+    }
+   ],
    "bg": "zooms/zoom_closet.png"
   }
  },

@@ -181,7 +181,7 @@ shot("dver_schitovoy_noch")
 node("take_pointer"); dismiss()
 to_room("B")
 shot("komnata_B_noch")
-read_hs("hs_mop", "B", "doc_mop_tag", "doc_birka_shvabra", btn=2)
+read_hs("hs_mop", "zoom_closet", "doc_mop_tag", "doc_birka_shvabra", btn=2)  # (р9) швабра в зуме шкафа
 node("see_net"); dismiss()
 node("push_net"); dismiss()
 add(op="assert_flag", f="vents_open")

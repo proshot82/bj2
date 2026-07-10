@@ -65,9 +65,9 @@ A_hotspots = [
        name="Кодовая тумба", cursor="zoom"),
     HS("hs_kpi_board", [1758, 278, 150, 200], name="KPI-доска", look=True,
        rect_day=[1785, 150, 120, 320]),
-    HS("hs_pointer", [1802, 348, 78, 68], node="take_pointer", name="Магнитная указка",
+    HS("hs_pointer", [1795, 266, 68, 68], node="take_pointer", name="Магнитная указка",
        hide_on=["done:take_pointer"],
-       rect_day=[1814, 274, 78, 68]),
+       rect_day=[1808, 256, 68, 68]),
     # --- правая зона: рассинхрон день/ночь, всюду rect_day ---
     HS("hs_exit_sign", [1504, 130, 100, 58], name="Табличка EXIT", look=True,
        rect_day=[1540, 126, 86, 62]),
@@ -106,11 +106,11 @@ A_cutouts = [
     CO("cutouts/st_ruler_on_desk.png", [1150, 702], 1.68, z=20,
        hide_on=["done:take_ruler"]),
     # указка (диагональная) лежит ВНУТРИ силуэта KPI-доски (ночь/день)
-    # (раунд 7) магнитная указка ВПЛОТНУЮ внутри силуэта KPI-доски
-    # (ночь щит x1758..1908, день x1785..1905) — прилегает к поверхности
-    CO("cutouts/st_pointer_on_board.png", [1716, 336], 1.5, z=20,
+    # (раунд 9) уменьшена (1.5->1.35) и отцентрована в белом поле щита с запасом
+    # от кромок: ночь щит x1755..1898 y150..475, день x1778..1905 y58..510
+    CO("cutouts/st_pointer_on_board.png", [1721, 260], 1.35, z=20,
        hide_on=["done:take_pointer"],
-       pos_day=[1728, 262]),
+       pos_day=[1737, 248]),
     CO("cutouts/st_wheel_wall.png", [1002, 206], 0.52, z=20,
        hide_on=["done:take_wheel"]),
     # открытая решётка накрывает закрытую грилю офиса (x1282..1405 y138..203)
@@ -128,16 +128,18 @@ A_cutouts = [
     CO("cutouts/st_garland_on.png", [360, 150], 1.0, z=30,
        show_on=["garland_on"], glow=True,
        img_day="cutouts/st_garland_on_day.png"),
+    # (раунд 9) pos_day LED выправлены по дневному фону: индикатор считывателя
+    # ~(1663,365), плата сигнализации на синей двери x1735..1770 y378..425
     CO("cutouts/st_led_alarm_on.png", [1673, 382], 0.34, z=25,
-       hide_on=["alarm_off"], pos_day=[1731, 328]),
+       hide_on=["alarm_off"], pos_day=[1739, 378]),
     CO("cutouts/st_led_alarm_off.png", [1673, 382], 0.34, z=25,
-       show_on=["alarm_off"], pos_day=[1731, 328]),
+       show_on=["alarm_off"], pos_day=[1739, 378]),
     CO("cutouts/st_led_reader_off.png", [1568, 325], 0.42, z=25,
-       hide_on=["power_on"], pos_day=[1648, 330]),
+       hide_on=["power_on"], pos_day=[1652, 349]),
     CO("cutouts/st_led_reader_red.png", [1568, 325], 0.42, z=25,
-       show_on=["power_on"], hide_on=["reader_green"], pos_day=[1648, 330]),
+       show_on=["power_on"], hide_on=["reader_green"], pos_day=[1652, 349]),
     CO("cutouts/st_led_reader_green.png", [1568, 325], 0.42, z=25,
-       show_on=["reader_green"], pos_day=[1648, 330]),
+       show_on=["reader_green"], pos_day=[1652, 349]),
     # открытая дверь щитовой (перспективный кадр автора, ночь): дверь приоткрыта,
     # из щели льётся тёплый свет. Вырезана по контуру двери (край мягкий ~2px,
     # угол настольной лампы вымаскирован), гамма-подъём теней 0.9 под дневной фон.
@@ -156,7 +158,8 @@ A_cutouts = [
     # одному кадру, не суммирует); посажен вплотную над кружкой
     CO("cutouts/st_fish_a.png", [952, 412], 0.36, z=18, idle="fish_wide",
        frames=["cutouts/st_fish_a.png", "cutouts/st_fish_b.png"]),
-    CO("cutouts/st_steam_a.png", [1199, 380], 0.42, z=22, idle="steam",
+    # (раунд 9) пар сдвинут влево — база над чашкой (ночь x~1216 / день x~1233)
+    CO("cutouts/st_steam_a.png", [1186, 378], 0.42, z=22, idle="steam",
        frames=["cutouts/st_steam_a.png", "cutouts/st_steam_b.png",
                "cutouts/st_steam_c.png"], show_on=["sockets_on"]),
 ]
@@ -188,13 +191,12 @@ B_hotspots = [
        name="Коробка (ещё раз)", show_on=["item:relic_fez"], hide_on=["item:crown"]),
     HS("hs_closet", [1310, 190, 285, 690], goto="zoom_closet", name="Шкаф уборщицы",
        cursor="zoom"),
-    HS("hs_net_top", [1398, 138, 122, 120], node="see_net", name="Верх шкафа",
+    HS("hs_net_top", [1398, 108, 122, 120], node="see_net", name="Верх шкафа",
        hide_on=["net_down"]),
     HS("hs_net_floor", [1290, 885, 240, 185], node="take_net", name="Сачок",
        show_on=["net_down"], hide_on=["done:take_net"]),
     HS("hs_vent_util", [1385, 50, 180, 145], name="Вентрешётка", look=True),
-    HS("hs_mop", [1555, 332, 72, 180], node="take_mop", name="Швабра",
-       hide_on=["done:take_mop"], doc_rmb="doc_mop_tag"),
+    # (раунд 9) швабра ПЕРЕНЕСЕНА в zoom_closet (крючки внутри шкафа уборщицы)
     HS("hs_boiler", [1655, 80, 195, 440], node="h_boiler", name="Бойлер"),
     HS("hs_sink", [1600, 590, 255, 175], name="Раковина", look=True),
     HS("hs_sink_valve", [1700, 760, 120, 130], node="h_sink_valve",
@@ -203,8 +205,8 @@ B_hotspots = [
 ]
 B_cutouts = [
     # сачок лежит на КРЫШКЕ шкафа со свесом за передний край
-    # (раунд 8: поднят на ~17px — не «прилипает» к верхнему краю, лежит на крышке)
-    CO("cutouts/st_net_on_top.png", [1360, 133], 0.80, z=20,
+    # (раунд 8: +17px; раунд 9: ещё +30px — низ со свесом на крышке)
+    CO("cutouts/st_net_on_top.png", [1360, 103], 0.80, z=20,
        hide_on=["net_down"]),
     CO("cutouts/st_net_on_floor.png", [1296, 892], 0.86, z=20,
        show_on=["net_down"], hide_on=["done:take_net"]),
@@ -212,9 +214,7 @@ B_cutouts = [
     # (раунд 7) цветокоррекция; (раунд 8) ×1.58 + тёмный бэкинг под грилю
     CO("cutouts/st_vent_open_util.png", [1327, 24], 1.58, z=20,
        show_on=["vents_open"], img_day="cutouts/st_vent_open_util_day.png"),
-    # швабра на крюке-вешалке ПЕРЕНЕСЕНА на деревянную дверцу шкафа уборщицы
-    # (раунд 8: раньше висела в зазоре шкаф/бойлер — на тёмном фоне «парила»)
-    CO("cutouts/st_mop_on_hook.png", [1512, 258], 0.78, z=20, hide_on=["done:take_mop"]),
+    # (раунд 9) катаут швабры st_mop_on_hook ПЕРЕНЕСЁН в zoom_closet (крючки)
     # банка литола СТОИТ на полке, тень-эллипс под ней
     # (раунд 8: опущена ещё на 12px — низ строго на полке ~y527)
     CO("cutouts/st_grease_on_shelf.png", [1134, 452], 0.82, z=20,
@@ -421,25 +421,33 @@ zooms["zoom_workbench"] = {"room": "B", "hotspots": [
 ]}
 
 zooms["zoom_attic"] = {"room": "B", "hotspots": [
-    HS("hs_z_box_shelf", [380, 300, 560, 260], node="box_down",
+    HS("hs_z_box_shelf", [400, 235, 560, 360], node="box_down",
        name="Коробка «НГ-2019»", hide_on=["box_down"]),
     HS("hs_z_tinsel", [890, 400, 200, 640], name="Мишура", look=True),
     HS("hs_z_dust", [300, 320, 700, 200], name="Пыльный след", look=True,
        show_on=["box_down"]),
 ], "cutouts": [
-    # (раунд 7) коробка крупнее и посажена на пыльный след полки (промер зума)
-    CO("cutouts/st_box_on_floor.png", [402, 302], 1.3, z=20,
+    # (раунд 9) новый авторский арт коробки «НГ-2019» с мишурой (ракурс
+    # сверху-сбоку — под антресоль). Полка: задний край y~400, передний ~600
+    CO("cutouts/st_box_attic.png", [378, 238], 0.62, z=20,
        hide_on=["box_down"]),
 ]}
 
 zooms["zoom_closet"] = {"room": "B", "hotspots": [
     HS("hs_z_medkit", [1128, 88, 186, 388], node="take_validol", name="Аптечка",
        hide_on=["done:take_validol"]),
+    # (раунд 9) швабра висит на крючках ВНУТРИ шкафа — зона взятия здесь
+    HS("hs_mop", [845, 120, 140, 410], node="take_mop", name="Швабра",
+       hide_on=["done:take_mop"], doc_rmb="doc_mop_tag"),
     HS("hs_z_hooks", [640, 105, 380, 140], name="Крючки", look=True),
     HS("hs_z_rag", [520, 385, 360, 140], name="Тряпка", look=True),
     HS("hs_z_bottles", [780, 530, 240, 480], name="Бутыли", look=True),
     HS("hs_z_bucket2", [510, 550, 300, 460], name="Ведро", look=True),
-], "cutouts": []}
+], "cutouts": [
+    # (раунд 9) швабра (черенок удлинён ~x2, gen_r9_cutouts) на среднем крючке
+    CO("cutouts/st_mop_on_hook.png", [763, 50], 1.5, z=20,
+       hide_on=["done:take_mop"]),
+]}
 
 def _hs_area(h):
     r = h["rect"]; return r[2] * r[3]
