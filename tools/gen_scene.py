@@ -113,17 +113,18 @@ A_cutouts = [
        pos_day=[1728, 262]),
     CO("cutouts/st_wheel_wall.png", [1002, 206], 0.52, z=20,
        hide_on=["done:take_wheel"]),
-    # открытая решётка ТОЧНО поверх закрытой из фона (промер грили ночь/день)
-    # (раунд 7) катаут цветокорректирован под фон (ночь/день), высота ×0.75;
-    # посажен так, чтобы ПОЛНОСТЬЮ накрыть закрытую грилю и не лезть на шкаф
-    CO("cutouts/st_vent_open_office.png", [1252, 120], 0.85, z=20,
+    # открытая решётка накрывает закрытую грилю офиса (x1282..1405 y138..203)
+    # (раунд 7) цветокоррекция, высота ×0.75; (раунд 8) ×0.95, центр по гриле
+    # день+ночь + тёмный бэкинг (gen_vents_r7)
+    CO("cutouts/st_vent_open_office.png", [1242, 116], 0.95, z=20,
        show_on=["vents_open"],
-       img_day="cutouts/st_vent_open_office_day.png", pos_day=[1254, 128]),
+       img_day="cutouts/st_vent_open_office_day.png", pos_day=[1244, 114]),
     CO("cutouts/st_gift.png", [430, 600], 0.62, z=20, hide_on=["done:take_gift"]),
     # (раунд 7) открытый ящик Иры перенесён В ЗУМ тумбы (zoom_drawer_keypad):
     # на вайде тумба остаётся ЗАКРЫТОЙ (см. zoom cutouts + hs_ira_drawer_out там)
-    # (раунд 7) процедурная гирлянда по силуэту ёлки (tools/gen_garland.py):
+    # процедурная гирлянда по силуэту ёлки (tools/gen_garland.py):
     # нити+лампочки glow, обрезаны маской ёлки; ночь ярче, день бледнее (img_day)
+    # (раунд 8: дневные лампочки/glow усилены — читаются в масштабе комнаты)
     CO("cutouts/st_garland_on.png", [360, 150], 1.0, z=30,
        show_on=["garland_on"], glow=True,
        img_day="cutouts/st_garland_on_day.png"),
@@ -150,10 +151,12 @@ A_cutouts = [
        img_day="cutouts/st_util_door_open_day.png", pos_day=[1695, 287]),
     CO("cutouts/st_door_open_final.png", [1476, 178], 0.62, z=40,
        show_on=["victory"], pos_day=[1512, 176]),
-    # идл: рыбка в аквариуме на вайде (мелкая), пар над кофе
+    # идл: рыбка в аквариуме (мелкая), пар над кофе.
+    # (раунд 8) пар — ОДИН катаут frames=[a,b,c] idle="steam" (чередует по
+    # одному кадру, не суммирует); посажен вплотную над кружкой
     CO("cutouts/st_fish_a.png", [952, 412], 0.36, z=18, idle="fish_wide",
        frames=["cutouts/st_fish_a.png", "cutouts/st_fish_b.png"]),
-    CO("cutouts/st_steam_a.png", [1150, 230], 0.5, z=22, idle="steam",
+    CO("cutouts/st_steam_a.png", [1199, 380], 0.42, z=22, idle="steam",
        frames=["cutouts/st_steam_a.png", "cutouts/st_steam_b.png",
                "cutouts/st_steam_c.png"], show_on=["sockets_on"]),
 ]
@@ -174,7 +177,7 @@ B_hotspots = [
        cursor="zoom"),
     HS("hs_bench", [585, 380, 480, 220], goto="zoom_bench", name="Стенд",
        cursor="zoom"),
-    HS("hs_shelf_grease", [1150, 452, 112, 66], node="take_grease", name="Смазка",
+    HS("hs_shelf_grease", [1150, 462, 112, 72], node="take_grease", name="Смазка",
        hide_on=["done:take_grease"]),
     HS("hs_shelf", [1005, 190, 310, 620], name="Стеллаж", look=True),
     HS("hs_attic", [1005, 190, 305, 115], goto="zoom_attic", name="Антресоль",
@@ -185,12 +188,12 @@ B_hotspots = [
        name="Коробка (ещё раз)", show_on=["item:relic_fez"], hide_on=["item:crown"]),
     HS("hs_closet", [1310, 190, 285, 690], goto="zoom_closet", name="Шкаф уборщицы",
        cursor="zoom"),
-    HS("hs_net_top", [1398, 150, 122, 118], node="see_net", name="Верх шкафа",
+    HS("hs_net_top", [1398, 138, 122, 120], node="see_net", name="Верх шкафа",
        hide_on=["net_down"]),
     HS("hs_net_floor", [1290, 885, 240, 185], node="take_net", name="Сачок",
        show_on=["net_down"], hide_on=["done:take_net"]),
     HS("hs_vent_util", [1385, 50, 180, 145], name="Вентрешётка", look=True),
-    HS("hs_mop", [1570, 340, 100, 230], node="take_mop", name="Швабра",
+    HS("hs_mop", [1555, 332, 72, 180], node="take_mop", name="Швабра",
        hide_on=["done:take_mop"], doc_rmb="doc_mop_tag"),
     HS("hs_boiler", [1655, 80, 195, 440], node="h_boiler", name="Бойлер"),
     HS("hs_sink", [1600, 590, 255, 175], name="Раковина", look=True),
@@ -199,19 +202,22 @@ B_hotspots = [
     HS("hs_bucket", [1560, 780, 135, 160], name="Ведро", look=True),
 ]
 B_cutouts = [
-    # сачок лежит на крышке шкафа (y~205) с правдоподобным свесом за передний край
-    CO("cutouts/st_net_on_top.png", [1360, 150], 0.80, z=20,
+    # сачок лежит на КРЫШКЕ шкафа со свесом за передний край
+    # (раунд 8: поднят на ~17px — не «прилипает» к верхнему краю, лежит на крышке)
+    CO("cutouts/st_net_on_top.png", [1360, 133], 0.80, z=20,
        hide_on=["net_down"]),
     CO("cutouts/st_net_on_floor.png", [1296, 892], 0.86, z=20,
        show_on=["net_down"], hide_on=["done:take_net"]),
-    # открытая решётка ТОЧНО поверх закрытой грили (x1385..1560 y50..190)
-    # (раунд 7) цветокоррекция под фон подсобки (тёмная ночь / тёплый день)
-    CO("cutouts/st_vent_open_util.png", [1376, 46], 1.0, z=20,
+    # открытая решётка ПОЛНОСТЬЮ накрывает закрытую грилю (x1390..1577 y62..183)
+    # (раунд 7) цветокоррекция; (раунд 8) ×1.58 + тёмный бэкинг под грилю
+    CO("cutouts/st_vent_open_util.png", [1327, 24], 1.58, z=20,
        show_on=["vents_open"], img_day="cutouts/st_vent_open_util_day.png"),
-    CO("cutouts/st_mop_on_hook.png", [1556, 258], 0.78, z=20, hide_on=["done:take_mop"]),
-    # (раунд 7) банка литола стоит НА полке (низ на линию полки y~515),
-    # программная тень-эллипс под ней (shadow)
-    CO("cutouts/st_grease_on_shelf.png", [1134, 440], 0.82, z=20,
+    # швабра на крюке-вешалке ПЕРЕНЕСЕНА на деревянную дверцу шкафа уборщицы
+    # (раунд 8: раньше висела в зазоре шкаф/бойлер — на тёмном фоне «парила»)
+    CO("cutouts/st_mop_on_hook.png", [1512, 258], 0.78, z=20, hide_on=["done:take_mop"]),
+    # банка литола СТОИТ на полке, тень-эллипс под ней
+    # (раунд 8: опущена ещё на 12px — низ строго на полке ~y527)
+    CO("cutouts/st_grease_on_shelf.png", [1134, 452], 0.82, z=20,
        shadow=True, hide_on=["done:take_grease"]),
     CO("cutouts/st_box_on_floor.png", [1012, 872], 0.72, z=20,
        show_on=["box_down"]),

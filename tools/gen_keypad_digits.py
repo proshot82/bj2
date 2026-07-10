@@ -8,7 +8,7 @@
 from PIL import Image, ImageDraw, ImageFont
 im=Image.open('work/orig_zoom_drawer_keypad_nodigits.png').convert('RGBA')
 d=ImageDraw.Draw(im)
-cols=[732,790,846]; rows=[440,495,543,590]
+cols=[743,794,844]; rows=[444,494,540,589]  # р8: перепромер центров кнопок
 labels=[["1","2","3"],["4","5","6"],["7","8","9"],["C","0","OK"]]
 def fnt(sz): return ImageFont.truetype('assets/fonts/PTSans-Bold.ttf',sz)
 for ri,row in enumerate(rows):

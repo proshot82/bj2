@@ -40,7 +40,9 @@ def build(night=True):
     d=ImageDraw.Draw(layer); dg=ImageDraw.Draw(glow)
     # цвета лампочек (тёплые)
     cols=[(255,120,90),(255,210,110),(255,240,200),(150,220,255),(255,160,120)]
-    wire=(210,205,190,150) if night else (150,150,140,120)
+    # р8: дневная гирлянда заметно ярче (читается в полнокадровом масштабе),
+    #     но всё же бледнее ночной
+    wire=(210,205,190,150) if night else (200,193,178,175)
     # уровни нитей по высоте ёлки (доля высоты маски)
     for frac in [0.30,0.42,0.55,0.68,0.82]:
         yy=int(mh*frac)
@@ -70,12 +72,13 @@ def build(night=True):
             xi,yi=int(x),int(y)
             if not(0<=yi<mh and 0<=xi<mw and mask[min(yi,mh-1),xi]): continue
             col=cols[(k+int(frac*10))%len(cols)]
-            gr=11 if night else 7
-            dg.ellipse([x-gr,y-gr,x+gr,y+gr],fill=(col[0],col[1],col[2],110 if night else 55))
-            cr=4
-            d.ellipse([x-cr,y-cr,x+cr,y+cr],fill=(min(255,col[0]+30),min(255,col[1]+30),min(255,col[2]+30),255))
+            gr=11 if night else 10
+            dg.ellipse([x-gr,y-gr,x+gr,y+gr],fill=(col[0],col[1],col[2],115 if night else 100))
+            cr=4 if night else 5
+            cb=30 if night else 48
+            d.ellipse([x-cr,y-cr,x+cr,y+cr],fill=(min(255,col[0]+cb),min(255,col[1]+cb),min(255,col[2]+cb),255))
             d.ellipse([x-1.5,y-1.5,x+1.5,y+1.5],fill=(255,255,245,255))
-    glow=glow.filter(ImageFilter.GaussianBlur(5 if night else 4))
+    glow=glow.filter(ImageFilter.GaussianBlur(5 if night else 5))
     out=Image.alpha_composite(glow,layer)
     # финальная обрезка по маске (нити/glow только на ёлке; лампочкам даём +2px)
     md=ndimage.binary_dilation(mask,iterations=3)
