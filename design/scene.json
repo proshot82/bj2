@@ -703,6 +703,16 @@
      "img_day": "cutouts/st_garland_on_day.png"
     },
     {
+     "img": "cutouts/st_siren_day.png",
+     "pos": [
+      1728,
+      384
+     ],
+     "scale": 0.07,
+     "z": 16,
+     "day_only": true
+    },
+    {
      "img": "cutouts/st_led_alarm_on.png",
      "pos": [
       1673,
@@ -714,8 +724,8 @@
       "alarm_off"
      ],
      "pos_day": [
-      1739,
-      378
+      1751,
+      380
      ]
     },
     {
@@ -730,8 +740,8 @@
       "alarm_off"
      ],
      "pos_day": [
-      1739,
-      378
+      1751,
+      380
      ]
     },
     {

@@ -130,10 +130,17 @@ A_cutouts = [
        img_day="cutouts/st_garland_on_day.png"),
     # (раунд 9) pos_day LED выправлены по дневному фону: индикатор считывателя
     # ~(1663,365), плата сигнализации на синей двери x1735..1770 y378..425
+    # (раунд 10) ДНЕВНАЯ сирена — основа панели сигнализации. Ночной арт
+    # офиса содержит коробку-сирену с X-узором на синей двери
+    # (~x1717..1747 y382..416); дневной арт её НЕ имеет (плоская плита).
+    # Катаут st_siren_day (день-only, day_only=True) кладёт X-коробку на
+    # дневную дверь; масштаб под ночную коробку. Кроп по альфе (гало убрано).
+    # LED alarm (ниже) садится днём на КУПОЛ-ЛАМПУ сирены (отн.0.763,0.187).
+    CO("cutouts/st_siren_day.png", [1728, 384], 0.070, z=16, day_only=True),
     CO("cutouts/st_led_alarm_on.png", [1673, 382], 0.34, z=25,
-       hide_on=["alarm_off"], pos_day=[1739, 378]),
+       hide_on=["alarm_off"], pos_day=[1751, 380]),
     CO("cutouts/st_led_alarm_off.png", [1673, 382], 0.34, z=25,
-       show_on=["alarm_off"], pos_day=[1739, 378]),
+       show_on=["alarm_off"], pos_day=[1751, 380]),
     CO("cutouts/st_led_reader_off.png", [1568, 325], 0.42, z=25,
        hide_on=["power_on"], pos_day=[1652, 349]),
     CO("cutouts/st_led_reader_red.png", [1568, 325], 0.42, z=25,

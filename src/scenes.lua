@@ -68,6 +68,9 @@ end
 
 -- ---------- катаут: специальная state-логика ----------
 local function cutout_visible(c)
+  -- (раунд 10) day-only катаут (дневная сирена сигнализации): виден
+  -- только в дневном режиме (power_on); ночью — родная коробка арта
+  if c.day_only and scenes.mode() ~= "day" then return false end
   if c.valve then
     -- вентиль: state on = вентиль уже переложен в bench.seq
     local placed = false
