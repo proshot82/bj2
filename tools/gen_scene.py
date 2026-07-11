@@ -82,8 +82,8 @@ A_hotspots = [
     HS("hs_poster_ot", [1506, 246, 94, 76], doc="doc_poster",
        name="Плакат по охране труда", cursor="zoom",
        rect_day=[1543, 236, 64, 58]),
-    HS("hs_alarm", [1680, 376, 46, 74], goto="zoom_alarm", name="Сигнализация",
-       cursor="zoom", rect_day=[1733, 323, 46, 64]),
+    HS("hs_alarm", [1711, 376, 46, 48], goto="zoom_alarm", name="Сигнализация",
+       cursor="zoom", rect_day=[1716, 224, 50, 50]),
     HS("hs_util_door", [1706, 285, 92, 320], node="open_utility",
        name="Дверь щитовой", hide_on=["utility_open"],
        rect_day=[1712, 278, 93, 332]),
@@ -92,7 +92,7 @@ A_hotspots = [
        rect_day=[1712, 278, 93, 332]),
     HS("hs_util_shaft", [1733, 358, 58, 74], name="Квадратный шток", look=True,
        hide_on=["utility_open"], rect_day=[1724, 300, 52, 62]),
-    HS("hs_reader", [1578, 388, 46, 70], node="reader_swipe", name="Считыватель",
+    HS("hs_reader", [1615, 332, 48, 74], node="reader_swipe", name="Считыватель",
        rect_day=[1650, 382, 44, 80]),
     HS("hs_extinguisher", [1852, 425, 66, 190], node="h_extinguisher",
        name="Огнетушитель",
@@ -136,17 +136,24 @@ A_cutouts = [
     # Катаут st_siren_day (день-only, day_only=True) кладёт X-коробку на
     # дневную дверь; масштаб под ночную коробку. Кроп по альфе (гало убрано).
     # LED alarm (ниже) садится днём на КУПОЛ-ЛАМПУ сирены (отн.0.763,0.187).
-    CO("cutouts/st_siren_day.png", [1728, 384], 0.070, z=16, day_only=True),
-    CO("cutouts/st_led_alarm_on.png", [1673, 382], 0.34, z=25,
-       hide_on=["alarm_off"], pos_day=[1751, 380]),
-    CO("cutouts/st_led_alarm_off.png", [1673, 382], 0.34, z=25,
-       show_on=["alarm_off"], pos_day=[1751, 380]),
-    CO("cutouts/st_led_reader_off.png", [1568, 325], 0.42, z=25,
-       hide_on=["power_on"], pos_day=[1652, 349]),
-    CO("cutouts/st_led_reader_red.png", [1568, 325], 0.42, z=25,
-       show_on=["power_on"], hide_on=["reader_green"], pos_day=[1652, 349]),
-    CO("cutouts/st_led_reader_green.png", [1568, 325], 0.42, z=25,
-       show_on=["reader_green"], pos_day=[1652, 349]),
+    # (раунд 11) LED-индикаторы уменьшены до «маленького огонька» (диаметр
+    # линзы ~9-14px под арт): reader scale 0.42->0.28, alarm 0.34->0.24.
+    # Сирена день ПЕРЕСАЖЕНА со створки (днём дверь всегда открыта — катаут
+    # st_util_door_open_day) на СТЕНУ над дверной коробкой (центр ~1740,248,
+    # под тан-распредкоробкой, чистая от полотна/KPI/зон). Ночь: LED reader
+    # на овал СКУД (1636,358), alarm на центр X-коробки (1734,399); зоны
+    # hs_reader/hs_alarm ночь подвинуты на эти арт-объекты (был рассинхрон ~50px).
+    CO("cutouts/st_siren_day.png", [1719, 230], 0.070, z=16, day_only=True),
+    CO("cutouts/st_led_alarm_on.png", [1727, 392], 0.24, z=25,
+       hide_on=["alarm_off"], pos_day=[1744, 230]),
+    CO("cutouts/st_led_alarm_off.png", [1727, 392], 0.24, z=25,
+       show_on=["alarm_off"], pos_day=[1744, 230]),
+    CO("cutouts/st_led_reader_off.png", [1628, 350], 0.28, z=25,
+       hide_on=["power_on"], pos_day=[1655, 357]),
+    CO("cutouts/st_led_reader_red.png", [1627, 350], 0.28, z=25,
+       show_on=["power_on"], hide_on=["reader_green"], pos_day=[1654, 357]),
+    CO("cutouts/st_led_reader_green.png", [1628, 350], 0.28, z=25,
+       show_on=["reader_green"], pos_day=[1655, 357]),
     # открытая дверь щитовой (перспективный кадр автора, ночь): дверь приоткрыта,
     # из щели льётся тёплый свет. Вырезана по контуру двери (край мягкий ~2px,
     # угол настольной лампы вымаскирован), гамма-подъём теней 0.9 под дневной фон.

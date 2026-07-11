@@ -16,12 +16,30 @@
    },
    "hotspots": [
     {
+     "id": "hs_alarm",
+     "rect": [
+      1711,
+      376,
+      46,
+      48
+     ],
+     "cursor": "zoom",
+     "goto": "zoom_alarm",
+     "name": "Сигнализация",
+     "rect_day": [
+      1716,
+      224,
+      50,
+      50
+     ]
+    },
+    {
      "id": "hs_reader",
      "rect": [
-      1578,
-      388,
-      46,
-      70
+      1615,
+      332,
+      48,
+      74
      ],
      "cursor": "act",
      "node": "reader_swipe",
@@ -31,24 +49,6 @@
       382,
       44,
       80
-     ]
-    },
-    {
-     "id": "hs_alarm",
-     "rect": [
-      1680,
-      376,
-      46,
-      74
-     ],
-     "cursor": "zoom",
-     "goto": "zoom_alarm",
-     "name": "Сигнализация",
-     "rect_day": [
-      1733,
-      323,
-      46,
-      64
      ]
     },
     {
@@ -705,8 +705,8 @@
     {
      "img": "cutouts/st_siren_day.png",
      "pos": [
-      1728,
-      384
+      1719,
+      230
      ],
      "scale": 0.07,
      "z": 16,
@@ -715,58 +715,58 @@
     {
      "img": "cutouts/st_led_alarm_on.png",
      "pos": [
-      1673,
-      382
+      1727,
+      392
      ],
-     "scale": 0.34,
+     "scale": 0.24,
      "z": 25,
      "hide_on": [
       "alarm_off"
      ],
      "pos_day": [
-      1751,
-      380
+      1744,
+      230
      ]
     },
     {
      "img": "cutouts/st_led_alarm_off.png",
      "pos": [
-      1673,
-      382
+      1727,
+      392
      ],
-     "scale": 0.34,
+     "scale": 0.24,
      "z": 25,
      "show_on": [
       "alarm_off"
      ],
      "pos_day": [
-      1751,
-      380
+      1744,
+      230
      ]
     },
     {
      "img": "cutouts/st_led_reader_off.png",
      "pos": [
-      1568,
-      325
+      1628,
+      350
      ],
-     "scale": 0.42,
+     "scale": 0.28,
      "z": 25,
      "hide_on": [
       "power_on"
      ],
      "pos_day": [
-      1652,
-      349
+      1655,
+      357
      ]
     },
     {
      "img": "cutouts/st_led_reader_red.png",
      "pos": [
-      1568,
-      325
+      1627,
+      350
      ],
-     "scale": 0.42,
+     "scale": 0.28,
      "z": 25,
      "show_on": [
       "power_on"
@@ -775,24 +775,24 @@
       "reader_green"
      ],
      "pos_day": [
-      1652,
-      349
+      1654,
+      357
      ]
     },
     {
      "img": "cutouts/st_led_reader_green.png",
      "pos": [
-      1568,
-      325
+      1628,
+      350
      ],
-     "scale": 0.42,
+     "scale": 0.28,
      "z": 25,
      "show_on": [
       "reader_green"
      ],
      "pos_day": [
-      1652,
-      349
+      1655,
+      357
      ]
     },
     {
