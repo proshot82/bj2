@@ -93,7 +93,7 @@ A_hotspots = [
     HS("hs_util_shaft", [1733, 358, 58, 74], name="Квадратный шток", look=True,
        hide_on=["utility_open"], rect_day=[1724, 300, 52, 62]),
     HS("hs_reader", [1615, 332, 48, 74], node="reader_swipe", name="Считыватель",
-       rect_day=[1650, 382, 44, 80]),
+       rect_day=[1641, 322, 44, 80]),
     HS("hs_extinguisher", [1852, 425, 66, 190], node="h_extinguisher",
        name="Огнетушитель",
        rect_day=[1852, 425, 66, 190]),
@@ -144,10 +144,24 @@ A_cutouts = [
     # на овал СКУД (1636,358), alarm на центр X-коробки (1734,399); зоны
     # hs_reader/hs_alarm ночь подвинуты на эти арт-объекты (был рассинхрон ~50px).
     CO("cutouts/st_siren_day.png", [1719, 230], 0.070, z=16, day_only=True),
+    # (микрораунд 12) LED сигнализации разделены по состоянию двери щитовой.
+    # Ночью X-короб сигнализации НАРИСОВАН на полотне двери и «уезжает» с
+    # распахнутой створкой (катаут st_util_door_open). Поэтому:
+    #  ЗАКРЫТАЯ дверь (ночь до utility_open) — LED на родном коробе арта
+    #  (центр X ~1734,399) pos [1727,392]; прячем при utility_open.
+    #  ОТКРЫТАЯ дверь — LED на уехавшем коробе. Ночь: центр X на распахнутой
+    #  створке промерен = (1721,367) -> pos [1714,360]. День: дверь всегда
+    #  открыта (power_on=>utility_open), короб представлен настенной сиреной
+    #  st_siren_day, LED на её куполе pos_day [1744,230] (как в р.11).
+    # Состояние on/off — прежний флаг alarm_off (у обеих пар одинаково).
     CO("cutouts/st_led_alarm_on.png", [1727, 392], 0.24, z=25,
-       hide_on=["alarm_off"], pos_day=[1744, 230]),
+       hide_on=["alarm_off", "utility_open"]),
     CO("cutouts/st_led_alarm_off.png", [1727, 392], 0.24, z=25,
-       show_on=["alarm_off"], pos_day=[1744, 230]),
+       show_on=["alarm_off"], hide_on=["utility_open"]),
+    CO("cutouts/st_led_alarm_on.png", [1714, 360], 0.24, z=25,
+       show_on=["utility_open"], hide_on=["alarm_off"], pos_day=[1744, 230]),
+    CO("cutouts/st_led_alarm_off.png", [1714, 360], 0.24, z=25,
+       show_on=["utility_open", "alarm_off"], pos_day=[1744, 230]),
     CO("cutouts/st_led_reader_off.png", [1628, 350], 0.28, z=25,
        hide_on=["power_on"], pos_day=[1655, 357]),
     CO("cutouts/st_led_reader_red.png", [1627, 350], 0.28, z=25,

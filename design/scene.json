@@ -45,8 +45,8 @@
      "node": "reader_swipe",
      "name": "Считыватель",
      "rect_day": [
-      1650,
-      382,
+      1641,
+      322,
       44,
       80
      ]
@@ -721,11 +721,8 @@
      "scale": 0.24,
      "z": 25,
      "hide_on": [
-      "alarm_off"
-     ],
-     "pos_day": [
-      1744,
-      230
+      "alarm_off",
+      "utility_open"
      ]
     },
     {
@@ -737,6 +734,41 @@
      "scale": 0.24,
      "z": 25,
      "show_on": [
+      "alarm_off"
+     ],
+     "hide_on": [
+      "utility_open"
+     ]
+    },
+    {
+     "img": "cutouts/st_led_alarm_on.png",
+     "pos": [
+      1714,
+      360
+     ],
+     "scale": 0.24,
+     "z": 25,
+     "show_on": [
+      "utility_open"
+     ],
+     "hide_on": [
+      "alarm_off"
+     ],
+     "pos_day": [
+      1744,
+      230
+     ]
+    },
+    {
+     "img": "cutouts/st_led_alarm_off.png",
+     "pos": [
+      1714,
+      360
+     ],
+     "scale": 0.24,
+     "z": 25,
+     "show_on": [
+      "utility_open",
       "alarm_off"
      ],
      "pos_day": [
