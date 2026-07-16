@@ -9,6 +9,7 @@ local S, P, T, ST
 local letter = {sx = 1, sy = 1, ox = 0, oy = 0}
 local AUTOPLAY = nil
 local HEADLESS = false   -- true в selftest/autoplay: там нужен os.exit, а не экран ошибки
+local cur_cursor = nil   -- (аудит F10) setCursor только при смене
 
 local function readfile(p)
   local data = love.filesystem.read(p)
@@ -118,9 +119,14 @@ end
 
 -- ---------- load ----------
 function love.load(args)
-  S = json.decode(readfile("design/scene.json"))
-  P = json.decode(readfile("design/puzzles.json"))
-  T = json.decode(readfile("design/texts.json"))
+  local function load_json(path)   -- (аудит F14) внятная ошибка при повреждённых данных
+    local ok, v = pcall(json.decode, readfile(path))
+    if not ok then error("повреждён файл данных " .. path .. ": " .. tostring(v)) end
+    return v
+  end
+  S = load_json("design/scene.json")
+  P = load_json("design/puzzles.json")
+  T = load_json("design/texts.json")
 
   local mode = nil
   for i, a in ipairs(args or {}) do
@@ -208,13 +214,14 @@ function love.update(dt)
   ui.update(dt)
   local ap = package.loaded["src.autoplay"]
   if ap and ap.active then ap.update(dt) end
+  local want = "normal"
   if not ui.in_menu() and not ui.dialog_active() and not ui.widget_kind() then
     local mx, my = to_world(love.mouse.getPosition())
     local h = scenes.hit(mx, my)
-    local kind = h and (h.cursor or "act") or "normal"
-    if ui.cursors[kind] then love.mouse.setCursor(ui.cursors[kind]) end
-  elseif ui.cursors then
-    love.mouse.setCursor(ui.cursors.normal)
+    want = h and (h.cursor or "act") or "normal"
+  end
+  if want ~= cur_cursor and ui.cursors and ui.cursors[want] then
+    love.mouse.setCursor(ui.cursors[want]); cur_cursor = want   -- (аудит F10) только при смене
   end
 end
 

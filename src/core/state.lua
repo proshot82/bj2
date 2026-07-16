@@ -39,6 +39,7 @@ end
 
 function M:need_ok(need)
   -- need: item или flag (в puzzles needs без префиксов)
+  if need:find(":", 1, true) then return self:has_flag(need) end   -- (аудит F12) префиксы done:/item:/read:
   if self.items_set[need] then return self.inv[need] == true end
   return self.flags[need] == true
 end

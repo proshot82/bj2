@@ -5,7 +5,7 @@ local json = require("src.json")
 local utf8 = require("utf8")
 
 local T, P, ST, SC, IMG, AUD, F
-local settings = {music = true, sound = true, fullscreen = false, noshake = false}
+local settings = {music = true, sound = true, fullscreen = false, noshake = false, fasttext = false}
 local savefile = "save_bj2.json"
 
 -- палитра
@@ -28,6 +28,7 @@ local hint = {last = -1e9, topic_idx = {}}
 local toast = nil
 local idle_timer = 0
 local shake_seed = 0
+local last_autosave = -1e9   -- (аудит F06) троттлинг автосейва
 local victory_stage = nil   -- объявлен выше менеджера музыки/стингеров
 
 ui.autoplay_hooks = {}    -- заполняет autoplay
@@ -35,6 +36,8 @@ ui.autoplay_hooks = {}    -- заполняет autoplay
 function ui.init(texts, puzzles, state, scenes_mod, images, audio, fonts)
   T, P, ST, SC, IMG, AUD, F = texts, puzzles, state, scenes_mod, images, audio, fonts
   SC.set_fonts(fonts)
+  ui.load_settings()                                    -- (аудит F09) отдельный settings-файл
+  love.window.setFullscreen(settings.fullscreen or false)
 end
 
 function ui.state() return {dlg = dlg, widget = widget, reader = reader,
@@ -181,6 +184,7 @@ local function dlg_update(dt)
   if not cur then return end
   local full = utf8.len(cur.t)
   if dlg.shown < full then
+    if settings.fasttext then dlg.shown = full; dlg.t = full; return end   -- (аудит U03) мгновенный текст
     dlg.t = dlg.t + dt * 40
     local new = math.min(full, math.floor(dlg.t))
     if new > dlg.shown then
@@ -232,7 +236,7 @@ local function dlg_draw()
   lg.setColor(C.panel)
   lg.rectangle("fill", px, py, 268, 280, 10, 10)
   lg.setColor(1, 1, 1)
-  lg.draw(port, px + 6, py + 6, 0, 0.5, 0.5)
+  if port then lg.draw(port, px + 6, py + 6, 0, 0.5, 0.5) end   -- (аудит F11) не падать на отсутствующем портрете
   if (ST.flags.crown or ST.inv.crown) and cur.s == "lap" then
     lg.draw(IMG["portraits/port_crown_overlay.png"], px + 128, py + 22,
       -0.09, 0.36, 0.36, 261, 256)
@@ -691,6 +695,20 @@ function ui.load_save()
   return true
 end
 
+-- (аудит F09) настройки персистятся отдельно от прогресса (settings-файл)
+local settings_file = "settings_bj2.json"
+function ui.save_settings()
+  atomic_write(settings_file, json.encode(settings))
+end
+function ui.load_settings()
+  local s = love.filesystem.read(settings_file)
+  if not s then return end
+  local ok, t = pcall(json.decode, s)
+  if ok and type(t) == "table" then
+    for k, v in pairs(t) do if settings[k] ~= nil then settings[k] = v end end
+  end
+end
+
 -- ================= toasts (взятие предметов) =================
 function ui.toast(txt)
   toast = {t = txt, until_t = SC.time() + 2.2}
@@ -712,6 +730,10 @@ end
 -- ================= after_fire: эффекты узлов =================
 function ui.after_fire(id)
   idle_timer = 0
+  -- (аудит F06) прогресс переживает вылет: автосейв после значимого узла (троттлинг 3с)
+  if not ui.in_menu() and SC.time() - last_autosave > 3 then
+    last_autosave = SC.time(); ui.save()
+  end
   local sfx = {
     take_ruler = "pickup", take_handle = "pickup", take_pointer = "pickup",
     take_net = "pickup", take_key_toy = "pickup", take_wrench = "pickup",
@@ -1096,9 +1118,10 @@ local function menu_draw()
       end
     else
       local opts = {{"music", T.ui.music}, {"sound", T.ui.sound},
-                    {"fullscreen", T.ui.fullscreen}, {"noshake", T.ui.noshake}}
+                    {"fullscreen", T.ui.fullscreen}, {"noshake", T.ui.noshake},
+                    {"fasttext", T.ui.fasttext or "Быстрый текст"}}
       for i, o in ipairs(opts) do
-        local by = 350 + (i - 1) * 80
+        local by = 350 + (i - 1) * 68
         title_btns[#title_btns + 1] = {id = "opt_" .. o[1], x = 720, y = by,
                                         w = 480, h = 60}
         lg.setColor(C.text)
@@ -1138,6 +1161,7 @@ local function menu_click(x, y)
         local k = b.id:sub(5)
         settings[k] = not settings[k]
         if k == "fullscreen" then love.window.setFullscreen(settings.fullscreen) end
+        ui.save_settings()                              -- (аудит F09) сохранить настройку сразу
       end
       return true
     end
@@ -1214,12 +1238,32 @@ local function held_item_draw()
   lg.setColor(1, 1, 1, 1)
 end
 
+-- (аудит U01) имя объекта под курсором (узнаваемость p&c)
+local function hover_name_draw()
+  if menu or reader or widget or victory_stage or ui.dialog_active() then return end
+  local mx, my = SC.mouse_world()
+  local h = SC.hit(mx, my)
+  if not h or not h.name then return end
+  lg.setFont(F.small)
+  local w = F.small:getWidth(h.name) + 24
+  local x = math.max(4, math.min(mx + 22, 1920 - w - 4))
+  local y = math.max(4, my - 40)
+  lg.setColor(C.panel)
+  lg.rectangle("fill", x, y, w, 32, 6, 6)
+  lg.setColor(C.panel_line)
+  lg.rectangle("line", x, y, w, 32, 6, 6)
+  lg.setColor(C.text)
+  lg.print(h.name, x + 12, y + 4)
+  lg.setColor(1, 1, 1)
+end
+
 function ui.draw_overlays()
   if not (victory_stage and not ui.dialog_active()) then
     goals_draw()
     inv_draw()
     hud_draw()
     held_item_draw()
+    hover_name_draw()
   end
   widget_draw()
   reader_draw()

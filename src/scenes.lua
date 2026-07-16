@@ -5,6 +5,8 @@ local lg = love.graphics
 local S, ST, IMG   -- scene.json, state, кэш картинок
 local view = {kind = "room", room = "A", zoom = nil}
 local t_global = 0
+local frame_no = 0
+local hs_cache = {key = nil, list = nil}   -- (аудит F10) кеш хотспотов на кадр
 local snow = nil
 local LB = {sx = 1, sy = 1, ox = 0, oy = 0}   -- letterbox из main.lua
 
@@ -91,6 +93,7 @@ end
 
 function scenes.update(dt)
   t_global = t_global + dt
+  frame_no = frame_no + 1   -- (аудит F10) инвалидация кеша хотспотов по кадру
   for _, f in ipairs(snow) do
     f.y = f.y + f.v * dt
     f.x = f.x + math.sin(t_global * 0.8 + f.ph) * 8 * dt
@@ -191,6 +194,8 @@ function scenes.draw(highlight)
 end
 
 function scenes.active_hotspots()
+  local ckey = frame_no .. "|" .. view.kind .. "|" .. tostring(view.room) .. "|" .. tostring(view.zoom)
+  if hs_cache.key == ckey then return hs_cache.list end   -- (аудит F10) переиспользуем в пределах кадра
   local cont = cur_container()
   local out = {}
   for _, h in ipairs(cont.hotspots or {}) do
@@ -223,6 +228,7 @@ function scenes.active_hotspots()
     if sa ~= sb then return sa < sb end
     return a._seq < b._seq
   end)
+  hs_cache.key = ckey; hs_cache.list = out   -- (аудит F10)
   return out
 end
 
@@ -251,6 +257,19 @@ end
 -- ---------- движковые элементы зумов ----------
 local FontS
 function scenes.set_fonts(fonts) FontS = fonts end
+
+-- (аудит U02) нецветовой индикатор статуса поверх LED: галочка (ok) / крест
+local function state_glyph(cx, cy, ok, r)
+  lg.setLineWidth(3)
+  lg.setColor(0.05, 0.05, 0.06, 0.92)
+  if ok then
+    lg.line(cx - r, cy + r * 0.1, cx - r * 0.25, cy + r * 0.75, cx + r, cy - r * 0.75)
+  else
+    lg.line(cx - r * 0.7, cy - r * 0.7, cx + r * 0.7, cy + r * 0.7)
+    lg.line(cx - r * 0.7, cy + r * 0.7, cx + r * 0.7, cy - r * 0.7)
+  end
+  lg.setLineWidth(1); lg.setColor(1, 1, 1, 1)
+end
 
 function scenes.draw_zoom_engine(zid)
   local z = S.zooms[zid]
@@ -284,12 +303,15 @@ function scenes.draw_zoom_engine(zid)
     lg.setColor(col[1], col[2], col[3],
       0.75 + 0.25 * math.sin(t_global * 3))
     lg.circle("fill", led[1], led[2], 9)
+    if ST.flags.reader_green then state_glyph(led[1], led[2], true, 5)   -- (аудит U02)
+    elseif ST.flags.power_on then state_glyph(led[1], led[2], false, 5) end
     lg.setColor(1, 1, 1, 1)
   elseif zid == "zoom_alarm" then
     local led = z.led.alarm
     if ST.flags.alarm_off then lg.setColor(0.3, 0.9, 0.4, 0.9)
     else lg.setColor(1, 0.2, 0.15, 0.6 + 0.4 * math.sin(t_global * 4.5)) end
     lg.circle("fill", led[1], led[2], 13)
+    state_glyph(led[1], led[2], ST.flags.alarm_off, 7)   -- (аудит U02)
     lg.setColor(1, 1, 1, 1)
   elseif zid == "zoom_panel" then
     lg.setFont(FontS.tiny)
