@@ -322,9 +322,7 @@
    ],
    "mand": true,
    "lock": null,
-   "consumes": [
-    "handle"
-   ],
+   "consumes": [],
    "herring": false,
    "secret": false
   },

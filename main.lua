@@ -8,6 +8,7 @@ local IMG, AUD, F = {}, {}, {}
 local S, P, T, ST
 local letter = {sx = 1, sy = 1, ox = 0, oy = 0}
 local AUTOPLAY = nil
+local HEADLESS = false   -- true в selftest/autoplay: там нужен os.exit, а не экран ошибки
 
 local function readfile(p)
   local data = love.filesystem.read(p)
@@ -72,6 +73,7 @@ local MUSIC_LIST = {
 
 -- ---------- selftest ----------
 local function selftest()
+  HEADLESS = true
   local ok = true
   local function fail(msg) print("SELFTEST FAIL: " .. msg); ok = false end
   for p in pairs(gfx_manifest()) do
@@ -176,6 +178,7 @@ function love.load(args)
   love.graphics.setBackgroundColor(0, 0, 0)
 
   if mode == "autoplay" then
+    HEADLESS = true
     local ap = require("src.autoplay")
     ap.start(AUTOPLAY, {ui = ui, scenes = scenes, state = ST,
                         texts = T, puzzles = P, scene = S})
@@ -252,7 +255,31 @@ function love.quit()
 end
 
 function love.errorhandler(msg)
-  io.stderr:write("FATAL: " .. tostring(msg) .. "\n" ..
-    debug.traceback() .. "\n")
-  os.exit(1)
+  -- (аудит F03) headless (selftest/autoplay) — прежний os.exit; иначе экран ошибки
+  -- + запись crash.log в каталог сохранений (stderr на Windows-GUI не виден).
+  local report = "FATAL: " .. tostring(msg) .. "\n" .. debug.traceback() .. "\n"
+  io.stderr:write(report)
+  pcall(function()
+    love.filesystem.append("crash.log", os.date("%Y-%m-%d %H:%M:%S ") .. report)
+  end)
+  if HEADLESS then os.exit(1) end
+  if love.audio then pcall(love.audio.stop) end
+  local ok_font, font = pcall(function() return love.graphics.newFont(18) end)
+  return function()
+    love.event.pump()
+    for e in love.event.poll() do
+      if e == "quit" or e == "keypressed" or e == "mousepressed" then return 1 end
+    end
+    love.graphics.origin()
+    love.graphics.setScissor()
+    love.graphics.clear(0.10, 0.10, 0.13)
+    love.graphics.setColor(1, 1, 1)
+    if ok_font and font then love.graphics.setFont(font) end
+    love.graphics.printf(
+      "Что-то сломалось.\nПодробности сохранены в crash.log (папка сохранений).\n\n"
+      .. tostring(msg) .. "\n\n[любая клавиша или закрыть окно] — выход",
+      80, 80, love.graphics.getWidth() - 160)
+    love.graphics.present()
+    love.timer.sleep(0.05)
+  end
 end

@@ -646,18 +646,43 @@ function ui.hint()
 end
 
 -- ================= сейвы =================
+-- (аудит F02) Атомарная запись: во временный файл -> подмена через ОС; прежний
+-- сейв уходит в .bak. Прерванная запись (вылет/питание/диск) не оставит усечённый
+-- рабочий сейв. os.rename в пределах save-каталога атомарен (один том).
+local function atomic_write(path, data)
+  if not love.filesystem.write(path .. ".tmp", data) then return false end
+  local dir = love.filesystem.getSaveDirectory()
+  os.remove(dir .. "/" .. path .. ".bak")
+  os.rename(dir .. "/" .. path, dir .. "/" .. path .. ".bak")  -- прежний -> .bak (может отсутствовать)
+  return os.rename(dir .. "/" .. path .. ".tmp", dir .. "/" .. path)
+end
+
 function ui.save()
-  local blob = {state = ST:serialize(), view = SC.view(),
+  local blob = {version = 3, state = ST:serialize(), view = SC.view(),
                 settings = settings, hint_idx = hint.topic_idx}
-  love.filesystem.write(savefile, json.encode(blob))
+  atomic_write(savefile, json.encode(blob))
 end
 function ui.has_save() return love.filesystem.getInfo(savefile) ~= nil end
+
+-- (аудит F01) Защищённое чтение: битый/частичный JSON или отсутствие .state не
+-- роняют игру; при порче рабочего файла пробуем .bak.
+local function read_save(path)
+  local s = love.filesystem.read(path)
+  if not s then return nil end
+  local ok, blob = pcall(json.decode, s)
+  if not ok or type(blob) ~= "table" or type(blob.state) ~= "table" then return nil end
+  return blob
+end
+
 function ui.load_save()
-  local s = love.filesystem.read(savefile)
-  if not s then return false end
-  local blob = json.decode(s)
+  local blob = read_save(savefile) or read_save(savefile .. ".bak")
+  if not blob then
+    ui.toast("Сейв повреждён — не загрузился")
+    return false
+  end
   ST:deserialize(blob.state)
   for k, v in pairs(blob.settings or {}) do settings[k] = v end
+  love.window.setFullscreen(settings.fullscreen or false)   -- (аудит F04) применить оконный режим
   hint.topic_idx = blob.hint_idx or {}
   local v = blob.view
   if v and v.kind == "zoom" and v.zoom then
@@ -1098,7 +1123,8 @@ local function menu_click(x, y)
       if b.id == "start" then
         menu = nil; ui.new_game()
       elseif b.id == "cont" then
-        menu = nil; ui.load_save(); mus_boot()
+        -- (аудит F01) на битом сейве остаёмся на титуле, а не в пустом состоянии
+        if ui.load_save() then menu = nil; mus_boot() end
       elseif b.id == "settings" then
         settings_from = menu; menu = "settings"
       elseif b.id == "quit" then love.event.quit()

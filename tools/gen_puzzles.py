@@ -114,8 +114,9 @@ node("pry_drawer", "D0", "A", "action", ["ruler"], ["drawer_pried"], True)
 node("take_handle", "D0", "A", "pickup", ["drawer_pried"], ["handle"], True)
 node("search_drawer_again", "D0", "A", "pickup",
      ["drawer_pried", "handle"], ["relic_yatagan"], False, secret=True)
-node("open_utility", "D0", "A", "action", ["handle"], ["utility_open"], True,
-     consumes=["handle"])
+# (раунд 13 / аудит F05) handle НЕ потребляется: иначе открытие щитовой навсегда
+# лишает секретной реликвии relic_yatagan (search_drawer_again тоже требует handle).
+node("open_utility", "D0", "A", "action", ["handle"], ["utility_open"], True)
 
 # --- D1: пропуск (A<->B через вентиляцию)
 node("see_net", "D1", "B", "action", ["utility_open"], ["seen_net"], True)

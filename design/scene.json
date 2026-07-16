@@ -27,8 +27,8 @@
      "goto": "zoom_alarm",
      "name": "Сигнализация",
      "rect_day": [
-      1716,
-      224,
+      1712,
+      370,
       50,
       50
      ]
@@ -703,16 +703,6 @@
      "img_day": "cutouts/st_garland_on_day.png"
     },
     {
-     "img": "cutouts/st_siren_day.png",
-     "pos": [
-      1719,
-      230
-     ],
-     "scale": 0.07,
-     "z": 16,
-     "day_only": true
-    },
-    {
      "img": "cutouts/st_led_alarm_on.png",
      "pos": [
       1727,
@@ -755,8 +745,8 @@
       "alarm_off"
      ],
      "pos_day": [
-      1744,
-      230
+      1730,
+      388
      ]
     },
     {
@@ -772,8 +762,8 @@
       "alarm_off"
      ],
      "pos_day": [
-      1744,
-      230
+      1730,
+      388
      ]
     },
     {
