@@ -111,7 +111,19 @@ local function mus_update(dt)
   mus.gain = approach(mus.gain, settings.music and 1 or 0, dt, GATE_FADE)
   if not mus.prev then mus_sync_flags() end
 
-  -- кроссфейд фонового трека между двумя каналами
+  -- «Саундтрек тряски» (слой nervous) и обычный фон ВЗАИМОИСКЛЮЧЕНЫ.
+  -- Правило (запрос автора): nervous звучит ⟺ тряска РЕАЛЬНО идёт — включена
+  -- в настройках (not noshake) И не унята внутриигрово (not calm_down), в самой
+  -- игре (не титул/не победа). Как только тряску унял (валидол+кофе → calm_down)
+  -- или выключил в настройках — звучит обычный фон. То есть аудио точно повторяет
+  -- визуальную тряску (см. shake_amp: тоже 0 при noshake или calm_down).
+  -- Две дорожки одновременно НИКОГДА: входящая поднимается только когда исходящая
+  -- полностью стихла (порог 0.03) — наложения нет даже на переходе («вдох» тишины).
+  local nervous = (not settings.noshake) and not ST.flags.calm_down
+                  and menu ~= "title" and not victory_stage
+
+  -- выбор слота фона идёт всегда, даже когда фон приглушён из-за nervous —
+  -- чтобы при возврате сразу звучала музыка текущей комнаты
   local want = mus_target_bgm()
   local cs = mus.slots[mus.cur]
   if mus.cur == 0 or (cs and cs.name ~= want) then
@@ -121,18 +133,27 @@ local function mus_update(dt)
     ns.name, ns.vol, ns.src = want, 0, AUD[want]
     mus.cur = ni
   end
+
+  -- взаимный гейт: уровни исходящих дорожек (порог тишины 0.03)
+  local bgm_v = math.max(mus.slots[1].vol, mus.slots[2].vol)
+  local ln_q = mus.ln_vol < 0.03                    -- nervous уже стих?
+  local bgm_q = bgm_v < 0.03 and mus.lg_vol < 0.03  -- фон и гирлянда стихли?
+
+  -- обычный фон звучит, только если nervous не нужен И уже стих
+  local bgm_on = (not nervous) and ln_q
   for i, s in ipairs(mus.slots) do
-    s.vol = approach(s.vol, (i == mus.cur) and 1 or 0, dt, BGM_FADE)
+    s.vol = approach(s.vol, (i == mus.cur and bgm_on) and 1 or 0, dt, BGM_FADE)
     mus_apply(s.src, s.vol * mus.gain * MUS_MASTER)
   end
 
-  -- слой «нервы»: с начала игры до calm_down; на титуле/победе молчит
-  local ln_on = menu ~= "title" and not victory_stage and not ST.flags.calm_down
+  -- слой «нервы» звучит, только если нужен И фон уже стих
+  local ln_on = nervous and bgm_q
   mus.ln_vol = approach(mus.ln_vol, ln_on and 1 or 0, dt, LAYER_FADE)
   mus_apply(AUD.layer_nervous, mus.ln_vol * mus.gain * MUS_MASTER)
 
-  -- слой «гирлянда»: при garland_on
+  -- слой «гирлянда»: festive-акцент только поверх обычного фона (не поверх nervous)
   local lg_on = ST.flags.garland_on and menu ~= "title" and not victory_stage
+                and not nervous and ln_q
   mus.lg_vol = approach(mus.lg_vol, lg_on and 1 or 0, dt, LAYER_FADE)
   mus_apply(AUD.layer_garland, mus.lg_vol * mus.gain * MUS_MASTER)
 
@@ -148,14 +169,19 @@ end
 local function shake_amp()
   if settings.noshake then return 0 end
   if ST.flags.calm_down then return 0 end
-  if ST.inv.coffee or ST.inv.validol then return 0.9 end
-  return 2.6
+  if ST.inv.coffee or ST.inv.validol then return 2.5 end  -- унял чуть — дрожь спадает
+  return 6.0                                               -- на нервах — заметно трясёт (плашки)
 end
 local function shk(k)
   local a = shake_amp()
   if a == 0 then return 0, 0 end
-  local t = SC.time() * 13 + k * 7.3
-  return math.sin(t) * a, math.cos(t * 1.31) * a * 0.7
+  -- нервная дрожь плашки: сумма двух частот (быстрая тремор-составляющая),
+  -- фаза разнесена по k, чтобы плашки не «ехали» синхронно. Смещение — только
+  -- в отрисовке плашек; хит-тесты плашек статичны, целимся в центр — клик не рвётся.
+  local t = SC.time()
+  local ox = (math.sin(t * 17 + k * 7.3) * 0.7 + math.sin(t * 31 + k * 2.1) * 0.3) * a
+  local oy = (math.cos(t * 15 + k * 5.1) * 0.7 + math.cos(t * 27 + k * 1.7) * 0.3) * a * 0.85
+  return ox, oy
 end
 
 -- ================= диалог =================
@@ -1326,6 +1352,36 @@ function ui.use_item_on(item, h)
   push_lines({T.item_wrong[love.math.random(#T.item_wrong)]})
 end
 
+-- (clarity р.16) Почему выходная дверь не открывается: перечисляем незакрытые
+-- требования узла door_open живым языком Лапидуса. Спойлеров нет — только «что
+-- ещё висит». reader_green раскрываем на под-причины: нет света / пропуск не
+-- оживлён / осталось приложить пропуск к считывателю.
+local DOOR_REASON = {
+  surveyed  = {s = "lap", e = "neutral", t = "Я тут ещё толком не осмотрелся. Сперва — глаза разуть."},
+  alarm_off = {s = "lap", e = "worried", t = "Сигналка ещё под током. С ней дверь злить не будем."},
+  bolt_free = {s = "lap", e = "tired",   t = "Засов держит намертво. Сам себя он не отпустит."},
+  calm_down = {s = "lap", e = "panic",   t = "Руки ходуном — какой тут замок. Сперва надо унять трясучку."},
+}
+local function door_reason_lines()
+  local out = {}
+  for _, need in ipairs(ST.nodes.door_open.needs) do
+    if not ST:need_ok(need) then
+      if need == "reader_green" then
+        if not ST.flags.power_on then
+          out[#out + 1] = {s = "lap", e = "tired", t = "Считыватель у двери мёртв — на нём нет питания. Света бы сюда."}
+        elseif not ST.flags.card_active then
+          out[#out + 1] = {s = "lap", e = "tired", t = "Считывателю нечего читать: пропуск ещё не оживлён."}
+        else
+          out[#out + 1] = {s = "lap", e = "neutral", t = "Пропуск готов, свет есть — осталось приложить его к считывателю у двери."}
+        end
+      elseif DOOR_REASON[need] then
+        out[#out + 1] = DOOR_REASON[need]
+      end
+    end
+  end
+  return out
+end
+
 -- Клик мира: хотспот → действие
 local function world_click(x, y, btn)
   local h = SC.hit(x, y)
@@ -1405,6 +1461,14 @@ local function world_click(x, y, btn)
     local ok, why = ST:can_fire(h.node)
     if why == "already" then say_node(h.node, "already"); return end
     if not ok then
+      if h.node == "door_open" then   -- (clarity р.16) внятный список незакрытого
+        local rs = door_reason_lines()
+        if #rs > 0 then
+          push_lines({{s = "lap", e = "tired", t = "Дверь не поддаётся. Гляну, что ещё висит:"}})
+          push_lines(rs)
+          return
+        end
+      end
       say_node(h.node, "fail")
       if not T.nodes[h.node].fail then
         push_lines({{s = "lap", e = "neutral", t = "Пока не выходит."}})
