@@ -5,8 +5,18 @@ gen_puzzles.py — «Латунный янычар 2.0», Фаза 1.
 Строит design/puzzles.json: граф узлов D0–D6, замки, ответы (генерируются
 здесь и живут ТОЛЬКО в puzzles.json / WALKTHROUGH_SPOILERS.md), документы,
 токены улик. Ответы в stdout НЕ печатаются.
+
+ОСТОРОЖНО (аудит К4). Ответы здесь СЛУЧАЙНЫЕ. Голый запуск поверх готового
+puzzles.json сменил бы коды, глиф-карту и порядок стенда — и с игрой молча
+разошлись бы документы, walkthrough, скриншоты и чужие сохранения. Поэтому
+перезапись без ключей запрещена, а штатный путь правки — `--pin`:
+
+  gen_puzzles.py --pin                    структура заново, ответы прежние
+  gen_puzzles.py --new-answers --force    новые ответы, осознанно
+  gen_puzzles.py --new-answers --seed N   новые ответы от фиксированного сида
+  gen_puzzles.py --pin --out PATH         песочница, боевой файл не тронут
 """
-import json, secrets, sys, os
+import argparse, json, secrets, random, shutil, sys, os, time
 
 R = secrets.SystemRandom()
 
@@ -17,6 +27,9 @@ GLYPH_RU = {"fez": "феска", "yatagan": "ятаган", "crescent": "пол�
             "star": "звезда", "drum": "барабан", "horseshoe": "подкова",
             "teapot": "чайник", "key": "ключ", "fish": "рыба",
             "snowflake": "снежинка"}
+
+# печатная версия стенда отличается от верной ровно одним перевёрнутым шагом
+WRONGMAP = {"P+": "P-", "K1+": "K1-", "S-": "S+", "K2+": "K2-"}
 
 def gen_answers():
     a = {}
@@ -51,9 +64,8 @@ def gen_answers():
     R.shuffle(base)
     # рукописная правка: печатная версия имеет ОДИН неверный шаг
     idx = R.randrange(4)
-    wrongmap = {"P+": "P-", "K1+": "K1-", "S-": "S+", "K2+": "K2-"}
     printed = list(base)
-    printed[idx] = wrongmap[base[idx]]
+    printed[idx] = WRONGMAP[base[idx]]
     pumps = R.randrange(4, 8)
     a["bench_seq"] = base + [f"PUMP{pumps}"]
     a["bench_printed"] = printed
@@ -61,7 +73,117 @@ def gen_answers():
     a["bench_pumps"] = pumps
     return a
 
-ANS = gen_answers()
+# ------------------------------------------------ защита ответов (аудит К4)
+DEFAULT_OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           "..", "design", "puzzles.json")
+
+# Поля, из которых собирается ПОЛНЫЙ набор ответов уже готового файла.
+PIN_FROM_ANSWERS = ["pc_pin", "glyph_map", "pin_glyphs", "ira_code",
+                    "alarm_code", "bench_seq", "bench_fix_idx", "bench_pumps"]
+PIN_FROM_TOKENS  = ["about_year", "alarm_day", "card_number", "gena_dept", "depts"]
+
+def die(msg):
+    """Отказ: внятная причина в stderr и ненулевой код возврата."""
+    print(msg, file=sys.stderr)
+    sys.exit(2)
+
+def pin_answers(path):
+    """Достаёт прежние ответы из существующего puzzles.json.
+    Значения не печатаются. Нехватка любого поля — отказ, а не тихая замена
+    случайным: молчаливая подмена ровно та беда, от которой мы защищаемся."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            cur = json.load(f)
+    except OSError as e:
+        die(f"ОТКАЗ: неоткуда взять прежние ответы — {path} не читается ({e}).")
+    except ValueError as e:
+        die(f"ОТКАЗ: {path} повреждён и разобрать его не удалось ({e}).")
+    A = cur.get("answers") or {}
+    T = cur.get("tokens") or {}
+    miss = ([f"answers/{k}" for k in PIN_FROM_ANSWERS if k not in A] +
+            [f"tokens/{k}"  for k in PIN_FROM_TOKENS  if k not in T])
+    if miss:
+        die(f"ОТКАЗ: в {path} нет полей {', '.join(miss)} — прежние ответы "
+            "восстановить нечем. Файл от другой версии схемы?")
+    a = {k: A[k] for k in PIN_FROM_ANSWERS}
+    a.update({k: T[k] for k in PIN_FROM_TOKENS})
+    # печатный порядок стенда однозначно выводится из верного и номера правки
+    base, idx = list(a["bench_seq"])[:4], a["bench_fix_idx"]
+    if len(base) != 4 or not (0 <= idx < 4) or base[idx] not in WRONGMAP:
+        die(f"ОТКАЗ: в {path} последовательность стенда несовместима с текущим "
+            "генератором — перегенерация с прежними ответами невозможна.")
+    printed = list(base)
+    printed[idx] = WRONGMAP[base[idx]]
+    a["bench_printed"] = printed
+    return a
+
+def cli():
+    """Разбирает ключи и решает судьбу ответов ДО того, как что-то построено."""
+    ap = argparse.ArgumentParser(
+        description="Сборка design/puzzles.json. Ответы случайны, поэтому "
+                    "перезапись готового файла без явного ключа запрещена.")
+    ap.add_argument("--pin", action="store_true",
+                    help="перестроить структуру, ответы взять из готового файла "
+                         "(штатный путь правки)")
+    ap.add_argument("--pin-from", metavar="PATH",
+                    help="откуда брать прежние ответы "
+                         "(по умолчанию — боевой design/puzzles.json)")
+    ap.add_argument("--new-answers", action="store_true",
+                    help="сгенерировать НОВЫЕ ответы; поверх готового файла "
+                         "требует ещё и --force")
+    ap.add_argument("--seed", type=int, metavar="N",
+                    help="фиксированный сид для --new-answers (воспроизводимо)")
+    ap.add_argument("--force", action="store_true",
+                    help="разрешить перезапись готового файла новыми ответами")
+    ap.add_argument("--out", metavar="PATH", default=DEFAULT_OUT,
+                    help="куда писать (по умолчанию design/puzzles.json)")
+    ap.add_argument("--no-backup", action="store_true",
+                    help="не делать резервную копию перед перезаписью")
+    o = ap.parse_args()
+    global ARGS_NO_BACKUP
+    ARGS_NO_BACKUP = o.no_backup
+
+    out = os.path.abspath(o.out)
+    # ответы приколачиваются от боевого файла, а писать можно куда угодно:
+    # «--pin --out /tmp/проба.json» обязан работать без лишних ключей
+    src = os.path.abspath(o.pin_from) if o.pin_from else os.path.abspath(DEFAULT_OUT)
+    exists = os.path.exists(out)
+
+    if o.pin and o.new_answers:
+        die("ОТКАЗ: --pin и --new-answers взаимоисключающи.")
+    if o.seed is not None and not o.new_answers:
+        die("ОТКАЗ: --seed управляет генерацией новых ответов, поэтому имеет "
+            "смысл только вместе с --new-answers.")
+    if o.pin_from and not o.pin:
+        die("ОТКАЗ: --pin-from имеет смысл только вместе с --pin.")
+
+    if o.pin:
+        if not os.path.exists(src):
+            die(f"ОТКАЗ: --pin просит прежние ответы из {src}, а его нет.")
+        return out, pin_answers(src), "прежние ответы (--pin)"
+
+    if exists and not o.new_answers:
+        die(f"ОТКАЗ: {out} уже существует, а этот запуск сгенерировал бы НОВЫЕ "
+            "случайные ответы.\n"
+            "       Сменились бы коды, глиф-карта и порядок стенда — и с игрой "
+            "молча разошлись бы\n"
+            "       документы, walkthrough, скриншоты гаунтлета и чужие "
+            "сохранения.\n"
+            "  Правите генератор:   gen_puzzles.py --pin\n"
+            "  Нужны новые ответы:  gen_puzzles.py --new-answers --force\n"
+            "  Проба на стороне:    gen_puzzles.py --pin --out /tmp/proba.json")
+    if exists and not o.force:
+        die(f"ОТКАЗ: --new-answers поверх существующего {out} требует ещё и "
+            "--force.\n       Прежние ответы будут потеряны безвозвратно.")
+
+    global R
+    if o.seed is not None:
+        R = random.Random(o.seed)          # значение сида в вывод не идёт
+        return out, None, "новые ответы от фиксированного сида"
+    return out, None, "новые случайные ответы"
+
+OUT, PINNED, MODE = cli()
+ANS = PINNED if PINNED is not None else gen_answers()
 
 VALVE_RU = {"P": "П", "K1": "К1", "K2": "К2", "S": "С"}
 def seq_ru(seq):
@@ -250,8 +372,11 @@ PUZ = {
     ],
 }
 
-out = os.path.join(os.path.dirname(__file__), "..", "design", "puzzles.json")
-with open(out, "w", encoding="utf-8") as f:
+if os.path.exists(OUT) and not ARGS_NO_BACKUP:
+    bak = f"{OUT}.bak-{time.strftime('%Y%m%d-%H%M%S')}"
+    shutil.copy2(OUT, bak)
+    print(f"резервная копия: {os.path.basename(bak)}")
+with open(OUT, "w", encoding="utf-8") as f:
     json.dump(PUZ, f, ensure_ascii=False, indent=1)
-print(f"puzzles.json записан: узлов {len(N)}, доков {len(DOCS)} "
-      f"(ответы сгенерированы, в консоль не выводятся)")
+print(f"puzzles.json записан: узлов {len(N)}, доков {len(DOCS)}; "
+      f"{MODE} (значения в консоль не выводятся)")
