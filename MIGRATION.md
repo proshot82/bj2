@@ -50,7 +50,7 @@ rm -rf ~/.local/share/love/BrassJanissary2     # чистый сейв
 python3 tools/gen_autoplay.py
 xvfb-run -a -s "-screen 0 1920x1080x24" love . --autoplay work/autoplay_full.json
 python3 tools/gates.py                         # пиксельные гейты по скринам
-luajit tools/fuzz_state.lua                    # 3×25000 + анти-софтлок
+luajit tools/fuzz_state.lua                    # 3×25000 + анти-софтлок + гейт покрытия веток
 luajit tools/trace_solver.lua && python3 tools/clue_audit.py
 python3 tools/gen_walkthrough.py               # спойлеры → docs/ (не в чат!)
 python3 tools/gen_verify_sheets.py             # verify-листы зон → смотреть глазами
