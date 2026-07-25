@@ -2,7 +2,16 @@
 package.path = package.path .. ";./?.lua"
 local json = require("src.json")
 local State = require("src.core.state")
-local function rf(p) local f=io.open(p,"rb");local d=f:read("*a");f:close();return d end
+-- (аудит С4) внятный отказ вместо «attempt to index a nil value»
+local function die(msg)
+  io.stderr:write("TRACE FAIL: " .. msg .. "\n")
+  os.exit(1)
+end
+local function rf(p)
+  local f = io.open(p, "rb")
+  if not f then die("не читается " .. p .. " — запускать из корня репозитория") end
+  local d = f:read("*a"); f:close(); return d
+end
 local P = json.decode(rf("design/puzzles.json"))
 local T = json.decode(rf("design/texts.json"))
 local items = {}
@@ -35,6 +44,18 @@ while not st.flags.victory do
   end
   snap(id)
 end
-local f = io.open("work/solver_trace.json", "wb")
-f:write(json.encode(trace)); f:close()
+-- (аудит С4) Каталог создаём сами и проверяем результат открытия. Раньше при
+-- отсутствии work/ скрипт падал на «attempt to index a nil value (local 'f')»,
+-- а следующий за ним clue_audit.py — питоновской трассировкой про ненайденный
+-- файл. Два невнятных падения подряд вместо одной понятной строки.
+local OUT = "work/solver_trace.json"
+os.execute("mkdir -p work")
+local f = io.open(OUT, "wb")
+if not f then
+  die("не открывается на запись " .. OUT ..
+      " — нет каталога work/ или нет прав; запускать из корня репозитория")
+end
+local ok, werr = f:write(json.encode(trace))
+if not ok then f:close(); die("не записался " .. OUT .. ": " .. tostring(werr)) end
+f:close()
 print("trace nodes:", #trace)

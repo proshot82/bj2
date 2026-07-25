@@ -16,7 +16,7 @@
 ## Запуск и тесты
 - `love .` · смок `love . --selftest` · гаунтлет `love . --autoplay work/autoplay_full.json`.
 - Headless: `xvfb-run -a -s "-screen 0 1920x1080x24" love . ...`; ускорение libfaketime: `FAKETIME="+0 x4" LD_PRELOAD=.../libfaketime.so.1 DONT_FAKE_MONOTONIC=0` (вотчдог 10 с сим-времени/шаг; x4–x5 безопасно).
-- **DoD-конвейер** (`MIGRATION.md §3`) целиком перед релизом: test_state → GATE1 → gen_scene+gen_texts → GATE2 → selftest → чистый сейв (`%APPDATA%\LOVE\BrassJanissary2` / `~/.local/share/love/BrassJanissary2`) → gen_autoplay → гаунтлет → gates.py → fuzz 3×25000 → trace_solver+clue_audit → gen_walkthrough → gen_verify_sheets (смотреть глазами) → смок 1536×864.
+- **DoD-конвейер** (`MIGRATION.md §3`) целиком перед релизом: test_state → GATE1 → gen_scene+gen_texts → GATE2 → selftest → чистый сейв (`%APPDATA%\LOVE\BrassJanissary2` / `~/.local/share/love/BrassJanissary2`) → gen_autoplay → гаунтлет → gates.py → fuzz 3×25000 → trace_solver+clue_audit → gen_walkthrough → gen_verify_sheets (смотреть глазами) → letterbox-смок (окно меняет сам сценарий: 1600×1000 / 1920×864 / 1500×900; ключом xvfb окно не ограничить) → `tools/test_negatives.py` (негативы; 18 кейсов, ≈2 мин, `--fast` без движка).
 - Галерея всех экранов: `tools/gen_gallery.py` → `work/gallery/` (49 кадров + контактные листы) — прогонять после визуальных правок, автор ревьюит по ней.
 - Сборка релиза: `docs/BUILDLOG.md` Фаза 6 — `work/game.love` (zip -9: main.lua conf.lua src assets design) → fuse с официальным love.exe 11.5 win64 → portable-пакет → `dist/...-win64-portable.zip` → **SHA-256** → wine-гаунтлет из кириллического пути (WINEPREFIX в $HOME, LANG=C.UTF-8).
 

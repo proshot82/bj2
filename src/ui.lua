@@ -185,8 +185,30 @@ local function shk(k)
 end
 
 -- ================= диалог =================
+-- (аудит К3) Реплика без speaker/emotion роняла отрисовку на конкатенации
+-- nil (порт, плашка имени) и на utf8.len(nil). Ловить это обязан GATE2 на
+-- сборке (см. tools/validate_scene.py), но рантайм не имеет права падать в
+-- Lua-ошибку у игрока: битая запись чинится дефолтом и пишется в stderr.
+-- Здоровый путь не трогаем — копия создаётся только у битой записи.
+local DEF_EMO = { lap = "neutral", anc = "calm" }
+local function fix_line(r)
+  if type(r) ~= "table" then
+    io.stderr:write("UI WARN: реплика не таблица (" .. type(r) .. ")\n")
+    return { s = "lap", e = DEF_EMO.lap, t = "…" }
+  end
+  if type(r.s) == "string" and type(r.e) == "string" and type(r.t) == "string"
+     and DEF_EMO[r.s] then return r end
+  local s = (type(r.s) == "string" and DEF_EMO[r.s]) and r.s or "lap"
+  local fixed = { s = s,
+                  e = (type(r.e) == "string") and r.e or DEF_EMO[s],
+                  t = (type(r.t) == "string") and r.t or "…" }
+  io.stderr:write(("UI WARN: битая реплика s=%s e=%s t=%s → %s/%s\n"):format(
+    tostring(r.s), tostring(r.e), type(r.t), fixed.s, fixed.e))
+  return fixed
+end
+
 local function push_lines(lines)
-  for _, r in ipairs(lines or {}) do dlg.queue[#dlg.queue + 1] = r end
+  for _, r in ipairs(lines or {}) do dlg.queue[#dlg.queue + 1] = fix_line(r) end
 end
 ui.say = push_lines
 
@@ -202,7 +224,20 @@ local function dlg_next()
 end
 
 function ui.dialog_active() return dlg.cur ~= nil or #dlg.queue > 0 end
-function ui.current_speaker() return dlg.cur and dlg.cur.s or nil end
+-- (аудит В4) спикер берётся из активной реплики, а если кадр обновления ещё
+-- не наступил — из головы очереди: утверждение не должно зависеть от того,
+-- успел ли пройти dlg_update между кликом и проверкой
+function ui.current_speaker()
+  if dlg.cur then return dlg.cur.s end
+  local q = dlg.queue[1]
+  return q and q.s or nil
+end
+-- (аудит К1/В4) текст текущей реплики — для текстовых утверждений автоплея
+function ui.current_text()
+  if dlg.cur then return dlg.cur.t end
+  local q = dlg.queue[1]
+  return q and q.t or nil
+end
 
 local function dlg_update(dt)
   if not dlg.cur and #dlg.queue > 0 then dlg_next() end
@@ -687,37 +722,136 @@ local function atomic_write(path, data)
   return os.rename(dir .. "/" .. path .. ".tmp", dir .. "/" .. path)
 end
 
+local SAVE_VERSION = 3
+
 function ui.save()
-  local blob = {version = 3, state = ST:serialize(), view = SC.view(),
+  local blob = {version = SAVE_VERSION, state = ST:serialize(), view = SC.view(),
                 settings = settings, hint_idx = hint.topic_idx}
   atomic_write(savefile, json.encode(blob))
 end
 function ui.has_save() return love.filesystem.getInfo(savefile) ~= nil end
 
--- (аудит F01) Защищённое чтение: битый/частичный JSON или отсутствие .state не
--- роняют игру; при порче рабочего файла пробуем .bak.
+-- (аудит F01/С1) Защищённое чтение. Битый JSON, отсутствие .state или ЧУЖАЯ
+-- версия формата не роняют игру и не подсовывают состояние от другой сборки:
+-- поля меняются между версиями, и «почти подходящий» сейв хуже отсутствующего.
+-- Возвращает blob либо nil и причину — причина нужна вызывающему, чтобы внятное
+-- «версия» не подменилось невнятным «нет файла» от резервной копии.
 local function read_save(path)
   local s = love.filesystem.read(path)
-  if not s then return nil end
+  if not s then return nil, "нет файла" end
   local ok, blob = pcall(json.decode, s)
-  if not ok or type(blob) ~= "table" or type(blob.state) ~= "table" then return nil end
+  if not ok or type(blob) ~= "table" or type(blob.state) ~= "table" then
+    return nil, "битый файл"
+  end
+  if blob.version ~= SAVE_VERSION then
+    return nil, string.format("версия %s ≠ %d", tostring(blob.version), SAVE_VERSION)
+  end
   return blob
 end
 
+-- (аудит С1) Чистка снимка по словарям сборки. Сейв — обычный JSON в
+-- пользовательском каталоге: его правят руками, таскают между сборками и бьют
+-- на полпути. Имя, которого в этой сборке нет, — это не «немного другой
+-- прогресс», а предмет без картинки и узел без правил. Выбрасываем.
+local function sanitize_state(s)
+  local dropped = {}
+  local function filter(list, known, label)
+    local out, bad = {}, 0
+    for _, k in ipairs(list or {}) do
+      if type(k) == "string" and known[k] then out[#out + 1] = k
+      else bad = bad + 1 end
+    end
+    if bad > 0 then dropped[#dropped + 1] = string.format("%s %d", label, bad) end
+    return out
+  end
+  s.inv  = filter(s.inv,  ST.items_set, "предметов")
+  s.done = filter(s.done, ST.nodes,     "узлов")
+  s.read = filter(s.read, T.docs,       "документов")
+  -- Флаги словаря не имеют: их порождают узлы, списка «всех возможных» нет.
+  -- Чужой флаг безвреден — он просто никогда не совпадёт ни с одним needs,
+  -- а вред от недостижимой победы ловит проба ниже.
+  if type(s.flags) ~= "table" then s.flags = {} end
+  local b = type(s.bench) == "table" and s.bench or {}
+  if not ST:bench_seq_ok(b.seq) then
+    b.seq, b.pumps = {}, 0
+    dropped[#dropped + 1] = "стенд сброшен"
+  end
+  b.pumps = tonumber(b.pumps) or 0
+  s.bench, s.steps = b, tonumber(s.steps) or 0
+  return dropped
+end
+
+-- (аудит С1) Точка обзора тоже проверяется по словарю сцены: зум, которого в
+-- сборке нет, оставлял игрока в пустом кадре без единого хотспота — выйти
+-- можно было только через меню.
+local function restore_view(v)
+  local S = ui.scene_json or {}
+  local rooms, zooms = S.rooms or {}, S.zooms or {}
+  if type(v) ~= "table" then SC.goto_room("A"); return nil end
+  if type(v.room) ~= "string" or not rooms[v.room] then
+    SC.goto_room("A")
+    if v.room ~= nil then
+      return string.format("неизвестная комната %q — откат в комнату A",
+                           tostring(v.room))
+    end
+    return nil
+  end
+  SC.goto_room(v.room)
+  if v.kind == "zoom" then
+    if type(v.zoom) == "string" and zooms[v.zoom] then
+      SC.goto_zoom(v.zoom)
+    else
+      return string.format("неизвестный зум %q — показываю комнату %s целиком",
+                           tostring(v.zoom), v.room)
+    end
+  end
+  return nil
+end
+
+-- (аудит С1) Проба на проходимость: применённое состояние прогоняется солвером
+-- на копии. Загрузку это не отменяет — решать игроку, — но про тупик он узнаёт
+-- сразу, а не после получаса обшаривания углов.
+local function probe_dead_end()
+  if ST.flags.victory then return nil end
+  local ok, won, why = pcall(function() return ST:clone():solve(400) end)
+  if not ok then return "солвер не отработал" end
+  if won then return nil end
+  return why == "budget" and "не уложился в бюджет шагов" or "тупик"
+end
+
 function ui.load_save()
-  local blob = read_save(savefile) or read_save(savefile .. ".bak")
+  local blob, why = read_save(savefile)
   if not blob then
-    ui.toast("Сейв повреждён — не загрузился")
+    local bak, why_bak = read_save(savefile .. ".bak")
+    -- причина от основного файла информативнее: .bak обычно просто нет
+    if bak then blob, why = bak, nil
+    elseif why == "нет файла" then why = why_bak end
+  end
+  if not blob then
+    print("сейв: отвергнут — " .. tostring(why))
+    ui.toast("Сейв не загрузился: " .. tostring(why))
     return false
   end
+  local dropped = sanitize_state(blob.state)
+  if #dropped > 0 then
+    print("сейв: выброшено чужих имён — " .. table.concat(dropped, ", "))
+    ui.toast("Сейв из другой сборки — лишнее выброшено")
+  end
   ST:deserialize(blob.state)
+  SC.reset_anims()                                          -- (аудит С2) метки не наследуются
   for k, v in pairs(blob.settings or {}) do settings[k] = v end
   love.window.setFullscreen(settings.fullscreen or false)   -- (аудит F04) применить оконный режим
-  hint.topic_idx = blob.hint_idx or {}
-  local v = blob.view
-  if v and v.kind == "zoom" and v.zoom then
-    SC.goto_room(v.room); SC.goto_zoom(v.zoom)
-  else SC.goto_room((v and v.room) or "A") end
+  hint.topic_idx = type(blob.hint_idx) == "table" and blob.hint_idx or {}
+  local note = restore_view(blob.view)
+  if note then
+    print("сейв: " .. note)
+    ui.toast("Точка обзора из сейва не найдена")
+  end
+  local dead = probe_dead_end()
+  if dead then
+    print("сейв: из этой точки победа недостижима (" .. dead .. ")")
+    ui.toast("Внимание: из этой точки победа недостижима")
+  end
   return true
 end
 
@@ -1197,6 +1331,7 @@ end
 
 function ui.new_game()
   ST:deserialize({})
+  SC.reset_anims()   -- (аудит С2) метки идл-анимаций не переживают новую игру
   SC.goto_room("A")
   hint.topic_idx = {}
   hint_intro_done = false
@@ -1424,7 +1559,12 @@ local function world_click(x, y, btn)
     local idx = math.floor((x - h.breaker_x0) / h.breaker_step) + 1
     idx = math.max(1, math.min(#h.breaker_map, idx))
     local node = h.breaker_map[idx]
-    if node == nil then push_lines(T.breaker_dead); snd("ui_click"); return end
+    -- (аудит К1) дырка в карте приходит из JSON как json.null: раньше она
+    -- проваливалась при разборе, длина карты падала до 5, и клик по шестому
+    -- рычагу зажимался клампом в пятый (герринг «РЕЗЕРВ»).
+    if node == nil or node == json.null then
+      push_lines(T.breaker_dead); snd("ui_click"); return
+    end
     if ST.nodes[node].herring then fire_herring(node); return end
     if ST.done[node] then say_node(node, "already"); return end
     local ok = select(1, ST:fire(node))
@@ -1491,6 +1631,15 @@ function ui.save_auto() ui.save() end
 function ui.mousepressed(x, y, btn)
   if menu then menu_click(x, y); return end
   if victory_stage and not ui.dialog_active() then return end
+  -- (аудит С3) Порядок разбора обязан совпадать с порядком отрисовки, иначе
+  -- клик получает не тот слой, который человек видит сверху. Рисуем виджет →
+  -- читалку → диалог (см. draw_overlays), значит и ввод идёт сверху вниз:
+  -- диалог раньше читалки. Раньше было наоборот, и реплики поверх открытого
+  -- документа приходилось «прокликивать» вслепую через страницы.
+  if ui.dialog_active() then
+    if btn == 1 then dlg_click() end
+    return
+  end
   if reader then
     if btn == 2 then reader = nil; snd("paper")
     else
@@ -1498,10 +1647,6 @@ function ui.mousepressed(x, y, btn)
       if reader.page < #d.pages then reader.page = reader.page + 1
       else reader = nil; snd("paper") end
     end
-    return
-  end
-  if ui.dialog_active() then
-    if btn == 1 then dlg_click() end
     return
   end
   if btn == 1 and not widget and ui.goals_click(x, y) then
@@ -1553,9 +1698,10 @@ function ui.keypressed(key)
     return
   end
   if key == "escape" then
-    if reader then reader = nil
+    -- (аудит С3) тот же порядок, что и у мыши: сперва верхний нарисованный слой
+    if ui.dialog_active() then dlg_click()
+    elseif reader then reader = nil
     elseif widget then ui.close_widget(); snd("zoom_out")
-    elseif ui.dialog_active() then dlg_click()
     elseif inv.selected then inv.selected = nil; snd("ui_click")
     elseif SC.view().kind == "zoom" then snd("zoom_out"); SC.leave_zoom()
     elseif menu == "pause" then menu = nil

@@ -72,6 +72,30 @@ local MUSIC_LIST = {
   "layer_nervous","layer_garland","sting_power","sting_crown","sting_solved",
 }
 
+-- (аудит Н1) Файлы, которые лежат в дереве, но движку не нужны. Список именно
+-- ЗДЕСЬ, а не в документации: заметка в markdown устаревает молча, а этот
+-- список сверяется селфтестом — и лишний файл, и запись о несуществующем
+-- роняют сборку. Оба файла остались от снятых решений и намеренно не удалены:
+-- арт генерируется снаружи, и выкинуть исходник дешевле, чем потом его добыть.
+local UNUSED_ASSETS = {
+  ["assets/gfx/cutouts/st_siren_day.png"] =
+    "дневная сирена: катаут снят из данных в раунде 13 вместе с признаком day_only",
+  ["assets/audio/ambient.ogg"] =
+    "фоновый эмбиент: заменён слоями bgm_*/layer_* в музыкальной схеме 2.0.5",
+}
+
+-- рекурсивный обход дерева ассетов (love.filesystem, без команд оболочки)
+local function asset_tree(dir, out)
+  out = out or {}
+  for _, name in ipairs(love.filesystem.getDirectoryItems(dir)) do
+    local p = dir .. "/" .. name
+    local info = love.filesystem.getInfo(p)
+    if info and info.type == "directory" then asset_tree(p, out)
+    elseif info then out[p] = true end
+  end
+  return out
+end
+
 -- ---------- selftest ----------
 local function selftest()
   HEADLESS = true
@@ -90,6 +114,42 @@ local function selftest()
   for _, f in ipairs({"fonts/PTSans-Regular.ttf", "fonts/PTSans-Bold.ttf",
                       "fonts/Neucha.ttf"}) do
     if not love.filesystem.getInfo("assets/" .. f) then fail("нет " .. f) end
+  end
+  -- (аудит Н1) Дерево ассетов сверяется в ОБЕ стороны. Нехватку ловят проверки
+  -- выше; здесь ловится лишнее: файл, который движок не грузит, едет в portable
+  -- ZIP мёртвым весом, а через полгода никто уже не помнит, забытый он или
+  -- нужный. Осознанно неиспользуемое перечислено в UNUSED_ASSETS с причиной.
+  do
+    local need = gfx_manifest()
+    for _, list in ipairs({AUDIO_LIST, MUSIC_LIST}) do
+      for _, a in ipairs(list) do need["assets/audio/" .. a .. ".ogg"] = true end
+    end
+    for _, f in ipairs({"fonts/PTSans-Regular.ttf", "fonts/PTSans-Bold.ttf",
+                        "fonts/Neucha.ttf"}) do
+      need["assets/" .. f] = true
+    end
+    local have = asset_tree("assets")
+    local stray = {}
+    for p in pairs(have) do
+      if not need[p] and not UNUSED_ASSETS[p] then stray[#stray + 1] = p end
+    end
+    table.sort(stray)
+    for _, p in ipairs(stray) do
+      fail("файл в дереве, но движку не нужен: " .. p ..
+           " — удалить или внести в UNUSED_ASSETS с причиной")
+    end
+    for p, why in pairs(UNUSED_ASSETS) do
+      if not have[p] then
+        fail("UNUSED_ASSETS ссылается на несуществующий файл: " .. p ..
+             " (" .. why .. ") — запись протухла, убрать")
+      elseif need[p] then
+        fail("файл числится неиспользуемым, но движок его грузит: " .. p ..
+             " — убрать из UNUSED_ASSETS")
+      end
+    end
+    local function count(t) local k = 0; for _ in pairs(t) do k = k + 1 end; return k end
+    print(("[selftest] ассеты: нужных %d, в дереве %d, осознанно лишних %d")
+          :format(count(need), count(have), count(UNUSED_ASSETS)))
   end
   for _, p in ipairs({"assets/gfx/cutouts/st_gift.png",
                       "assets/gfx/cutouts/st_net_on_top.png"}) do

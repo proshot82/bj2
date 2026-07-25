@@ -1,6 +1,17 @@
 -- src/json.lua — минимальный JSON decode/encode (чистый Lua, без love.*)
 local json = {}
 
+-- (аудит К1) JSON null внутри МАССИВА несёт позицию: если положить nil,
+-- элемент исчезает и все последующие сдвигаются влево (шестой рубильник
+-- становился пятым). Поэтому в массивах null материализуется часовым
+-- json.null. Внутри ОБЪЕКТА позиции нет, там null == отсутствие ключа,
+-- и естественное представление — nil (сохраняем прежнее поведение:
+-- 47 значений "lock": null в design/puzzles.json обязаны остаться nil).
+json.null = setmetatable({}, {
+  __tostring = function() return "json.null" end,
+  __newindex = function() error("json.null неизменяем") end,
+})
+
 local function skip(s, i)
   while true do
     local c = s:sub(i, i)
@@ -82,9 +93,12 @@ decode_value = function(s, i)
     local arr = {}
     i = skip(s, i + 1)
     if s:sub(i, i) == "]" then return arr, i + 1 end
+    local n = 0
     while true do
       local v; v, i = decode_value(s, i)
-      arr[#arr + 1] = v
+      n = n + 1
+      if v == nil then v = json.null end   -- (аудит К1) позиция важна
+      arr[n] = v
       i = skip(s, i); c = s:sub(i, i)
       if c == "," then i = i + 1
       elseif c == "]" then return arr, i + 1
@@ -103,6 +117,7 @@ function json.decode(s)
 end
 
 local function enc(v, out)
+  if v == json.null then out[#out+1] = "null"; return end   -- (аудит К1)
   local tv = type(v)
   if tv == "nil" then out[#out+1] = "null"
   elseif tv == "boolean" then out[#out+1] = tostring(v)

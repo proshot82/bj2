@@ -22,6 +22,14 @@ function scenes.init(scene_json, state, images, texts)
 end
 
 function scenes.set_letterbox(lb) LB = lb end
+-- (аудит: смок в «кривом» разрешении) Обратный пересчёт мир → экран. Нужен
+-- автоплею: он обязан бить по окну теми же координатами, что и мышь игрока, —
+-- иначе letterbox не проверяет никто. Живёт здесь, а не в autoplay.lua, потому
+-- что LB известен только сцене, и второй экземпляр этой арифметики однажды
+-- разъедется с первым.
+function scenes.to_screen(wx, wy)
+  return wx * LB.sx + LB.ox, wy * LB.sy + LB.oy
+end
 -- мышь в МИРОВЫХ координатах (для индикатора «предмет в руке»)
 function scenes.mouse_world()
   local mx, my = love.mouse.getPosition()
@@ -38,9 +46,34 @@ function scenes.leave_zoom()
   if view.kind == "zoom" then view.kind, view.zoom = "room", nil end
 end
 
+-- Метки идл-анимаций (аудит С2). Живут в ST, но НЕ сериализуются и НЕ
+-- сбрасываются в state:deserialize — значит переживают и новую игру, и
+-- загрузку. Пока метка висит, положение болта рисуется по ней, а не по
+-- флагу: после «Новой игры» болт молча уезжал в открытое положение при
+-- закрытом флаге. Лечится с двух сторон: явный сброс на старте прогона
+-- и снятие метки по истечении её длительности.
+local ANIM_LEN = {_pump_anim = 0.9, _bolt_anim = 0.5}
+
 function scenes.mark_pump() ST._pump_anim = t_global end
 function scenes.mark_bolt() ST._bolt_anim = t_global end
 function scenes.time() return t_global end
+
+function scenes.reset_anims()
+  if not ST then return end
+  for k in pairs(ANIM_LEN) do ST[k] = nil end
+end
+
+-- какие метки сейчас висят — для автотеста (см. op assert_no_anim)
+function scenes.anim_marks()
+  local out = {}
+  if ST then
+    for k in pairs(ANIM_LEN) do
+      if ST[k] then out[#out + 1] = k end
+    end
+  end
+  table.sort(out)
+  return out
+end
 
 local function flag_list_ok(obj)
   for _, f in ipairs(obj.show_on or {}) do
@@ -70,9 +103,12 @@ end
 
 -- ---------- катаут: специальная state-логика ----------
 local function cutout_visible(c)
-  -- (раунд 10) day-only катаут (дневная сирена сигнализации): виден
-  -- только в дневном режиме (power_on); ночью — родная коробка арта
-  if c.day_only and scenes.mode() ~= "day" then return false end
+  -- (аудит Н1) Ветка day_only убрана: признак снят из данных в раунде 13, и
+  -- катаутов с ним ноль. Мёртвая машинерия в движке — это не запас на будущее,
+  -- а обещание поведения, которого никто не проверяет: она молча пережила бы
+  -- любую поломку. Дневной вариант картинки живёт в img_day, дневная рамка —
+  -- в rect_day/pos_day, они на месте и работают. Осиротевший файл сирены
+  -- перечислен в UNUSED_ASSETS в main.lua и сверяется селфтестом.
   if c.valve then
     -- вентиль: state on = вентиль уже переложен в bench.seq
     local placed = false
@@ -94,6 +130,13 @@ end
 function scenes.update(dt)
   t_global = t_global + dt
   frame_no = frame_no + 1   -- (аудит F10) инвалидация кеша хотспотов по кадру
+  -- (аудит С2) метка живёт ровно свою длительность: доиграла — снимаем, и
+  -- положение снова определяет флаг, а не застрявшая отметка времени.
+  if ST then
+    for k, len in pairs(ANIM_LEN) do
+      if ST[k] and (t_global - ST[k]) >= len then ST[k] = nil end
+    end
+  end
   for _, f in ipairs(snow) do
     f.y = f.y + f.v * dt
     f.x = f.x + math.sin(t_global * 0.8 + f.ph) * 8 * dt

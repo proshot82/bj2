@@ -11,12 +11,40 @@ local pending_shot = nil  -- имя скрина, ждущего кадра
 local shot_stage = 0
 local log = io.stderr
 
+-- (аудит В3) Успех гаунтлета обязан подтверждаться терминальным условием.
+-- Раньше он печатался просто по исчерпании списка шагов: сценарий, который
+-- сломался на середине и «доехал» до конца впустую, рапортовал AUTOPLAY OK.
+local TERMINAL_FLAG = "victory"
+local terminal_seen = false
+-- (аудит В4) Счётчики бейдж-проверок: сколько снято, сколько подтверждено.
+local badge_total, badge_checked = 0, 0
+
 local function die(msg)
   log:write("AUTOPLAY FAIL @step " .. ip .. ": " .. msg .. "\n")
   os.exit(1)
 end
 
 local function info(msg) log:write("[ap " .. ip .. "] " .. msg .. "\n") end
+
+-- (аудит Н4) Каталог скринов создавался слепым `os.execute("mkdir -p …")`:
+-- код возврата не проверялся, на не-POSIX системе команда просто не та, и
+-- отказ всплывал позже — падением на первом же скриншоте. Теперь: сперва
+-- проба на запись, каталог создаётся только если пробы нет, результат
+-- перепроверяется, и невозможность писать — внятная ошибка сразу на старте.
+local function ensure_shots_dir()
+  local function writable()
+    local probe = io.open(shots_dir .. "/.probe", "wb")
+    if not probe then return false end
+    probe:close(); os.remove(shots_dir .. "/.probe"); return true
+  end
+  if writable() then return end
+  local win = (package.config:sub(1, 1) == "\\")
+  os.execute(win and ('mkdir "' .. shots_dir:gsub("/", "\\") .. '"')
+                  or ('mkdir -p "' .. shots_dir .. '"'))
+  if not writable() then
+    die("каталог скринов недоступен для записи: " .. shots_dir)
+  end
+end
 
 function ap.start(path, env)
   E = env
@@ -25,13 +53,24 @@ function ap.start(path, env)
   local raw = f:read("*a"); f:close()
   local doc = json.decode(raw)
   steps = doc.steps or doc
-  os.execute('mkdir -p "' .. shots_dir .. '"')
+  ensure_shots_dir()
   ap.active = true
   info("сценарий: " .. #steps .. " шагов")
 end
 
 -- ---------- примитивы ----------
-local function click(x, y, btn) E.ui.mousepressed(x, y, btn or 1) end
+-- (аудит: смок в «кривом» разрешении) Клик идёт ЧЕРЕЗ ОКНО, а не прямо в UI.
+-- Раньше здесь стояло E.ui.mousepressed(x, y) — то есть автоплей входил в игру
+-- на ступеньку ниже игрока и перепрыгивал love.mousepressed вместе с пересчётом
+-- экранных координат в мировые. Смок при 1536×864 из-за этого не проверял ровно
+-- то, ради чего стоит в конвейере: сломанный letterbox он проходил насквозь.
+-- Теперь мировая точка переводится в экранную сценой и отдаётся в love.mousepressed
+-- — тот же вход, что у настоящей мыши. При 1920×1080 масштаб единичный и сдвиг
+-- нулевой, так что основной гаунтлет ведёт себя в точности как прежде.
+local function click(x, y, btn)
+  local sx, sy = E.scenes.to_screen(x, y)
+  love.mousepressed(sx, sy, btn or 1)
+end
 local function key(k) E.ui.keypressed(k) end
 
 local function dismiss_once()
@@ -74,25 +113,61 @@ local function save_shot(imgdata, name)
   info("shot " .. name)
 end
 
+-- (аудит В4) Проверка цвета рамки портрета — единственный пиксельный
+-- свидетель того, что портрет реально сменился по спикеру. Прежняя версия
+-- была неверна трижды: (1) масштаб w/1920 применялся к ОБЕИМ осям и без
+-- сдвига леттербокса — в нештатном разрешении окно сэмпла уезжало мимо
+-- рамки; (2) грубая эвристика по каналам ловила и тона портрета под
+-- рамкой; (3) при нуле совпадений «steel > brass» ложно давало ЛАПИДУСА,
+-- то есть слепой кадр молча засчитывался как успешная проверка.
+-- Теперь: честный мир→экран через леттербокс, классификация по эталонным
+-- цветам рамки и явные пороги уверенности — мало точек или ничья роняют
+-- гаунтлет вместо тихого вердикта.
+local BADGE_REF = {                 -- держать синхронно с C.brass/C.steel в ui.lua
+  ["ЛАПИДУС"] = {0.72, 0.58, 0.34},
+  ["ПРЕДОК"]  = {0.55, 0.70, 0.86},
+}
 local function badge_check(imgdata, want)
-  -- сэмпл левой грани рамки портрета: x∈[20..34], y∈[840..980]
-  local steel, brass = 0, 0
   local w, h = imgdata:getDimensions()
-  local sx = w / 1920
-  for yy = math.floor(840 * sx), math.floor(980 * sx), 2 do
-    for xx = math.floor(20 * sx), math.floor(34 * sx) do
+  local s = math.min(w / 1920, h / 1080)          -- как recalc_letterbox()
+  local ox, oy = (w - 1920 * s) / 2, (h - 1080 * s) / 2
+  -- мировая полоса левой грани рамки портрета (24±дрожь, ширина линии 4):
+  -- берём с запасом на дрожь плашки ±6 px
+  local X0, X1, Y0, Y1 = 14, 40, 820, 1000
+  local hit, total = {}, 0
+  for name in pairs(BADGE_REF) do hit[name] = 0 end
+  for wy = Y0, Y1 do
+    for wx = X0, X1 do
+      local xx, yy = math.floor(ox + wx * s), math.floor(oy + wy * s)
       if xx >= 0 and yy >= 0 and xx < w and yy < h then
         local r, g, b = imgdata:getPixel(xx, yy)
-        if b > 0.45 and b > r * 1.25 then steel = steel + 1
-        elseif r > 0.45 and r > b * 1.25 then brass = brass + 1 end
+        local best, bd = nil, 1e9
+        for name, c in pairs(BADGE_REF) do
+          local d = (r - c[1])^2 + (g - c[2])^2 + (b - c[3])^2
+          if d < bd then best, bd = name, d end
+        end
+        if bd < 0.01 then hit[best] = hit[best] + 1; total = total + 1 end
       end
     end
   end
-  local got = (steel > brass) and "ПРЕДОК" or "ЛАПИДУС"
-  info(("badge steel=%d brass=%d → %s"):format(steel, brass, got))
+  local lap, anc = hit["ЛАПИДУС"], hit["ПРЕДОК"]
+  local got = (anc > lap) and "ПРЕДОК" or "ЛАПИДУС"
+  local win, lose = math.max(lap, anc), math.min(lap, anc)
+  info(("badge ЛАПИДУС=%d ПРЕДОК=%d → %s"):format(lap, anc, got))
+  badge_total = badge_total + 1
+  -- порог уверенности: рамка обязана быть найдена, и однозначно
+  local need = math.max(40, math.floor(120 * s * s))
+  if total < need then
+    die(("бейдж: рамка не опознана (совпадений %d < %d) — кадр пустой " ..
+         "или сэмпл мимо"):format(total, need))
+  end
+  if lose * 3 > win then
+    die(("бейдж: неуверенный вердикт ЛАПИДУС=%d ПРЕДОК=%d"):format(lap, anc))
+  end
   if want and got ~= want then
     die("бейдж: ожидал " .. want .. ", вижу " .. got)
   end
+  if want then badge_checked = badge_checked + 1 end
 end
 
 -- ---------- исполнение шага ----------
@@ -111,6 +186,11 @@ local function exec(s)
     if dismiss_once() then return false end
     return true
   elseif op == "close_reader" then
+    -- (аудит С3) реплики теперь разбираются раньше читалки — ровно как рисуются.
+    -- Значит ПКМ по документу под очередью реплик уйдёт в диалог, а не в
+    -- читалку: сперва дочитываем очередь, потом закрываем документ. Без этого
+    -- шаг крутился бы до таймаута.
+    if E.ui.dialog_active() then dismiss_once(); return false end
     if E.ui.reader_open() then click(1200, 500, 2); return false end
     return true
   elseif op == "bench_bad" then
@@ -247,6 +327,8 @@ local function exec(s)
     request_shot(s.name, s.v or "ПРЕДОК"); return "shot"
   elseif op == "assert_flag" then
     if not E.state:has_flag(s.f) then die("нет флага " .. s.f) end
+    -- (аудит В3) факт достижения финала защёлкивается: op quit проверит его
+    if s.f == TERMINAL_FLAG then terminal_seen = true end
     info("flag ok: " .. s.f); return true
   elseif op == "assert_not_flag" then
     if E.state:has_flag(s.f) then die("флаг не должен стоять: " .. s.f) end
@@ -262,6 +344,21 @@ local function exec(s)
       die("спикер " .. tostring(E.ui.current_speaker()) .. " ≠ " .. s.s)
     end
     return true
+  elseif op == "assert_line" then
+    -- (аудит К1) утверждение по тексту текущей реплики: s.sub — обязана
+    -- содержаться, s.nosub — обязана отсутствовать (plain-поиск, не паттерн)
+    local txt = E.ui.current_text()
+    if not txt then die("нет активной реплики для assert_line") end
+    if s.sub and not txt:find(s.sub, 1, true) then
+      die("реплика не содержит " .. string.format("%q", s.sub) ..
+          ": " .. txt:sub(1, 90))
+    end
+    if s.nosub and txt:find(s.nosub, 1, true) then
+      die("реплика содержит запрещённое " .. string.format("%q", s.nosub) ..
+          ": " .. txt:sub(1, 90))
+    end
+    info("line ok: " .. txt:sub(1, 40))
+    return true
   elseif op == "assert_view" then
     local v = E.scenes.view()
     local cur = (v.kind == "zoom") and v.zoom or v.room
@@ -275,8 +372,102 @@ local function exec(s)
   elseif op == "assert_steps_ge" then
     if E.state.steps < s.n then die("шагов " .. E.state.steps .. " < " .. s.n) end
     return true
+  elseif op == "assert_reader" then
+    local want = (s.open ~= false)
+    if E.ui.reader_open() ~= want then
+      die("документ " .. (E.ui.reader_open() and "открыт" or "закрыт") ..
+          ", ожидалось " .. (want and "открыт" or "закрыт"))
+    end
+    return true
+  elseif op == "assert_dialog_over_reader" then
+    -- (аудит С3) Порядок разбора ввода обязан совпадать с порядком отрисовки.
+    -- Здесь одновременно открыт документ и не пуста очередь реплик, а реплики
+    -- рисуются ПОВЕРХ документа (draw_overlays: widget → reader → dlg).
+    -- Значит клик обязан достаться реплике, а документ — остаться нетронутым.
+    -- Прежде клик забирала читалка: человек листал невидимые ему страницы
+    -- вслепую под чужой плашкой, а у одностраничного документа — закрывал его
+    -- первым же кликом, так и не увидев.
+    if not E.ui.reader_open() then
+      die("нет открытого документа — проверять порядок слоёв не на чем")
+    end
+    if not E.ui.dialog_active() then
+      die("очередь реплик пуста — проверять порядок слоёв не на чем")
+    end
+    local page0 = (E.ui.state().reader or {}).page
+    click(1200, 500, 1)
+    if not E.ui.reader_open() then
+      die("клик закрыл документ: его забрала читалка, хотя сверху нарисована реплика")
+    end
+    if (E.ui.state().reader or {}).page ~= page0 then
+      die("клик перелистнул документ: его забрала читалка, хотя сверху нарисована реплика")
+    end
+    return true
+  elseif op == "assert_anim" then
+    -- (аудит С2) метка идл-анимации ПОСТАВЛЕНА: без этого утверждения парный
+    -- assert_no_anim ниже был бы зелен и на движке, который меток не ставит
+    -- вовсе, — то есть проверял бы отсутствие механизма, а не его исправность
+    local marks = E.scenes.anim_marks()
+    for _, m in ipairs(marks) do if m == s.m then return true end end
+    die("метка анимации " .. tostring(s.m) .. " не поставлена (висят: " ..
+        (#marks > 0 and table.concat(marks, ",") or "нет") .. ")")
+  elseif op == "assert_no_anim" then
+    -- (аудит С2) метка снята: положение болта снова определяет флаг, а не
+    -- отметка времени, застрявшая с прошлого прогона
+    local marks = E.scenes.anim_marks()
+    if #marks > 0 then
+      die("метки анимации не сняты: " .. table.concat(marks, ","))
+    end
+    return true
+  elseif op == "resize" then
+    -- (аудит: смок в «кривом» разрешении) Смена размера окна прямо посреди
+    -- прогона. Так проверяется letterbox: дальше сценарий продолжает бить по тем
+    -- же мировым точкам, а попадать они обязаны через пересчёт.
+    --
+    -- Размер задаётся ИЗНУТРИ игры намеренно. Прежний конвейер полагался на
+    -- «xvfb-run --screen 1536x864», но X разрешает окну быть больше экрана: окно
+    -- оставалось 1920×1080, масштаб единичным, и смок годами гонялся ровно в том
+    -- же разрешении, что и основной гаунтлет.
+    local w, h = love.graphics.getDimensions()
+    if w == s.w and h == s.h then
+      -- Тождественный letterbox означал бы, что проверять нечего: такой прогон
+      -- обязан падать, а не молча зеленеть.
+      local px, py = E.scenes.to_screen(1920, 1080)
+      if px == 1920 and py == 1080 then
+        die(("окно %dx%d, но letterbox тождественный — смоку нечего проверять")
+            :format(w, h))
+      end
+      info(("окно %dx%d, угол мира 1920,1080 → экран %.1f,%.1f")
+           :format(w, h, px, py))
+      return true
+    end
+    if not s.asked then
+      s.asked = true
+      love.window.setMode(s.w, s.h, {resizable = true, vsync = 1})
+    end
+    return false  -- ждём применения; не применится — поймает вотчдог
+  elseif op == "assert_title" then
+    -- (аудит С1) остались мы на титуле или нет. Отвергнутый сейв обязан
+    -- оставить игрока в меню (ui.load_save вернула false, menu не снялся);
+    -- принятый — увести в игру. Без этой проверки негативы на сейв мерили бы
+    -- только текст в консоли, а не то, пустил ли движок в прогон.
+    local want = (s.open ~= false)
+    if E.ui.title_shown() ~= want then
+      die("титул " .. (E.ui.title_shown() and "показан" or "снят") ..
+          ", ожидалось " .. (want and "показан" or "снят"))
+    end
+    return true
   elseif op == "quit" then
-    info("DONE steps=" .. E.state.steps)
+    -- (аудит В3) успех печатается ТОЛЬКО здесь и только при подтверждённом
+    -- терминальном условии
+    if not terminal_seen then
+      die("финал не подтверждён: за прогон не было assert_flag " .. TERMINAL_FLAG)
+    end
+    if badge_checked < 2 then
+      die(("бейдж-проверок с ожиданием %d < 2 — смена портрета не доказана")
+          :format(badge_checked))
+    end
+    info(("DONE steps=%d бейджей=%d/%d"):format(E.state.steps,
+         badge_checked, badge_total))
     print("AUTOPLAY OK")
     os.exit(s.code or 0)
   else
@@ -311,8 +502,10 @@ function ap.update(dt)
   end
   local s = steps[ip]
   if not s then
-    print("AUTOPLAY OK")
-    os.exit(0)
+    -- (аудит В3) сценарий кончился, не дойдя до op quit: раньше это молча
+    -- печаталось как успех — прогон, оборвавшийся на середине, рапортовал OK
+    die("сценарий исчерпан без op quit (шагов в файле " .. #steps ..
+        ") — финал не подтверждён")
   end
   if not s._logged then
     s._logged = true

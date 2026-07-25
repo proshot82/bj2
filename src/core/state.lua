@@ -233,6 +233,36 @@ function M:deserialize(s)
   self.steps = s.steps or 0
 end
 
+-- Проверка позиции стенда из сейва (аудит С1). Осмысленная позиция — это
+-- РОВНО префикс требуемой последовательности: до неё игрок мог дойти, дальше
+-- сработал бы замок. Наружу отдаётся только «да/нет», сама последовательность
+-- не выходит и в сообщения не попадает (спойлер-гигиена). Проверка нужна не
+-- ради честности очков: подложенный мусор в bench.seq сбивает и солвер —
+-- каждый ход сбрасывает набор, и проба на проходимость лжёт про тупик.
+function M:bench_seq_ok(seq)
+  if seq == nil then return true end
+  if type(seq) ~= "table" then return false end
+  local need = self:_vent_seq()
+  if #seq > #need then return false end
+  for i = 1, #seq do
+    if seq[i] ~= need[i] then return false end
+  end
+  return true
+end
+
+-- Копия для проб «а решается ли отсюда» (аудит С1). Структурные поля
+-- (P, answers, nodes, order, items_set) общие и только читаются; всё, что
+-- мутируют fire/give/consume/bench_op/try_code/try_form, лежит в полях
+-- прогона и переносится через serialize→deserialize. Поэтому солвер на
+-- клоне не может задеть боевое состояние.
+function M:clone()
+  local c = setmetatable({}, M)
+  c.P, c.answers = self.P, self.answers
+  c.nodes, c.order, c.items_set = self.nodes, self.order, self.items_set
+  c:deserialize(self:serialize())
+  return c
+end
+
 -- ---------- доступность и солвер ----------
 function M:available()
   local out = {}

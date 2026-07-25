@@ -158,31 +158,76 @@ ok("Нити: медиана одновременных веток в [3,4]", 3 
 ok("Солвер добивает победу", "door_open" in sim_fired,
    f"{len(sim_fired)} узлов")
 
-# --- 5. cross-room по веткам D1-D5
+# --- 5. cross-room по всем веткам из данных (аудит Н5)
+# Список веток берётся ИЗ ДАННЫХ, а не вписан в код. Прежние жёсткие D1-D5
+# молча пропускали всё, что появилось позже: на момент аудита в данных были
+# ещё D0, D6, WIN и H, и ветка D6 из пяти узлов не проверялась ни разу.
+# Комната сверяется с МНОЖЕСТВОМ: `r in "AB"` — это поиск подстроки, и для
+# пустой строки он истинен; узел без комнаты гейт считал бы комнатным.
+ROOMS = {"A", "B"}
+
+
 def node_room(i):
     return NODES[i]["room"]
-cr_pass = True
-for br in ["D1", "D2", "D3", "D4", "D5"]:
-    hit = None
-    for n in PUZ["nodes"]:
-        if n["branch"] != br:
-            continue
-        rooms_in = {node_room(s) for s in deps_of(n) if node_room(s) in "AB"}
+
+
+def branch_nodes(br):
+    return [n for n in PUZ["nodes"] if n["branch"] == br]
+
+
+def is_gateway(nodes):
+    """ветка-калитка: без её узлов живые узлы остаются лишь в одной комнате —
+    значит вторую открывает она сама. Пересечь границу, которую сам отпираешь,
+    нельзя по построению. Считается по графу, без единого имени в коде."""
+    fired, _ = fixpoint(frozenset(n["id"] for n in nodes))
+    left = {node_room(i) for i in fired
+            if node_room(i) in ROOMS and not NODES[i]["herring"]}
+    return len(left) < 2
+
+
+def crossing(nodes):
+    """первое найденное пересечение комнат внутри ветки либо None"""
+    for n in nodes:
+        rooms_in = {node_room(s) for s in deps_of(n) if node_room(s) in ROOMS}
         r = n["room"]
-        if r in "AB" and any(x != r for x in rooms_in):
-            hit = f"{n['id']}: need из {rooms_in} при комнате {r}"; break
-        if r == "inv" and rooms_in >= {"A", "B"}:
-            hit = f"{n['id']}: inv-стык потребностей A и B"; break
+        if r in ROOMS and any(x != r for x in rooms_in):
+            return f"{n['id']}: need из {sorted(rooms_in)} при комнате {r}"
+        if r == "inv" and rooms_in >= ROOMS:
+            return f"{n['id']}: inv-стык потребностей A и B"
         if n["lock"]:
             crooms = {DOCS[s]["room"] for s in n["lock"]["clue_sources"]}
-            if r in "AB" and any(x != r for x in crooms if x in "AB"):
-                hit = f"{n['id']}: clue из {crooms} при комнате {r}"; break
+            if r in ROOMS and any(x != r for x in crooms if x in ROOMS):
+                return f"{n['id']}: clue из {sorted(crooms)} при комнате {r}"
+    return None
+
+
+# Освобождения выводятся поимённо и с причиной: иначе завтрашняя ветка тихо
+# попадёт под освобождение и никто этого не заметит.
+branches = sorted({n["branch"] for n in PUZ["nodes"]})
+checked, exempt = [], []
+for br in branches:
+    nodes = branch_nodes(br)
+    if all(n["herring"] for n in nodes):
+        exempt.append((br, "вся из отвлекающих узлов: нечего пересекать"))
+    elif is_gateway(nodes):
+        exempt.append((br, "ветка-калитка: сама открывает вторую комнату"))
+    else:
+        checked.append(br)
+for br, why in exempt:
+    print(f"[ ~~ ] cross-room {br} — освобождена: {why}")
+    INFO.append(f"cross-room {br}: освобождена ({why})")
+cr_pass = True
+for br in checked:
+    hit = crossing(branch_nodes(br))
     okb = hit is not None
     cr_pass &= okb
     print(f"[{'PASS' if okb else 'FAIL'}] cross-room {br}"
-          + (f" — {hit}" if hit else ""))
+          + (f" — {hit}" if hit else " — ветка не выходит из своей комнаты"))
     (INFO if okb else FAIL).append(f"cross-room {br}: {hit}")
-ok("Cross-room гейт (D1-D5)", cr_pass)
+ok(f"Cross-room гейт (веток из данных {len(branches)}, "
+   f"проверено {len(checked)}, освобождено {len(exempt)})", cr_pass)
+ok("Cross-room: проверяемых веток >= 5", len(checked) >= 5,
+   ", ".join(checked) if checked else "ни одной — освобождения съели гейт")
 
 # --- 6. реликвии + корона
 relics = PUZ["relics"]

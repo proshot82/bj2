@@ -3,7 +3,7 @@
 """Маскированный clue-аудит (Фаза 5). Значения ответов не печатаются.
 
 1) У каждого замка (code/form/bench) ≥ 2 независимых clue-источника.
-2) По трассе золотого пути: каждый клю-док становится ДОСТУПЕН строго
+2) По трассе золотого пути: каждый док-улика становится ДОСТУПЕН строго
    раньше шага, на котором солвер проходит соответствующий замок.
    Доступность дока в состоянии: видима точка чтения (hs.doc / doc_rmb /
    reader_note / pc_docs / doc_items / doc_auto) с учётом show/hide-флагов
@@ -26,7 +26,21 @@ print(f"[1] замков: {len(locks)}, все с ≥2 источниками: "
       f"{'да' if not ERR else 'НЕТ'}")
 
 # ---------- 2) доступность по трассе ----------
-trace = json.load(open("work/solver_trace.json", encoding="utf-8"))
+# (аудит С4) Внятная диагностика вместо питоновской трассировки: трассу пишет
+# tools/trace_solver.lua, и «файла нет» здесь означает ровно одно — солвер не
+# отработал. Сообщать об этом надо словами, а не стеком вызовов json.
+TRACE = "work/solver_trace.json"
+try:
+    with open(TRACE, encoding="utf-8") as fh:
+        trace = json.load(fh)
+except FileNotFoundError:
+    sys.exit(f"CLUE FAIL: нет {TRACE} — сперва прогнать трассу солвера "
+             f"(love/luajit tools/trace_solver.lua) из корня репозитория")
+except json.JSONDecodeError as e:
+    sys.exit(f"CLUE FAIL: {TRACE} не разбирается как JSON ({e}) — "
+             f"трасса оборвана, перегенерировать")
+if not isinstance(trace, list) or not trace:
+    sys.exit(f"CLUE FAIL: {TRACE} пуст или не список — мерить доступность не по чему")
 
 def state_of(step):
     s = trace[step]
@@ -94,9 +108,9 @@ for nid, lk in locks:
             if doc_accessible(doc, j):
                 first = j; break
         if first is None:
-            err(f"{nid}: клю «{doc}» недоступен до шага {k}")
+            err(f"{nid}: улика «{doc}» недоступна до шага {k}")
         else:
-            print(f"[2] {nid}: клю «{doc}» доступен с шага {first} "
+            print(f"[2] {nid}: улика «{doc}» доступна с шага {first} "
                   f"(замок на шаге {k})")
 
 if ERR:
