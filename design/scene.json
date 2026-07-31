@@ -27,9 +27,9 @@
      "goto": "zoom_alarm",
      "name": "Сигнализация",
      "rect_day": [
-      1712,
-      370,
-      50,
+      1725,
+      372,
+      48,
       50
      ]
     },
@@ -1145,6 +1145,19 @@
     }
    ],
    "cutouts": [
+    {
+     "img": "cutouts/st_panel_open_wide.png",
+     "pos": [
+      223,
+      243
+     ],
+     "scale": 1.0,
+     "z": 16,
+     "show_on": [
+      "panel_open"
+     ],
+     "img_day": "cutouts/st_panel_open_wide_day.png"
+    },
     {
      "img": "cutouts/st_net_on_top.png",
      "pos": [
@@ -2416,6 +2429,18 @@
      "z": 20,
      "hide_on": [
       "wb_open"
+     ]
+    },
+    {
+     "img": "cutouts/st_vise_empty.png",
+     "pos": [
+      1509,
+      440
+     ],
+     "scale": 1.0,
+     "z": 16,
+     "show_on": [
+      "done:take_collector"
      ]
     }
    ],
