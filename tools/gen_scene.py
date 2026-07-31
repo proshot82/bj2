@@ -340,14 +340,25 @@ zooms["zoom_drawer_keypad"] = {"room": "A", "hotspots": [
     HS("hs_z_slot", [1140, 148, 365, 66], name="Щель шредера", look=True),
     HS("hs_z_mini_drawer", [1150, 235, 360, 180], name="Ящичек", look=True,
        hide_on=["drawer_ira_open"]),
-    # (раунд 7) открытый ящик Иры виден ТОЛЬКО здесь, в зуме тумбы
-    # (раунд 19) зона посажена на альфу катаута: x791..1018 y650..857
-    HS("hs_ira_drawer_out", [788, 644, 236, 218], doc="doc_registry",
+    # (раунд 19, зам.3) катаут-заплатка st_ira_drawer_open отправлен на пенсию:
+    # открытый ящик — отдельный полнокадровый зум по схеме Лапидуса. Зона
+    # сидит на самом ящичке (арт x1140..1515 y228..417) и ведёт в новый кадр.
+    HS("hs_ira_drawer_out", [1150, 235, 360, 180], goto="zoom_ira_drawer",
        name="Открытый ящик", show_on=["drawer_ira_open"], cursor="zoom"),
-], "cutouts": [
-    CO("cutouts/st_ira_drawer_open.png", [560, 604], 1.36, z=20,
-       show_on=["drawer_ira_open"]),
-]}
+], "cutouts": []}
+
+zooms["zoom_ira_drawer"] = {"room": "A", "needs_flag": "drawer_ira_open",
+                            "hotspots": [
+    # (раунд 19, зам.3) полнокадровый открытый ящик Иры 1920×1080 вместо
+    # катаута-заплатки. Промер финального арта: лист/стопка x700..1245
+    # y215..695 (низ обрезан до y695, чтобы не сесть на жестянку y700+);
+    # передняя стенка ящика x430..1520 y840..1015 — явный возврат к тумбе
+    # (выход из зума ведёт в комнату, а не в родительский зум).
+    HS("hs_z_registry", [700, 215, 545, 480], doc="doc_registry",
+       name="Реестр отделов", cursor="zoom"),
+    HS("hs_z_ira_back", [430, 840, 1090, 175], goto="zoom_drawer_keypad",
+       name="Назад к тумбе", cursor="move"),
+], "cutouts": []}
 
 zooms["zoom_alarm"] = {"room": "A", "hotspots": [
     # (раунд 19) промер: корпус панели x790..1180 y150..890; ревун/камера
@@ -480,18 +491,31 @@ zooms["zoom_workbench"] = {"room": "B", "hotspots": [
        name="Журнал испытаний", cursor="zoom"),
     HS("hs_z_padlock", [628, 590, 100, 120], node="open_workbench",
        name="Замочек", hide_on=["wb_open"]),
-    HS("hs_z_wb_drawer", [408, 480, 190, 165], node="take_wrench",
-       name="Ящик верстака", show_on=["wb_open"], hide_on=["done:take_wrench"]),
+    # (раунд 19, зам.3) ящик больше не «взять ключ»: зона ведёт в полнокадровый
+    # зум ящика; после взятия ключа на её месте — осмотр пустого ящика.
+    HS("hs_z_wb_drawer", [408, 480, 190, 165], goto="zoom_wb_drawer",
+       name="Ящик верстака", show_on=["wb_open"], hide_on=["done:take_wrench"],
+       cursor="zoom"),
+    HS("hs_z_wb_drawer_empty", [408, 480, 190, 165], name="Ящик верстака",
+       look=True, show_on=["done:take_wrench"]),
     HS("hs_z_vise", [1435, 335, 165, 300], name="Тиски", look=True),
 ], "cutouts": [
     # (раунд 7) навесной замок повешен на ПЕТЛЮ ящика верстака (промер зума)
+    # (раунд 19, зам.3) st_wb_drawer_open и ic_wrench-в-ящике на пенсии:
+    # открытый ящик — полнокадровый zoom_wb_drawer, разводник впечатан в арт
     CO("cutouts/st_padlock_zoom.png", [622, 584], 0.42, z=20,
        hide_on=["wb_open"]),
-    CO("cutouts/st_wb_drawer_open.png", [335, 452], 1.0, z=18,
-       show_on=["wb_open"]),
-    CO("icons/ic_wrench.png", [455, 505], 1.05, z=20, show_on=["wb_open"],
-       hide_on=["done:take_wrench"], comment="разводник в ящике до взятия"),
 ]}
+
+zooms["zoom_wb_drawer"] = {"room": "B", "needs_flag": "wb_open", "hotspots": [
+    # (раунд 19, зам.3) полнокадровый ящик верстака 1920×1080; разводной ключ
+    # впечатан в арт (иконка 128×128 растянулась бы вчетверо — мыло). Промер
+    # финального арта по маске красной рукояти + голова: x745..1125 y345..780.
+    # leave_zoom: после взятия ключа кадр закрывается сам — впечатанный ключ
+    # игрок больше не увидит. Сторожится негативом (test_negatives, семья 6).
+    HS("hs_z_wb_wrench", [745, 345, 380, 435], node="take_wrench",
+       name="Разводной ключ", leave_zoom=True, hide_on=["done:take_wrench"]),
+], "cutouts": []}
 
 zooms["zoom_attic"] = {"room": "B", "hotspots": [
     # (раунд 19) промер: коробка = альфа катаута x378..918 y238..587;

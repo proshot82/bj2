@@ -1575,21 +1575,6 @@
      "look": true
     },
     {
-     "id": "hs_ira_drawer_out",
-     "rect": [
-      788,
-      644,
-      236,
-      218
-     ],
-     "cursor": "zoom",
-     "doc": "doc_registry",
-     "name": "Открытый ящик",
-     "show_on": [
-      "drawer_ira_open"
-     ]
-    },
-    {
      "id": "hs_z_mini_drawer",
      "rect": [
       1150,
@@ -1601,6 +1586,21 @@
      "name": "Ящичек",
      "look": true,
      "hide_on": [
+      "drawer_ira_open"
+     ]
+    },
+    {
+     "id": "hs_ira_drawer_out",
+     "rect": [
+      1150,
+      235,
+      360,
+      180
+     ],
+     "cursor": "zoom",
+     "goto": "zoom_ira_drawer",
+     "name": "Открытый ящик",
+     "show_on": [
       "drawer_ira_open"
      ]
     },
@@ -1619,21 +1619,40 @@
      "widget_len": 4
     }
    ],
-   "cutouts": [
+   "cutouts": [],
+   "bg": "zooms/zoom_drawer_keypad.png"
+  },
+  "zoom_ira_drawer": {
+   "room": "A",
+   "needs_flag": "drawer_ira_open",
+   "hotspots": [
     {
-     "img": "cutouts/st_ira_drawer_open.png",
-     "pos": [
-      560,
-      604
+     "id": "hs_z_ira_back",
+     "rect": [
+      430,
+      840,
+      1090,
+      175
      ],
-     "scale": 1.36,
-     "z": 20,
-     "show_on": [
-      "drawer_ira_open"
-     ]
+     "cursor": "move",
+     "goto": "zoom_drawer_keypad",
+     "name": "Назад к тумбе"
+    },
+    {
+     "id": "hs_z_registry",
+     "rect": [
+      700,
+      215,
+      545,
+      480
+     ],
+     "cursor": "zoom",
+     "doc": "doc_registry",
+     "name": "Реестр отделов"
     }
    ],
-   "bg": "zooms/zoom_drawer_keypad.png"
+   "cutouts": [],
+   "bg": "zooms/zoom_ira_drawer.png"
   },
   "zoom_alarm": {
    "room": "A",
@@ -2336,13 +2355,28 @@
       190,
       165
      ],
-     "cursor": "act",
-     "node": "take_wrench",
+     "cursor": "zoom",
+     "goto": "zoom_wb_drawer",
      "name": "Ящик верстака",
      "show_on": [
       "wb_open"
      ],
      "hide_on": [
+      "done:take_wrench"
+     ]
+    },
+    {
+     "id": "hs_z_wb_drawer_empty",
+     "rect": [
+      408,
+      480,
+      190,
+      165
+     ],
+     "cursor": "act",
+     "name": "Ящик верстака",
+     "look": true,
+     "show_on": [
       "done:take_wrench"
      ]
     },
@@ -2383,37 +2417,33 @@
      "hide_on": [
       "wb_open"
      ]
-    },
-    {
-     "img": "cutouts/st_wb_drawer_open.png",
-     "pos": [
-      335,
-      452
-     ],
-     "scale": 1.0,
-     "z": 18,
-     "show_on": [
-      "wb_open"
-     ]
-    },
-    {
-     "img": "icons/ic_wrench.png",
-     "pos": [
-      455,
-      505
-     ],
-     "scale": 1.05,
-     "z": 20,
-     "show_on": [
-      "wb_open"
-     ],
-     "hide_on": [
-      "done:take_wrench"
-     ],
-     "comment": "разводник в ящике до взятия"
     }
    ],
    "bg": "zooms/zoom_workbench.png"
+  },
+  "zoom_wb_drawer": {
+   "room": "B",
+   "needs_flag": "wb_open",
+   "hotspots": [
+    {
+     "id": "hs_z_wb_wrench",
+     "rect": [
+      745,
+      345,
+      380,
+      435
+     ],
+     "cursor": "act",
+     "node": "take_wrench",
+     "name": "Разводной ключ",
+     "leave_zoom": true,
+     "hide_on": [
+      "done:take_wrench"
+     ]
+    }
+   ],
+   "cutouts": [],
+   "bg": "zooms/zoom_wb_drawer.png"
   },
   "zoom_attic": {
    "room": "B",

@@ -98,7 +98,11 @@ def to_zoom(z):
     if cur == z:
         return
     ev, ehs, _ = entry[z]
-    to_room(ev if ev in ("A", "B") else room_of[ev])
+    if ev in ("A", "B"):
+        to_room(ev)
+    else:
+        # (раунд 19) вход только из родительского зума — сперва до родителя
+        to_zoom(ev)
     add(op="click_hs", id=ehs)
     cur = z
 
@@ -251,17 +255,27 @@ add(op="assert_widget", kind="keypad")
 shot("widget_keypad_tumba")
 add(op="code", node="ira_code"); dismiss()
 add(op="assert_flag", f="drawer_ira_open")
-# (раунд 7) открытый ящик Иры — в зуме тумбы; клик БЕЗ выхода в комнату
+# (раунд 19, зам.3) открытый ящик Иры — полнокадровый зум по схеме Лапидуса
 add(op="click_hs", id="hs_ira_drawer_out")
+cur = "zoom_ira_drawer"
+add(op="wait", s=0.15)
+shot("zoom_yaschik_iry", zoom="zoom_ira_drawer")
+add(op="click_hs", id="hs_z_registry")
 add(op="wait", s=0.15)
 shot("doc_reestr", doc="doc_registry")
 add(op="close_reader")
+add(op="click_hs", id="hs_z_ira_back")     # явный возврат к тумбе
+cur = "zoom_drawer_keypad"
 
 to_zoom("zoom_workbench")
 shot("zoom_verstak", zoom="zoom_workbench")
 read_hs("hs_z_journal", "zoom_workbench", "doc_journal", "doc_zhurnal")
 node("open_workbench"); dismiss()
-node("take_wrench"); dismiss()
+# (раунд 19, зам.3) ящик верстака — полнокадровый зум, ключ впечатан в арт
+to_zoom("zoom_wb_drawer")
+shot("zoom_yaschik_verstaka", zoom="zoom_wb_drawer")
+add(op="click_hs", id="hs_z_wb_wrench"); dismiss()
+cur = "B"                                  # leave_zoom закрыл кадр сам
 add(op="assert_item", id="wrench")
 
 to_room("B")

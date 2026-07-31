@@ -1759,7 +1759,15 @@ local function world_click(x, y, btn)
       return
     end
     local fired = select(1, ST:fire(h.node))
-    if fired then say_node(h.node, "do"); ui.after_fire(h.node) end
+    if fired then
+      say_node(h.node, "do"); ui.after_fire(h.node)
+      -- (раунд 19, зам.3) признак leave_zoom: после срабатывания узла кадр
+      -- зума закрывается сам (разводник впечатан в арт ящика — после взятия
+      -- его там быть не должно). Сторожится негативом (семья 6).
+      if h.leave_zoom and SC.view().kind == "zoom" then
+        snd("zoom_out"); SC.leave_zoom()
+      end
+    end
     return
   end
   if h.look then

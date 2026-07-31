@@ -589,6 +589,82 @@ def case_smoke_teeth():
             print("     " + line)
 
 
+# ---------------- семья 6: исходник Lua → гаунтлет (leave_zoom, р.19) ----------------
+# Разводной ключ впечатан в арт zoom_wb_drawer; после взятия признак leave_zoom
+# обязан закрыть кадр (иначе игрок смотрит на взятый ключ). Динамику сторожит
+# assert_view "B" в основном сценарии; этот кейс доказывает, что сторож ловит:
+# признак глушится точечной мутацией ui.lua, укороченный прогон до этого
+# assert_view обязан упасть и назвать вид.
+LZ_SRC = "src/ui.lua"
+LZ_NEG = "Р19 заглушенный leave_zoom роняет гаунтлет"
+LZ_ANCHOR = "if h.leave_zoom and SC.view().kind == \"zoom\" then"
+LZ_BROKEN = "if h.leave_zoom and false and SC.view().kind == \"zoom\" then"
+
+
+def case_leave_zoom():
+    if not LOVE:
+        SKIPPED.append(LZ_NEG)
+        print(f"[ПРОПУСК] {LZ_NEG}: love не найден в PATH")
+        return
+    if not os.path.exists(AP):
+        SKIPPED.append(LZ_NEG)
+        print(f"[ПРОПУСК] {LZ_NEG}: нет {AP} — сперва gen_autoplay.py")
+        return
+    doc = json.load(open(AP, encoding="utf-8"))
+    steps = doc["steps"] if isinstance(doc, dict) else doc
+    cut = None
+    for i, st in enumerate(steps):
+        if st.get("op") == "click_hs" and st.get("id") == "hs_z_wb_wrench":
+            for j in range(i + 1, len(steps)):
+                if steps[j].get("op") == "assert_view":
+                    cut = j
+                    break
+            break
+    if cut is None:
+        SKIPPED.append(LZ_NEG)
+        print(f"[ПРОПУСК] {LZ_NEG}: в сценарии нет клика по ключу с "
+              f"последующим assert_view — негатив ослеп")
+        return
+    src = open(LZ_SRC, encoding="utf-8").read()
+    if src.count(LZ_ANCHOR) != 1:
+        SKIPPED.append(LZ_NEG)
+        print(f"[ПРОПУСК] {LZ_NEG}: якорь в {LZ_SRC} встречается "
+              f"{src.count(LZ_ANCHOR)} раз(а), ждали 1 — негатив ослеп")
+        return
+    before = md5(LZ_SRC)
+    tmp = tempfile.mkdtemp(prefix="lz_neg_")
+    shutil.copy2(LZ_SRC, os.path.join(tmp, "ui.lua"))
+    path = os.path.join(tmp, "neg.json")
+    json.dump({"steps": [dict(x) for x in steps[:cut + 1]]},
+              open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    home = os.path.expanduser("~/.local/share/love/BrassJanissary2")
+    shutil.rmtree(home, ignore_errors=True)
+    try:
+        open(LZ_SRC, "w", encoding="utf-8").write(
+            src.replace(LZ_ANCHOR, LZ_BROKEN, 1))
+        rc, out = run(["xvfb-run", "-a", "-s", "-screen 0 1920x1080x24",
+                       "env", "SDL_AUDIODRIVER=dummy",
+                       LOVE, ".", "--autoplay", path])
+    finally:
+        shutil.copy2(os.path.join(tmp, "ui.lua"), LZ_SRC)
+        shutil.rmtree(tmp, ignore_errors=True)
+        shutil.rmtree(home, ignore_errors=True)
+    if md5(LZ_SRC) != before:
+        FAILED.append(f"НЕ ВОССТАНОВЛЕН {LZ_SRC}")
+        print(f"[ПРОВАЛ] {LZ_SRC} не восстановлен после мутации!")
+    said_ok = "AUTOPLAY OK" in out
+    named = "вид zoom_wb_drawer" in out          # die называет застрявший вид
+    ok = (not said_ok) and named
+    (PASSED if ok else FAILED).append(LZ_NEG)
+    print(f"[{'OK  ' if ok else 'ПРОВАЛ'}] {LZ_NEG}: rc={rc} "
+          f"успех={'да' if said_ok else 'нет'} (ждали нет), застрявший вид "
+          f"{'назван' if named else 'НЕ НАЗВАН'}")
+    if not ok:
+        print("     ---- хвост прогона ----")
+        for line in out.strip().splitlines()[-10:]:
+            print("     " + line)
+
+
 def main():
     before = {p: md5(p) for p in FILES}
     tmp = tempfile.mkdtemp(prefix="negatives_")
@@ -634,9 +710,11 @@ def main():
     case_font_gate_lua()              # статика, движок не нужен
     if "--fast" in sys.argv:
         SKIPPED.append(SMOKE_NEG)
-        print("[ПРОПУСК] движковый негатив смока — режим --fast")
+        SKIPPED.append(LZ_NEG)
+        print("[ПРОПУСК] движковые негативы смока и leave_zoom — режим --fast")
     else:
         case_smoke_teeth()
+        case_leave_zoom()
 
     print(f"\nнегативов: {len(PASSED)} OK, {len(FAILED)} провалов, "
           f"{len(SKIPPED)} пропущено")

@@ -85,7 +85,12 @@ def to_zoom(z):
     if cur == z:
         return
     ev, ehs, _ = entry[z]
-    to_room(ev if ev in ("A", "B") else room_of[ev])
+    if ev in ("A", "B"):
+        to_room(ev)
+    else:
+        # (раунд 19) вход только из родительского зума (zoom_ira_drawer,
+        # zoom_wb_drawer): сперва добраться до родителя, потом клик
+        to_zoom(ev)
     add(op="click_hs", id=ehs)
     cur = z
 
@@ -236,9 +241,15 @@ shot("round4_05_keypad")                      # движковый кейпад 
 add(op="code", node="ira_code", value="1111"); dismiss(); neg("ira_code_1111")
 add(op="code", node="ira_code"); dismiss()
 dismiss()                                    # (раунд 7) остаёмся в зуме тумбы
-add(op="click_hs", id="hs_ira_drawer_out")   # реестр — теперь В ЗУМЕ тумбы
+add(op="click_hs", id="hs_ira_drawer_out")   # (р.19) ведёт в кадр ящика
+cur = "zoom_ira_drawer"
+add(op="assert_view", id="zoom_ira_drawer")
+add(op="click_hs", id="hs_z_registry")       # реестр — лист в ящике
 shot("ap_07_registry_gag")
 add(op="close_reader")
+add(op="click_hs", id="hs_z_ira_back")       # (р.19) явный возврат к тумбе
+cur = "zoom_drawer_keypad"
+add(op="assert_view", id="zoom_drawer_keypad")
 
 # ---------- S8: форма СКУД ----------
 to_zoom("zoom_pc")
@@ -256,7 +267,9 @@ add(op="assert_flag", f="card_active")
 # ---------- S9: верстак ----------
 to_zoom("zoom_workbench")
 node("open_workbench"); dismiss()
-node("take_wrench"); dismiss()
+node("take_wrench"); dismiss()               # клик по ключу в кадре ящика
+cur = "B"                                    # (р.19) leave_zoom закрыл кадр сам
+add(op="assert_view", id="B")                # (р.19) гейт leave_zoom
 add(op="assert_item", id="wrench")
 
 # ---------- S10: стенд ----------
