@@ -79,9 +79,12 @@ A_hotspots = [
     HS("hs_main_door_survey", [1483, 220, 140, 475], node="survey_door",
        name="Осмотреть дверь", hide_on=["surveyed"],
        rect_day=[1517, 180, 133, 435]),
-    HS("hs_poster_ot", [1506, 246, 94, 76], doc="doc_poster",
+    # (р.19) автор не нашёл словарь глифов: зона была впритык по белому листу,
+    # днём вообще 64x58. Расширена с запасом по обе стороны листа, оба времени
+    # суток промерены по сетке (work/rov/grid_night.png, grid_day.png).
+    HS("hs_poster_ot", [1499, 238, 100, 90], doc="doc_poster",
        name="Плакат по охране труда", cursor="zoom",
-       rect_day=[1543, 236, 64, 58]),
+       rect_day=[1529, 241, 100, 88]),
     HS("hs_alarm", [1711, 376, 46, 48], goto="zoom_alarm", name="Сигнализация",
        cursor="zoom", rect_day=[1712, 370, 50, 50]),   # (р.13) на короб дневной створки
     HS("hs_util_door", [1706, 285, 92, 320], node="open_utility",
@@ -119,7 +122,10 @@ A_cutouts = [
     CO("cutouts/st_vent_open_office.png", [1242, 116], 0.95, z=20,
        show_on=["vents_open"],
        img_day="cutouts/st_vent_open_office_day.png", pos_day=[1244, 114]),
-    CO("cutouts/st_gift.png", [430, 600], 0.62, z=20, hide_on=["done:take_gift"]),
+    # (раунд 19) подарок под ёлкой УБРАН с общего плана: на вайде под ёлкой
+    # только тень еловых лап, коробка живёт исключительно в zoom_tree
+    # (замечание автора: «подарок не должен быть виден на общем плане —
+    # только если посмотреть под ёлкой»). Зона hs_tree_base туда и ведёт.
     # (раунд 7) открытый ящик Иры перенесён В ЗУМ тумбы (zoom_drawer_keypad):
     # на вайде тумба остаётся ЗАКРЫТОЙ (см. zoom cutouts + hs_ira_drawer_out там)
     # процедурная гирлянда по силуэту ёлки (tools/gen_garland.py):
@@ -259,16 +265,22 @@ B_arrows = [
 zooms = {}
 
 zooms["zoom_tree"] = {"room": "A", "hotspots": [
-    HS("hs_z_keytoy", [640, 300, 110, 150], node="take_key_toy",
+    # (раунд 19) промер альфы st_key_toy: арт x640..725 y321..401
+    HS("hs_z_keytoy", [630, 308, 105, 105], node="take_key_toy",
        name="Ключик-«игрушка»", hide_on=["done:take_key_toy"]),
-    HS("hs_z_gift", [480, 620, 260, 220], node="take_gift", name="Подарок",
-       hide_on=["done:take_gift"]),
-    HS("hs_z_santa", [480, 620, 260, 110], doc="doc_santa", name="Бирки Санты",
-       hide_on=["done:take_gift"], cursor="zoom",
-       comment="бирка на подарке — читается до вскрытия"),
+    # (раунд 19) подарок разрезан ПО АРТУ (промер st_gift@1.05 построчно):
+    # бант/узел y629..682 x504..640, корпус коробки y686..782 x493..645.
+    # Раньше обе зоны стартовали с [480,620] и «чуть ниже коробки» срабатывал
+    # take_gift — замечание автора. Теперь верх = бирка, низ = развернуть.
+    HS("hs_z_santa", [498, 620, 145, 64], doc="doc_santa",
+       name="Бирка Тайного Санты", hide_on=["done:take_gift"], cursor="zoom",
+       comment="бирка на банте — читается до вскрытия"),
+    HS("hs_z_gift", [490, 686, 155, 98], node="take_gift",
+       name="Развернуть подарок", hide_on=["done:take_gift"],
+       doc_rmb="doc_santa"),
     HS("hs_z_balls", [60, 0, 480, 600], name="Игрушки", look=True),
-    HS("hs_z_stand", [60, 530, 500, 250], name="Крестовина", look=True),
-    HS("hs_z_bin", [1180, 130, 170, 210], name="Корзина", look=True),
+    HS("hs_z_stand", [55, 685, 660, 280], name="Крестовина", look=True),
+    HS("hs_z_bin", [1555, 175, 220, 265], name="Корзина", look=True),
 ], "cutouts": [
     CO("cutouts/st_key_toy.png", [640, 306], 1.0, z=20,
        hide_on=["done:take_key_toy"]),
@@ -277,11 +289,13 @@ zooms["zoom_tree"] = {"room": "A", "hotspots": [
 ]}
 
 zooms["zoom_lap_drawer"] = {"room": "A", "needs_flag": "drawer_pried", "hotspots": [
-    HS("hs_z_tray", [520, 190, 610, 640], node="take_handle",
+    # (раунд 19) промер по сетке: лоток x638..1268 y293..803,
+    # хлам x1268..1440 y225..810, фотки x510..638 y225..810
+    HS("hs_z_tray", [635, 290, 640, 515], node="take_handle",
        name="Лоток-органайзер", hide_on=["done:take_handle"]),
-    HS("hs_z_junk", [1140, 150, 290, 700], node="search_drawer_again",
+    HS("hs_z_junk", [1265, 225, 180, 590], node="search_drawer_again",
        name="Хлам справа", hide_on=["item:relic_yatagan"]),
-    HS("hs_z_photos", [390, 150, 130, 660], name="Фотки с корпоратива",
+    HS("hs_z_photos", [505, 225, 135, 590], name="Фотки с корпоратива",
        look=True),
 ], "cutouts": [
     CO("icons/ic_handle.png", [760, 420], 1.15, z=20,
@@ -293,8 +307,9 @@ zooms["zoom_aquarium"] = {"room": "A", "hotspots": [
        name="Что-то блестит", hide_on=["done:fish_card"]),
     HS("hs_z_fish", [700, 250, 400, 260], node="h_fish_poke", name="Рыбка",
        track_idle="fish_zoom"),
-    HS("hs_z_castle", [820, 280, 630, 500], name="Замок", look=True),
-    HS("hs_z_weed", [140, 80, 300, 720], name="Водоросли", look=True),
+    # (раунд 19) промер: замок x1050..1470 y353..750, водоросли x173..495 y90..705
+    HS("hs_z_castle", [1045, 350, 430, 410], name="Замок", look=True),
+    HS("hs_z_weed", [170, 85, 330, 630], name="Водоросли", look=True),
 ], "cutouts": [
     CO("cutouts/st_card_glint.png", [1050, 760], 1.0, z=18, hide_on=["done:fish_card"],
        glint=True),
@@ -307,20 +322,27 @@ zooms["zoom_pc"] = {"room": "A", "hotspots": [
        widget="pc", also_nodes=["skud_form"],
        pc_docs=["doc_chat", "doc_order", "doc_about", "doc_dict",
                 "doc_skud_blank"]),
-    HS("hs_z_sticker", [360, 660, 740, 200], doc="doc_sticker",
+    # (раунд 19) зона стикера ОПУЩЕНА на клавиатуру (замечание автора):
+    # клавиатура по промеру x480..1463 y758..900; было y660 — висело в воздухе
+    HS("hs_z_sticker", [480, 755, 985, 150], doc="doc_sticker",
        name="Стикер под клавиатурой", cursor="zoom"),
-    HS("hs_z_mouse", [1630, 820, 140, 85], name="Мышь", look=True),
-    HS("hs_z_pencils", [1370, 330, 240, 240], name="Карандашница", look=True),
+    HS("hs_z_mouse", [1540, 810, 180, 90], name="Мышь", look=True),
+    HS("hs_z_pencils", [1420, 490, 290, 260], name="Карандашница", look=True),
 ], "cutouts": []}
 
 zooms["zoom_drawer_keypad"] = {"room": "A", "hotspots": [
-    HS("hs_z_keypad", [505, 195, 200, 310], node="ira_code", name="Кейпад",
+    # (раунд 19) ВСЕ зоны выправлены по промеру арта — были смещены влево
+    # на ~175px (замечание автора: «зоны кодовой панели и ящичка смещены влево»).
+    # Кейпад x680..900 y275..640; щель шредера x1140..1500 y150..210;
+    # ящичек x1140..1515 y228..417.
+    HS("hs_z_keypad", [680, 275, 220, 365], node="ira_code", name="Кейпад",
        widget="keypad", widget_len=4),
-    HS("hs_z_slot", [1075, 82, 330, 66], name="Щель шредера", look=True),
-    HS("hs_z_mini_drawer", [865, 175, 310, 260], name="Ящичек", look=True,
+    HS("hs_z_slot", [1140, 148, 365, 66], name="Щель шредера", look=True),
+    HS("hs_z_mini_drawer", [1150, 235, 360, 180], name="Ящичек", look=True,
        hide_on=["drawer_ira_open"]),
     # (раунд 7) открытый ящик Иры виден ТОЛЬКО здесь, в зуме тумбы
-    HS("hs_ira_drawer_out", [560, 610, 640, 250], doc="doc_registry",
+    # (раунд 19) зона посажена на альфу катаута: x791..1018 y650..857
+    HS("hs_ira_drawer_out", [788, 644, 236, 218], doc="doc_registry",
        name="Открытый ящик", show_on=["drawer_ira_open"], cursor="zoom"),
 ], "cutouts": [
     CO("cutouts/st_ira_drawer_open.png", [560, 604], 1.36, z=20,
@@ -328,29 +350,35 @@ zooms["zoom_drawer_keypad"] = {"room": "A", "hotspots": [
 ]}
 
 zooms["zoom_alarm"] = {"room": "A", "hotspots": [
-    HS("hs_z_alarm_pad", [615, 280, 240, 580], node="alarm_off",
+    # (раунд 19) промер: корпус панели x790..1180 y150..890; ревун/камера
+    # верхняя секция y150..330; клавиатура y380..890; бирка x1163..1245
+    # y413..488 (свисает справа от панели); светодиод арта ~ (1060,316)
+    HS("hs_z_alarm_pad", [790, 360, 390, 535], node="alarm_off",
        name="Панель сигнализации", widget="keypad", widget_len=4),
-    HS("hs_z_alarm_tag", [850, 290, 120, 190], name="Бирка монтажника",
+    HS("hs_z_alarm_tag", [1150, 400, 120, 110], name="Бирка монтажника",
        look=True),
-    HS("hs_z_alarm_horn", [610, 150, 200, 130], name="Сирена", look=True),
-], "cutouts": [], "led": {"alarm": [810, 250]}}
+    HS("hs_z_alarm_horn", [800, 155, 380, 190], name="Сирена", look=True),
+], "cutouts": [], "led": {"alarm": [1060, 316]}}
 
 zooms["zoom_exit_door"] = {"room": "A", "hotspots": [
-    HS("hs_z_plate", [575, 85, 640, 270], name="Табличка", look=True,
+    # (раунд 19) промер по сетке: табличка x750..1208 y120..360; ручка+рычаг
+    # x1065..1385 y680..1035; скважина x1283..1313 y968..1020; считыватель
+    # x1658..1793 y518..668 (светодиод ~1752,640); домофон x143..338 y233..660
+    HS("hs_z_plate", [745, 112, 470, 252], name="Табличка", look=True,
        reader_note="door_plate"),
-    HS("hs_z_door_push", [430, 300, 1030, 620], node="door_open",
+    HS("hs_z_door_push", [530, 300, 930, 620], node="door_open",
        name="Толкнуть дверь", hide_on=["victory"]),
-    HS("hs_z_reader_small", [1620, 462, 210, 200], node="reader_swipe",
+    HS("hs_z_reader_small", [1650, 510, 145, 160], node="reader_swipe",
        name="Считыватель"),
     HS("hs_z_bolt", [1385, 470, 92, 165], node="bolt_free", name="Засов",
        widget="bolt"),
-    HS("hs_z_handle_lock", [820, 630, 220, 160], name="Ручка и замок",
+    HS("hs_z_handle_lock", [1065, 680, 320, 360], name="Ручка и замок",
        look=True),
-    HS("hs_z_keyhole", [940, 720, 70, 70], name="Скважина", look=True),
-    HS("hs_z_intercom2", [95, 160, 180, 690], node="h_intercom", name="Домофон"),
+    HS("hs_z_keyhole", [1272, 958, 62, 76], name="Скважина", look=True),
+    HS("hs_z_intercom2", [140, 225, 205, 630], node="h_intercom", name="Домофон"),
     HS("hs_z_alarm_go", [1596, 688, 262, 336], goto="zoom_alarm",
        name="Панель сигнализации", cursor="zoom"),
-], "cutouts": [], "led": {"reader_small": [1768, 618]},
+], "cutouts": [], "led": {"reader_small": [1752, 640]},
     "bolt_geom": {"plate": [1398, 480, 64, 140], "knob_closed": [1433, 512],
                   "knob_open": [1433, 588]}}
 
@@ -359,9 +387,12 @@ zooms["zoom_panel"] = {"room": "B", "needs_flag": "panel_open", "hotspots": [
        widget="breakers", breaker_map=["power_main", "sockets_on", "h_br_elka",
                                        "h_br_srv", "h_br_rezerv", None],
        breaker_x0=845, breaker_step=46.8),
-    HS("hs_z_schema", [295, 405, 200, 150], doc="doc_schema", name="Схема",
+    # (раунд 19) промер: карточка схемы x420..623 y555..698;
+    # рубильник x1373..1440 y705..818. Ряд автоматов НЕ трогать —
+    # он совпадает с артом и от него зависят breaker_x0/breaker_step.
+    HS("hs_z_schema", [415, 550, 215, 155], doc="doc_schema", name="Схема",
        cursor="zoom"),
-    HS("hs_z_ext_switch", [1028, 528, 100, 130], name="Рубильник", look=True),
+    HS("hs_z_ext_switch", [1360, 698, 95, 128], name="Рубильник", look=True),
 ], "cutouts": [
     # рычажки: базово все down; up при флаге
     CO("cutouts/st_breaker_down.png", [837, 456], 0.6, z=20, breaker_slot=0,
@@ -384,61 +415,74 @@ zooms["zoom_panel"] = {"room": "B", "needs_flag": "panel_open", "hotspots": [
 ], "labels_engine": ["ГЛАВНЫЙ", "РОЗЕТКИ", "ЁЛКА", "СРВ", "РЕЗЕРВ", ""]}
 
 zooms["zoom_bench"] = {"room": "B", "hotspots": [
-    HS("hs_z_valve_p", [700, 150, 130, 300], node="bench_move_P", show_on=["wheel_on"], name="П",
-       bench=True, needs_flag="wheel_on"),
-    HS("hs_z_valve_p_empty", [700, 150, 130, 300], node="install_wheel",
+    # (раунд 19) ГОЛЫЙ ШТОК ПЕРЕЕХАЛ ВПРАВО. Замечание автора: на общем плане
+    # подсобки шток без маховика — крайний ПРАВЫЙ, а в зуме был крайний левый.
+    # Промер арта зума: три толстых латунных шпинделя с гайками — центры
+    # 762 / 940 / 1118, четвёртый (тонкий хромированный пруток с шариком,
+    # центр 1299) — это и есть голый шток. Значит «П» = правый тонкий,
+    # К1/К2/С — три левых. Геометрия зон и катаутов не меняется, меняется
+    # только привязка имён; логика стенда и порядок ответа не затронуты.
+    HS("hs_z_valve_k1", [700, 150, 130, 300], node="bench_move_K1", name="К1",
+       bench=True),
+    HS("hs_z_valve_k2", [870, 150, 130, 290], node="bench_move_K2", name="К2",
+       bench=True),
+    HS("hs_z_valve_s", [1050, 150, 130, 290], node="bench_move_S", name="С",
+       bench=True),
+    HS("hs_z_valve_p", [1240, 150, 115, 330], node="bench_move_P",
+       show_on=["wheel_on"], name="П", bench=True, needs_flag="wheel_on"),
+    HS("hs_z_valve_p_empty", [1240, 150, 115, 330], node="install_wheel",
        name="Голый шток «П»", hide_on=["wheel_on"]),
-    HS("hs_z_valve_k1", [870, 150, 130, 290], node="bench_move_K1", name="К1",
+    # (раунд 19) промер: насос x1343..1485 y345..780; коробка СБРОС
+    # x150..240 y222..428; листок x518..803 y750..945; коллектор по альфе
+    # катаута x1504..1655 y734..867
+    HS("hs_z_pump", [1305, 255, 210, 530], node="bench_pump", name="Насос",
        bench=True),
-    HS("hs_z_valve_k2", [1050, 150, 130, 290], node="bench_move_K2", name="К2",
-       bench=True),
-    HS("hs_z_valve_s", [1240, 150, 115, 330], node="bench_move_S", name="С",
-       bench=True),
-    HS("hs_z_pump", [1330, 200, 190, 430], node="bench_pump", name="Насос",
-       bench=True),
-    HS("hs_z_reset", [150, 225, 90, 110], node="bench_reset", name="СБРОС",
+    HS("hs_z_reset", [148, 220, 95, 205], node="bench_reset", name="СБРОС",
        bench=True),
     HS("hs_z_gauge", [368, 92, 215, 222], name="Манометр", look=True),
-    HS("hs_z_note", [545, 770, 340, 240], doc="doc_bench_note",
+    HS("hs_z_note", [515, 745, 295, 205], doc="doc_bench_note",
        name="Листок-инструкция", cursor="zoom"),
-    HS("hs_z_collector", [1410, 690, 290, 185], node="take_collector",
+    HS("hs_z_collector", [1496, 726, 168, 148], node="take_collector",
        name="Коллектор в зажиме", show_on=["bench_solved"],
        hide_on=["done:take_collector"]),
     HS("hs_z_hatch", [1385, 82, 100, 135], name="Лючок", look=True),
 ], "cutouts": [
-    # П: латунный маховик после установки; положение по bench-состоянию
-    CO("cutouts/st_valve_wheel_off.png", [700, 180], 1.0, z=20, valve="P",
+    # три толстых шпинделя — красные маховики; правый тонкий пруток получает
+    # латунный маховик «П» только после установки (install_wheel)
+    CO("cutouts/st_valve_wheel_red_off.png", [700, 180], 1.0, z=20, valve="K1",
+       state="off"),
+    CO("cutouts/st_valve_wheel_red_on.png",  [700, 180], 1.0, z=20, valve="K1",
+       state="on"),
+    CO("cutouts/st_valve_wheel_red_off.png", [870, 180], 1.0, z=20, valve="K2",
+       state="off"),
+    CO("cutouts/st_valve_wheel_red_on.png",  [870, 180], 1.0, z=20, valve="K2",
+       state="on"),
+    CO("cutouts/st_valve_wheel_red_off.png", [1050, 180], 1.0, z=20, valve="S",
+       state="off"),
+    CO("cutouts/st_valve_wheel_red_on.png",  [1050, 180], 1.0, z=20, valve="S",
+       state="on"),
+    CO("cutouts/st_valve_wheel_off.png", [1244, 187], 0.82, z=20, valve="P",
        state="off", show_on=["wheel_on"]),
-    CO("cutouts/st_valve_wheel_on.png",  [700, 180], 1.0, z=20, valve="P",
+    CO("cutouts/st_valve_wheel_on.png",  [1244, 187], 0.82, z=20, valve="P",
        state="on", show_on=["wheel_on"]),
-    CO("cutouts/st_valve_wheel_red_off.png", [870, 180], 1.0, z=20, valve="K1",
-       state="off"),
-    CO("cutouts/st_valve_wheel_red_on.png",  [870, 180], 1.0, z=20, valve="K1",
-       state="on"),
-    CO("cutouts/st_valve_wheel_red_off.png", [1050, 180], 1.0, z=20, valve="K2",
-       state="off"),
-    CO("cutouts/st_valve_wheel_red_on.png",  [1050, 180], 1.0, z=20, valve="K2",
-       state="on"),
-    CO("cutouts/st_valve_wheel_red_off.png", [1244, 187], 0.82, z=20, valve="S",
-       state="off"),
-    CO("cutouts/st_valve_wheel_red_on.png",  [1244, 187], 0.82, z=20, valve="S",
-       state="on"),
     CO("cutouts/st_pump_lever_up.png",   [1305, 232], 1.0, z=22, pump="up"),
     CO("cutouts/st_pump_lever_down.png", [1305, 232], 1.0, z=22, pump="down"),
     CO("cutouts/st_collector_clamped.png", [1450, 705], 0.9, z=20,
        show_on=["bench_solved"], hide_on=["done:take_collector"]),
     CO("cutouts/st_gauge_glass.png", [366, 96], 0.84, z=30, always=True),
-], "gauge": {"cx": 475, "cy": 205, "r": 80},
-   "valve_labels": [["П", 765], ["К1", 935], ["К2", 1115], ["С", 1297]]}
+], "gauge": {"cx": 472, "cy": 193, "r": 82},
+   "valve_labels": [["К1", 765], ["К2", 935], ["С", 1115], ["П", 1297]]}
 
 zooms["zoom_workbench"] = {"room": "B", "hotspots": [
-    HS("hs_z_journal", [520, 220, 320, 150], doc="doc_journal",
+    # (раунд 19) промер: журнал x717..1068 y308..450; тиски x1440..1590
+    # y338..630; открытый ящик = альфа катаута + разводник, x412..591 y484..639
+    HS("hs_z_journal", [710, 300, 365, 160], doc="doc_journal",
        name="Журнал испытаний", cursor="zoom"),
     HS("hs_z_padlock", [628, 590, 100, 120], node="open_workbench",
        name="Замочек", hide_on=["wb_open"]),
-    HS("hs_z_wb_drawer", [300, 430, 440, 200], node="take_wrench",
+    HS("hs_z_wb_drawer", [408, 480, 190, 165], node="take_wrench",
        name="Ящик верстака", show_on=["wb_open"], hide_on=["done:take_wrench"]),
-    HS("hs_z_vise", [1400, 370, 210, 300], name="Тиски", look=True),
+    HS("hs_z_vise", [1435, 335, 165, 300], name="Тиски", look=True),
 ], "cutouts": [
     # (раунд 7) навесной замок повешен на ПЕТЛЮ ящика верстака (промер зума)
     CO("cutouts/st_padlock_zoom.png", [622, 584], 0.42, z=20,
@@ -450,10 +494,12 @@ zooms["zoom_workbench"] = {"room": "B", "hotspots": [
 ]}
 
 zooms["zoom_attic"] = {"room": "B", "hotspots": [
-    HS("hs_z_box_shelf", [400, 235, 560, 360], node="box_down",
+    # (раунд 19) промер: коробка = альфа катаута x378..918 y238..587;
+    # мишура x1223..1373 y533..1080; полка (след) x300..1500 y412..660
+    HS("hs_z_box_shelf", [380, 240, 540, 348], node="box_down",
        name="Коробка «НГ-2019»", hide_on=["box_down"]),
-    HS("hs_z_tinsel", [890, 400, 200, 640], name="Мишура", look=True),
-    HS("hs_z_dust", [300, 320, 700, 200], name="Пыльный след", look=True,
+    HS("hs_z_tinsel", [1215, 525, 170, 555], name="Мишура", look=True),
+    HS("hs_z_dust", [330, 420, 820, 190], name="Пыльный след", look=True,
        show_on=["box_down"]),
 ], "cutouts": [
     # (раунд 9) новый авторский арт коробки «НГ-2019» с мишурой (ракурс
@@ -463,15 +509,21 @@ zooms["zoom_attic"] = {"room": "B", "hotspots": [
 ]}
 
 zooms["zoom_closet"] = {"room": "B", "hotspots": [
-    HS("hs_z_medkit", [1128, 88, 186, 388], node="take_validol", name="Аптечка",
+    # (раунд 19) промер: аптечка x1268..1440 y135..465; швабра (черенок+щётка
+    # +бирка) x862..968 y68..510; левый крючок x792..858, правый x1028..1088,
+    # оба y165..245; тряпка x720..915 y525..683; бутыли x900..1095 y720..990;
+    # ведро x683..878 y750..990. Крючки РАЗДЕЛЕНЫ на два, чтобы не перехватывать
+    # черенок швабры (мелкая зона выигрывает у крупной по площади).
+    HS("hs_z_medkit", [1265, 130, 180, 340], node="take_validol", name="Аптечка",
        hide_on=["done:take_validol"]),
     # (раунд 9) швабра висит на крючках ВНУТРИ шкафа — зона взятия здесь
-    HS("hs_mop", [845, 120, 140, 410], node="take_mop", name="Швабра",
+    HS("hs_mop", [865, 58, 120, 462], node="take_mop", name="Швабра",
        hide_on=["done:take_mop"], doc_rmb="doc_mop_tag"),
-    HS("hs_z_hooks", [640, 105, 380, 140], name="Крючки", look=True),
-    HS("hs_z_rag", [520, 385, 360, 140], name="Тряпка", look=True),
-    HS("hs_z_bottles", [780, 530, 240, 480], name="Бутыли", look=True),
-    HS("hs_z_bucket2", [510, 550, 300, 460], name="Ведро", look=True),
+    HS("hs_z_hooks", [788, 155, 76, 100], name="Крючки", look=True),
+    HS("hs_z_hooks2", [1018, 155, 112, 100], name="Крючки", look=True),
+    HS("hs_z_rag", [715, 520, 205, 170], name="Тряпка", look=True),
+    HS("hs_z_bottles", [895, 715, 205, 280], name="Бутыли", look=True),
+    HS("hs_z_bucket2", [680, 745, 205, 250], name="Ведро", look=True),
 ], "cutouts": [
     # (раунд 9) швабра (черенок удлинён ~x2, gen_r9_cutouts) на среднем крючке
     CO("cutouts/st_mop_on_hook.png", [763, 50], 1.5, z=20,
@@ -505,6 +557,16 @@ scene = {
     "fx": {"util_handle": "cutouts/st_util_handle.png"},
     "doc_items": {"doc_card": "card", "doc_postcard": "hundred"},
     "doc_auto": {"take_gift": "doc_postcard"},
+    # (раунд 19) АРХИВ БУМАГ — кнопка «БУМАГИ» в HUD. Замечание автора:
+    # прочитанную бирку с подарка после вскрытия было не посмотреть заново
+    # (подарок исчезает, а сотка уходит в кофемашину вместе с открыткой).
+    # Здесь — порядок строк в архиве; показываются только прочитанные.
+    "doc_list": [
+        "doc_santa", "doc_postcard", "doc_card", "doc_sticker", "doc_poster",
+        "doc_calendar", "doc_karaoke", "doc_chat", "doc_order", "doc_about",
+        "doc_dict", "doc_skud_blank", "doc_registry", "doc_journal",
+        "doc_bench_note", "doc_schema", "doc_mop_tag",
+    ],
 }
 
 os.makedirs("design", exist_ok=True)

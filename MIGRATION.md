@@ -45,6 +45,7 @@ luajit tools/test_state.lua                    # ядро: солвер, нег�
 python3 tools/validate_puzzles.py              # GATE1: граф, разрешимость, герринги
 python3 tools/gen_scene.py && python3 tools/gen_texts.py
 python3 tools/validate_scene.py                # GATE2: сцена/тексты/тени/иконки
+python3 tools/check_fonts.py                   # гейт шрифтов: тофу-глифы (р.19)
 xvfb-run -a -s "-screen 0 1920x1080x24" love . --selftest      # смок
 rm -rf ~/.local/share/love/BrassJanissary2     # чистый сейв
 python3 tools/gen_autoplay.py

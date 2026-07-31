@@ -24,7 +24,10 @@
     букв нет», который якорь не ловит принципиально;
   * исходник → letterbox-смок: смок обязан ронять сломанный пересчёт
     экранных координат в мировые, а автоплей — входить в игру через окно,
-    а не ступенькой ниже игрока.
+    а не ступенькой ниже игрока;
+  * исходник → гейт шрифтов (р.19): тофу-глиф возвращается и в реплику, и в
+    строковый литерал Lua — обе ветки разбора обязаны его поймать и назвать
+    место. Свою собственную слепоту гейт сторожит канарейкой сам.
 
 Запуск из корня репозитория:  python3 tools/test_negatives.py
                               python3 tools/test_negatives.py --fast  (без движка)
@@ -99,7 +102,18 @@ def m_breaker_hole_lost(docs):
             h["breaker_map"] = [x for x in h["breaker_map"] if x is not None]
 
 
+def m_tofu_glyph(docs):
+    """(р.19) в реплику вернулся «✓» — в шрифтах сборки его нет, на экране квадрат.
+
+    Символ выбран не случайно: ровно он и стоял у каждой закрытой цели, пока
+    раунд 19 не вскрыл целый класс таких дыр. Ни один прежний гейт их не ловил
+    — движок молча рисует .notdef.
+    """
+    _first_replica_holder(docs["design/texts.json"])[0]["t"] += " ✓"
+
+
 GATE2 = [sys.executable, "tools/validate_scene.py"]
+FONTGATE = [sys.executable, "tools/check_fonts.py"]
 
 CASES = [
     ("К3 реплика без спикера роняет GATE2", m_no_speaker, GATE2, "реплика без поля 's'"),
@@ -107,6 +121,8 @@ CASES = [
     ("К3 нестроковый текст роняет GATE2", m_bad_type, GATE2, "поле 't' не строка"),
     ("К1 потеря дырки в рейке роняет GATE2", m_breaker_hole_lost, GATE2,
      "карта автоматов"),
+    ("Р19 тофу-глиф в реплике роняет гейт шрифтов", m_tofu_glyph, FONTGATE,
+     "FONT GATE FAIL"),
 ]
 
 
@@ -283,7 +299,11 @@ def _all_nodes():
 AP_CASES = [
     ("С1 сейв чужой версии не пускает в игру",
      _from_title({"op": "assert_title", "open": True}),
-     [f"версия {SAVE_V - 1} ≠ {SAVE_V}", TAIL],
+     # маркер повторяет формулировку ui.lua. Был «версия 2 ≠ 3»; «≠» выкинут
+     # из движка в р.19 — символа нет в Neucha, а строка уходит в тост
+     # (см. tools/check_fonts.py). Здесь, в консоли теста, «≠» был бы законен,
+     # но маркер обязан совпадать с тем, что реально печатает игра.
+     [f"версия {SAVE_V - 1}, нужна {SAVE_V}", TAIL],
      {"pre": _plant(_blob(version=SAVE_V - 1))}),
     ("С1 неизвестный зум в сейве откатывается в комнату",
      _from_title({"op": "assert_title", "open": False},
@@ -460,6 +480,52 @@ def case_click_path():
           f"{'ловится' if not broken else 'НЕ ЛОВИТСЯ'}")
 
 
+# ---------------- семья 5: исходник Lua → гейт шрифтов ----------------
+# Кейс в CASES сторожит ветку texts.json. Но четыре из шести дыр раунда 19
+# сидели не в данных, а в строковых литералах Lua («✓», «▸», «→», «←»), и
+# ветку разбора исходников надо сторожить отдельно — иначе она может тихо
+# ослепнуть (например, если сломается регулярка литерала), а гейт останется
+# зелёным и будет выглядеть работающим.
+FONT_SRC = "src/ui.lua"
+FONT_NEG = "Р19 тофу-глиф в литерале Lua роняет гейт шрифтов"
+FONT_ANCHOR = 'lg.print(g.t, x + 40, gy)'
+FONT_BROKEN = 'lg.print("✓ " .. g.t, x + 40, gy)'
+
+
+def case_font_gate_lua():
+    """(р.19) гейт шрифтов обязан видеть тофу и в исходнике, не только в JSON."""
+    src = open(FONT_SRC, encoding="utf-8").read()
+    if src.count(FONT_ANCHOR) != 1:
+        SKIPPED.append(FONT_NEG)
+        print(f"[ПРОПУСК] {FONT_NEG}: якорь в {FONT_SRC} встречается "
+              f"{src.count(FONT_ANCHOR)} раз(а), ждали 1 — негатив ослеп")
+        return
+    before = md5(FONT_SRC)
+    tmp = tempfile.mkdtemp(prefix="font_neg_")
+    shutil.copy2(FONT_SRC, os.path.join(tmp, "ui.lua"))
+    try:
+        open(FONT_SRC, "w", encoding="utf-8").write(
+            src.replace(FONT_ANCHOR, FONT_BROKEN, 1))
+        rc, out = run(FONTGATE)
+    finally:
+        shutil.copy2(os.path.join(tmp, "ui.lua"), FONT_SRC)
+        shutil.rmtree(tmp, ignore_errors=True)
+    if md5(FONT_SRC) != before:
+        FAILED.append(f"НЕ ВОССТАНОВЛЕН {FONT_SRC}")
+        print(f"[ПРОВАЛ] {FONT_SRC} не восстановлен после мутации!")
+    said = "FONT GATE FAIL" in out
+    named = FONT_SRC in out                     # гейт обязан назвать, где чинить
+    ok = rc != 0 and said and named
+    (PASSED if ok else FAILED).append(FONT_NEG)
+    print(f"[{'OK  ' if ok else 'ПРОВАЛ'}] {FONT_NEG}: rc={rc} ожидалось≠0, "
+          f"маркер {'найден' if said else 'НЕ НАЙДЕН'}, "
+          f"место {'названо' if named else 'НЕ НАЗВАНО'}")
+    if not ok:
+        print("     ---- вывод гейта ----")
+        for line in out.strip().splitlines()[-10:]:
+            print("     " + line)
+
+
 LB_ANCHOR = "  return (x - letter.ox) / letter.sx, (y - letter.oy) / letter.sy"
 LB_BROKEN = "  return x / letter.sx, y / letter.sy"
 
@@ -565,6 +631,7 @@ def main():
             gates_case(name, paint, sub, need)
 
     case_click_path()                 # статика, движок не нужен
+    case_font_gate_lua()              # статика, движок не нужен
     if "--fast" in sys.argv:
         SKIPPED.append(SMOKE_NEG)
         print("[ПРОПУСК] движковый негатив смока — режим --fast")

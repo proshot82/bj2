@@ -157,24 +157,6 @@
      ]
     },
     {
-     "id": "hs_poster_ot",
-     "rect": [
-      1506,
-      246,
-      94,
-      76
-     ],
-     "cursor": "zoom",
-     "doc": "doc_poster",
-     "name": "Плакат по охране труда",
-     "rect_day": [
-      1543,
-      236,
-      64,
-      58
-     ]
-    },
-    {
      "id": "hs_red_button",
      "rect": [
       1166,
@@ -212,6 +194,24 @@
      "cursor": "zoom",
      "doc": "doc_karaoke",
      "name": "Караоке-список"
+    },
+    {
+     "id": "hs_poster_ot",
+     "rect": [
+      1499,
+      238,
+      100,
+      90
+     ],
+     "cursor": "zoom",
+     "doc": "doc_poster",
+     "name": "Плакат по охране труда",
+     "rect_day": [
+      1529,
+      241,
+      100,
+      88
+     ]
     },
     {
      "id": "hs_lap_drawer",
@@ -674,18 +674,6 @@
      "pos_day": [
       1244,
       114
-     ]
-    },
-    {
-     "img": "cutouts/st_gift.png",
-     "pos": [
-      430,
-      600
-     ],
-     "scale": 0.62,
-     "z": 20,
-     "hide_on": [
-      "done:take_gift"
      ]
     },
     {
@@ -1243,12 +1231,28 @@
    "room": "A",
    "hotspots": [
     {
+     "id": "hs_z_santa",
+     "rect": [
+      498,
+      620,
+      145,
+      64
+     ],
+     "cursor": "zoom",
+     "doc": "doc_santa",
+     "name": "Бирка Тайного Санты",
+     "hide_on": [
+      "done:take_gift"
+     ],
+     "comment": "бирка на банте — читается до вскрытия"
+    },
+    {
      "id": "hs_z_keytoy",
      "rect": [
-      640,
-      300,
-      110,
-      150
+      630,
+      308,
+      105,
+      105
      ],
      "cursor": "act",
      "node": "take_key_toy",
@@ -1258,55 +1262,40 @@
      ]
     },
     {
-     "id": "hs_z_santa",
+     "id": "hs_z_gift",
      "rect": [
-      480,
-      620,
-      260,
-      110
+      490,
+      686,
+      155,
+      98
      ],
-     "cursor": "zoom",
-     "doc": "doc_santa",
-     "name": "Бирки Санты",
+     "cursor": "act",
+     "node": "take_gift",
+     "name": "Развернуть подарок",
      "hide_on": [
       "done:take_gift"
      ],
-     "comment": "бирка на подарке — читается до вскрытия"
+     "doc_rmb": "doc_santa"
     },
     {
      "id": "hs_z_bin",
      "rect": [
-      1180,
-      130,
-      170,
-      210
+      1555,
+      175,
+      220,
+      265
      ],
      "cursor": "act",
      "name": "Корзина",
      "look": true
     },
     {
-     "id": "hs_z_gift",
-     "rect": [
-      480,
-      620,
-      260,
-      220
-     ],
-     "cursor": "act",
-     "node": "take_gift",
-     "name": "Подарок",
-     "hide_on": [
-      "done:take_gift"
-     ]
-    },
-    {
      "id": "hs_z_stand",
      "rect": [
-      60,
-      530,
-      500,
-      250
+      55,
+      685,
+      660,
+      280
      ],
      "cursor": "act",
      "name": "Крестовина",
@@ -1360,10 +1349,10 @@
     {
      "id": "hs_z_photos",
      "rect": [
-      390,
-      150,
-      130,
-      660
+      505,
+      225,
+      135,
+      590
      ],
      "cursor": "act",
      "name": "Фотки с корпоратива",
@@ -1372,10 +1361,10 @@
     {
      "id": "hs_z_junk",
      "rect": [
-      1140,
-      150,
-      290,
-      700
+      1265,
+      225,
+      180,
+      590
      ],
      "cursor": "act",
      "node": "search_drawer_again",
@@ -1387,10 +1376,10 @@
     {
      "id": "hs_z_tray",
      "rect": [
-      520,
-      190,
-      610,
-      640
+      635,
+      290,
+      640,
+      515
      ],
      "cursor": "act",
      "node": "take_handle",
@@ -1449,27 +1438,27 @@
      "track_idle": "fish_zoom"
     },
     {
-     "id": "hs_z_weed",
-     "rect": [
-      140,
-      80,
-      300,
-      720
-     ],
-     "cursor": "act",
-     "name": "Водоросли",
-     "look": true
-    },
-    {
      "id": "hs_z_castle",
      "rect": [
-      820,
-      280,
-      630,
-      500
+      1045,
+      350,
+      430,
+      410
      ],
      "cursor": "act",
      "name": "Замок",
+     "look": true
+    },
+    {
+     "id": "hs_z_weed",
+     "rect": [
+      170,
+      85,
+      330,
+      630
+     ],
+     "cursor": "act",
+     "name": "Водоросли",
      "look": true
     }
    ],
@@ -1510,10 +1499,10 @@
     {
      "id": "hs_z_mouse",
      "rect": [
-      1630,
-      820,
-      140,
-      85
+      1540,
+      810,
+      180,
+      90
      ],
      "cursor": "act",
      "name": "Мышь",
@@ -1522,10 +1511,10 @@
     {
      "id": "hs_z_pencils",
      "rect": [
-      1370,
-      330,
-      240,
-      240
+      1420,
+      490,
+      290,
+      260
      ],
      "cursor": "act",
      "name": "Карандашница",
@@ -1534,10 +1523,10 @@
     {
      "id": "hs_z_sticker",
      "rect": [
-      360,
-      660,
-      740,
-      200
+      480,
+      755,
+      985,
+      150
      ],
      "cursor": "zoom",
      "doc": "doc_sticker",
@@ -1576,9 +1565,9 @@
     {
      "id": "hs_z_slot",
      "rect": [
-      1075,
-      82,
-      330,
+      1140,
+      148,
+      365,
       66
      ],
      "cursor": "act",
@@ -1586,26 +1575,27 @@
      "look": true
     },
     {
-     "id": "hs_z_keypad",
+     "id": "hs_ira_drawer_out",
      "rect": [
-      505,
-      195,
-      200,
-      310
+      788,
+      644,
+      236,
+      218
      ],
-     "cursor": "act",
-     "node": "ira_code",
-     "name": "Кейпад",
-     "widget": "keypad",
-     "widget_len": 4
+     "cursor": "zoom",
+     "doc": "doc_registry",
+     "name": "Открытый ящик",
+     "show_on": [
+      "drawer_ira_open"
+     ]
     },
     {
      "id": "hs_z_mini_drawer",
      "rect": [
-      865,
-      175,
-      310,
-      260
+      1150,
+      235,
+      360,
+      180
      ],
      "cursor": "act",
      "name": "Ящичек",
@@ -1615,19 +1605,18 @@
      ]
     },
     {
-     "id": "hs_ira_drawer_out",
+     "id": "hs_z_keypad",
      "rect": [
-      560,
-      610,
-      640,
-      250
+      680,
+      275,
+      220,
+      365
      ],
-     "cursor": "zoom",
-     "doc": "doc_registry",
-     "name": "Открытый ящик",
-     "show_on": [
-      "drawer_ira_open"
-     ]
+     "cursor": "act",
+     "node": "ira_code",
+     "name": "Кейпад",
+     "widget": "keypad",
+     "widget_len": 4
     }
    ],
    "cutouts": [
@@ -1652,10 +1641,10 @@
     {
      "id": "hs_z_alarm_tag",
      "rect": [
-      850,
-      290,
+      1150,
+      400,
       120,
-      190
+      110
      ],
      "cursor": "act",
      "name": "Бирка монтажника",
@@ -1664,10 +1653,10 @@
     {
      "id": "hs_z_alarm_horn",
      "rect": [
-      610,
-      150,
-      200,
-      130
+      800,
+      155,
+      380,
+      190
      ],
      "cursor": "act",
      "name": "Сирена",
@@ -1676,10 +1665,10 @@
     {
      "id": "hs_z_alarm_pad",
      "rect": [
-      615,
-      280,
-      240,
-      580
+      790,
+      360,
+      390,
+      535
      ],
      "cursor": "act",
      "node": "alarm_off",
@@ -1691,8 +1680,8 @@
    "cutouts": [],
    "led": {
     "alarm": [
-     810,
-     250
+     1060,
+     316
     ]
    },
    "bg": "zooms/zoom_alarm.png"
@@ -1703,10 +1692,10 @@
     {
      "id": "hs_z_keyhole",
      "rect": [
-      940,
-      720,
-      70,
-      70
+      1272,
+      958,
+      62,
+      76
      ],
      "cursor": "act",
      "name": "Скважина",
@@ -1726,24 +1715,12 @@
      "widget": "bolt"
     },
     {
-     "id": "hs_z_handle_lock",
-     "rect": [
-      820,
-      630,
-      220,
-      160
-     ],
-     "cursor": "act",
-     "name": "Ручка и замок",
-     "look": true
-    },
-    {
      "id": "hs_z_reader_small",
      "rect": [
-      1620,
-      462,
-      210,
-      200
+      1650,
+      510,
+      145,
+      160
      ],
      "cursor": "act",
      "node": "reader_swipe",
@@ -1762,24 +1739,24 @@
      "name": "Панель сигнализации"
     },
     {
-     "id": "hs_z_intercom2",
+     "id": "hs_z_handle_lock",
      "rect": [
-      95,
-      160,
-      180,
-      690
+      1065,
+      680,
+      320,
+      360
      ],
      "cursor": "act",
-     "node": "h_intercom",
-     "name": "Домофон"
+     "name": "Ручка и замок",
+     "look": true
     },
     {
      "id": "hs_z_plate",
      "rect": [
-      575,
-      85,
-      640,
-      270
+      745,
+      112,
+      470,
+      252
      ],
      "cursor": "act",
      "name": "Табличка",
@@ -1787,11 +1764,23 @@
      "reader_note": "door_plate"
     },
     {
+     "id": "hs_z_intercom2",
+     "rect": [
+      140,
+      225,
+      205,
+      630
+     ],
+     "cursor": "act",
+     "node": "h_intercom",
+     "name": "Домофон"
+    },
+    {
      "id": "hs_z_door_push",
      "rect": [
-      430,
+      530,
       300,
-      1030,
+      930,
       620
      ],
      "cursor": "act",
@@ -1805,8 +1794,8 @@
    "cutouts": [],
    "led": {
     "reader_small": [
-     1768,
-     618
+     1752,
+     640
     ]
    },
    "bolt_geom": {
@@ -1834,10 +1823,10 @@
     {
      "id": "hs_z_ext_switch",
      "rect": [
-      1028,
-      528,
-      100,
-      130
+      1360,
+      698,
+      95,
+      128
      ],
      "cursor": "act",
      "name": "Рубильник",
@@ -1846,10 +1835,10 @@
     {
      "id": "hs_z_schema",
      "rect": [
-      295,
-      405,
-      200,
-      150
+      415,
+      550,
+      215,
+      155
      ],
      "cursor": "zoom",
      "doc": "doc_schema",
@@ -2004,19 +1993,6 @@
    "room": "B",
    "hotspots": [
     {
-     "id": "hs_z_reset",
-     "rect": [
-      150,
-      225,
-      90,
-      110
-     ],
-     "cursor": "act",
-     "node": "bench_reset",
-     "name": "СБРОС",
-     "bench": true
-    },
-    {
      "id": "hs_z_hatch",
      "rect": [
       1385,
@@ -2029,22 +2005,40 @@
      "look": true
     },
     {
-     "id": "hs_z_valve_k1",
+     "id": "hs_z_reset",
      "rect": [
-      870,
-      150,
-      130,
-      290
+      148,
+      220,
+      95,
+      205
      ],
      "cursor": "act",
-     "node": "bench_move_K1",
-     "name": "К1",
+     "node": "bench_reset",
+     "name": "СБРОС",
      "bench": true
+    },
+    {
+     "id": "hs_z_collector",
+     "rect": [
+      1496,
+      726,
+      168,
+      148
+     ],
+     "cursor": "act",
+     "node": "take_collector",
+     "name": "Коллектор в зажиме",
+     "show_on": [
+      "bench_solved"
+     ],
+     "hide_on": [
+      "done:take_collector"
+     ]
     },
     {
      "id": "hs_z_valve_k2",
      "rect": [
-      1050,
+      870,
       150,
       130,
       290
@@ -2057,10 +2051,10 @@
     {
      "id": "hs_z_valve_s",
      "rect": [
-      1240,
+      1050,
       150,
-      115,
-      330
+      130,
+      290
      ],
      "cursor": "act",
      "node": "bench_move_S",
@@ -2070,10 +2064,10 @@
     {
      "id": "hs_z_valve_p",
      "rect": [
-      700,
+      1240,
       150,
-      130,
-      300
+      115,
+      330
      ],
      "cursor": "act",
      "node": "bench_move_P",
@@ -2087,10 +2081,10 @@
     {
      "id": "hs_z_valve_p_empty",
      "rect": [
-      700,
+      1240,
       150,
-      130,
-      300
+      115,
+      330
      ],
      "cursor": "act",
      "node": "install_wheel",
@@ -2098,6 +2092,19 @@
      "hide_on": [
       "wheel_on"
      ]
+    },
+    {
+     "id": "hs_z_valve_k1",
+     "rect": [
+      700,
+      150,
+      130,
+      300
+     ],
+     "cursor": "act",
+     "node": "bench_move_K1",
+     "name": "К1",
+     "bench": true
     },
     {
      "id": "hs_z_gauge",
@@ -2112,30 +2119,12 @@
      "look": true
     },
     {
-     "id": "hs_z_collector",
-     "rect": [
-      1410,
-      690,
-      290,
-      185
-     ],
-     "cursor": "act",
-     "node": "take_collector",
-     "name": "Коллектор в зажиме",
-     "show_on": [
-      "bench_solved"
-     ],
-     "hide_on": [
-      "done:take_collector"
-     ]
-    },
-    {
      "id": "hs_z_note",
      "rect": [
-      545,
-      770,
-      340,
-      240
+      515,
+      745,
+      295,
+      205
      ],
      "cursor": "zoom",
      "doc": "doc_bench_note",
@@ -2144,10 +2133,10 @@
     {
      "id": "hs_z_pump",
      "rect": [
-      1330,
-      200,
-      190,
-      430
+      1305,
+      255,
+      210,
+      530
      ],
      "cursor": "act",
      "node": "bench_pump",
@@ -2157,12 +2146,78 @@
    ],
    "cutouts": [
     {
-     "img": "cutouts/st_valve_wheel_off.png",
+     "img": "cutouts/st_valve_wheel_red_off.png",
      "pos": [
       700,
       180
      ],
      "scale": 1.0,
+     "z": 20,
+     "valve": "K1",
+     "state": "off"
+    },
+    {
+     "img": "cutouts/st_valve_wheel_red_on.png",
+     "pos": [
+      700,
+      180
+     ],
+     "scale": 1.0,
+     "z": 20,
+     "valve": "K1",
+     "state": "on"
+    },
+    {
+     "img": "cutouts/st_valve_wheel_red_off.png",
+     "pos": [
+      870,
+      180
+     ],
+     "scale": 1.0,
+     "z": 20,
+     "valve": "K2",
+     "state": "off"
+    },
+    {
+     "img": "cutouts/st_valve_wheel_red_on.png",
+     "pos": [
+      870,
+      180
+     ],
+     "scale": 1.0,
+     "z": 20,
+     "valve": "K2",
+     "state": "on"
+    },
+    {
+     "img": "cutouts/st_valve_wheel_red_off.png",
+     "pos": [
+      1050,
+      180
+     ],
+     "scale": 1.0,
+     "z": 20,
+     "valve": "S",
+     "state": "off"
+    },
+    {
+     "img": "cutouts/st_valve_wheel_red_on.png",
+     "pos": [
+      1050,
+      180
+     ],
+     "scale": 1.0,
+     "z": 20,
+     "valve": "S",
+     "state": "on"
+    },
+    {
+     "img": "cutouts/st_valve_wheel_off.png",
+     "pos": [
+      1244,
+      187
+     ],
+     "scale": 0.82,
      "z": 20,
      "valve": "P",
      "state": "off",
@@ -2173,82 +2228,16 @@
     {
      "img": "cutouts/st_valve_wheel_on.png",
      "pos": [
-      700,
-      180
+      1244,
+      187
      ],
-     "scale": 1.0,
+     "scale": 0.82,
      "z": 20,
      "valve": "P",
      "state": "on",
      "show_on": [
       "wheel_on"
      ]
-    },
-    {
-     "img": "cutouts/st_valve_wheel_red_off.png",
-     "pos": [
-      870,
-      180
-     ],
-     "scale": 1.0,
-     "z": 20,
-     "valve": "K1",
-     "state": "off"
-    },
-    {
-     "img": "cutouts/st_valve_wheel_red_on.png",
-     "pos": [
-      870,
-      180
-     ],
-     "scale": 1.0,
-     "z": 20,
-     "valve": "K1",
-     "state": "on"
-    },
-    {
-     "img": "cutouts/st_valve_wheel_red_off.png",
-     "pos": [
-      1050,
-      180
-     ],
-     "scale": 1.0,
-     "z": 20,
-     "valve": "K2",
-     "state": "off"
-    },
-    {
-     "img": "cutouts/st_valve_wheel_red_on.png",
-     "pos": [
-      1050,
-      180
-     ],
-     "scale": 1.0,
-     "z": 20,
-     "valve": "K2",
-     "state": "on"
-    },
-    {
-     "img": "cutouts/st_valve_wheel_red_off.png",
-     "pos": [
-      1244,
-      187
-     ],
-     "scale": 0.82,
-     "z": 20,
-     "valve": "S",
-     "state": "off"
-    },
-    {
-     "img": "cutouts/st_valve_wheel_red_on.png",
-     "pos": [
-      1244,
-      187
-     ],
-     "scale": 0.82,
-     "z": 20,
-     "valve": "S",
-     "state": "on"
     },
     {
      "img": "cutouts/st_pump_lever_up.png",
@@ -2297,25 +2286,25 @@
     }
    ],
    "gauge": {
-    "cx": 475,
-    "cy": 205,
-    "r": 80
+    "cx": 472,
+    "cy": 193,
+    "r": 82
    },
    "valve_labels": [
     [
-     "П",
+     "К1",
      765
     ],
     [
-     "К1",
+     "К2",
      935
     ],
     [
-     "К2",
+     "С",
      1115
     ],
     [
-     "С",
+     "П",
      1297
     ]
    ],
@@ -2340,36 +2329,12 @@
      ]
     },
     {
-     "id": "hs_z_journal",
-     "rect": [
-      520,
-      220,
-      320,
-      150
-     ],
-     "cursor": "zoom",
-     "doc": "doc_journal",
-     "name": "Журнал испытаний"
-    },
-    {
-     "id": "hs_z_vise",
-     "rect": [
-      1400,
-      370,
-      210,
-      300
-     ],
-     "cursor": "act",
-     "name": "Тиски",
-     "look": true
-    },
-    {
      "id": "hs_z_wb_drawer",
      "rect": [
-      300,
-      430,
-      440,
-      200
+      408,
+      480,
+      190,
+      165
      ],
      "cursor": "act",
      "node": "take_wrench",
@@ -2380,6 +2345,30 @@
      "hide_on": [
       "done:take_wrench"
      ]
+    },
+    {
+     "id": "hs_z_vise",
+     "rect": [
+      1435,
+      335,
+      165,
+      300
+     ],
+     "cursor": "act",
+     "name": "Тиски",
+     "look": true
+    },
+    {
+     "id": "hs_z_journal",
+     "rect": [
+      710,
+      300,
+      365,
+      160
+     ],
+     "cursor": "zoom",
+     "doc": "doc_journal",
+     "name": "Журнал испытаний"
     }
    ],
    "cutouts": [
@@ -2432,10 +2421,10 @@
     {
      "id": "hs_z_tinsel",
      "rect": [
-      890,
-      400,
-      200,
-      640
+      1215,
+      525,
+      170,
+      555
      ],
      "cursor": "act",
      "name": "Мишура",
@@ -2444,10 +2433,10 @@
     {
      "id": "hs_z_dust",
      "rect": [
-      300,
-      320,
-      700,
-      200
+      330,
+      420,
+      820,
+      190
      ],
      "cursor": "act",
      "name": "Пыльный след",
@@ -2459,10 +2448,10 @@
     {
      "id": "hs_z_box_shelf",
      "rect": [
-      400,
-      235,
-      560,
-      360
+      380,
+      240,
+      540,
+      348
      ],
      "cursor": "act",
      "node": "box_down",
@@ -2492,36 +2481,60 @@
    "room": "B",
    "hotspots": [
     {
-     "id": "hs_z_rag",
-     "rect": [
-      520,
-      385,
-      360,
-      140
-     ],
-     "cursor": "act",
-     "name": "Тряпка",
-     "look": true
-    },
-    {
      "id": "hs_z_hooks",
      "rect": [
-      640,
-      105,
-      380,
-      140
+      788,
+      155,
+      76,
+      100
      ],
      "cursor": "act",
      "name": "Крючки",
      "look": true
     },
     {
+     "id": "hs_z_hooks2",
+     "rect": [
+      1018,
+      155,
+      112,
+      100
+     ],
+     "cursor": "act",
+     "name": "Крючки",
+     "look": true
+    },
+    {
+     "id": "hs_z_rag",
+     "rect": [
+      715,
+      520,
+      205,
+      170
+     ],
+     "cursor": "act",
+     "name": "Тряпка",
+     "look": true
+    },
+    {
+     "id": "hs_z_bucket2",
+     "rect": [
+      680,
+      745,
+      205,
+      250
+     ],
+     "cursor": "act",
+     "name": "Ведро",
+     "look": true
+    },
+    {
      "id": "hs_mop",
      "rect": [
-      845,
+      865,
+      58,
       120,
-      140,
-      410
+      462
      ],
      "cursor": "act",
      "node": "take_mop",
@@ -2532,12 +2545,24 @@
      "doc_rmb": "doc_mop_tag"
     },
     {
+     "id": "hs_z_bottles",
+     "rect": [
+      895,
+      715,
+      205,
+      280
+     ],
+     "cursor": "act",
+     "name": "Бутыли",
+     "look": true
+    },
+    {
      "id": "hs_z_medkit",
      "rect": [
-      1128,
-      88,
-      186,
-      388
+      1265,
+      130,
+      180,
+      340
      ],
      "cursor": "act",
      "node": "take_validol",
@@ -2545,30 +2570,6 @@
      "hide_on": [
       "done:take_validol"
      ]
-    },
-    {
-     "id": "hs_z_bottles",
-     "rect": [
-      780,
-      530,
-      240,
-      480
-     ],
-     "cursor": "act",
-     "name": "Бутыли",
-     "look": true
-    },
-    {
-     "id": "hs_z_bucket2",
-     "rect": [
-      510,
-      550,
-      300,
-      460
-     ],
-     "cursor": "act",
-     "name": "Ведро",
-     "look": true
     }
    ],
    "cutouts": [
@@ -2605,5 +2606,24 @@
  },
  "doc_auto": {
   "take_gift": "doc_postcard"
- }
+ },
+ "doc_list": [
+  "doc_santa",
+  "doc_postcard",
+  "doc_card",
+  "doc_sticker",
+  "doc_poster",
+  "doc_calendar",
+  "doc_karaoke",
+  "doc_chat",
+  "doc_order",
+  "doc_about",
+  "doc_dict",
+  "doc_skud_blank",
+  "doc_registry",
+  "doc_journal",
+  "doc_bench_note",
+  "doc_schema",
+  "doc_mop_tag"
+ ]
 }

@@ -247,10 +247,14 @@ function scenes.active_hotspots()
   if view.kind == "room" then
     for _, a in ipairs(cont.arrows or {}) do
       if not a.needs_flag or ST:has_flag(a.needs_flag) then
+        -- (р.19) Раньше подпись перехода была «→»/«←». В PTSans этих стрелок
+        -- нет: игрок наводил курсор на дверь и получал квадрат-тофу. Теперь
+        -- плашка говорит, КУДА ведёт дверь, — это ещё и понятнее стрелки.
+        local nav = (scenes.texts and scenes.texts.ui and scenes.texts.ui.arrow_to) or {}
         out[#out + 1] = {id = "arrow_" .. a.dir, rect = a.rect,
                          goto_room = a.goto_room, cursor = "move",
                          _arrow = true,
-                         name = (a.dir == "right") and "→" or "←"}
+                         name = nav[a.goto_room] or "Перейти"}
       end
     end
   end
@@ -408,7 +412,7 @@ function scenes.draw_zoom_engine(zid)
     lg.rectangle("fill", 560, 1016, 800, 44, 10, 10)
     lg.setColor(0.9, 0.88, 0.8)
     lg.setFont(FontS.small)
-    lg.printf("ЛКМ — по часовой (+)   ·   ПКМ — против часовой (−)",
+    lg.printf("ЛКМ — по часовой (+)   ·   ПКМ — против часовой (-)",
       560, 1026, 800, "center")
     lg.setColor(1, 1, 1, 1)
   elseif zid == "zoom_pc" then

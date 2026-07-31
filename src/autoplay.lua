@@ -372,6 +372,37 @@ local function exec(s)
   elseif op == "assert_steps_ge" then
     if E.state.steps < s.n then die("шагов " .. E.state.steps .. " < " .. s.n) end
     return true
+  -- ---- (р.19) АРХИВ БУМАГ ----
+  elseif op == "hud" then
+    -- жмём настоящую кнопку HUD её же координатами (ui.hud_button_rect)
+    local x, y, w, h = E.ui.hud_button_rect(s.id)
+    if not x then die("нет кнопки HUD «" .. tostring(s.id) .. "»") end
+    click(x + w / 2, y + h / 2, 1)
+    return true
+  elseif op == "archive_doc" then
+    local x, y, w, h = E.ui.docs_slot_of(s.id)
+    if not x then die("в архиве нет бумаги «" .. tostring(s.id) .. "»") end
+    click(x + w / 2, y + h / 2, 1)
+    return true
+  elseif op == "assert_archive_missing" then
+    -- архив не должен быть оглавлением ненайденного: непрочитанной бумаги
+    -- в нём нет вовсе (иначе список сам себе спойлер)
+    if E.ui.docs_slot_of(s.id) then
+      die("бумага " .. tostring(s.id) .. " лежит в архиве, хотя не прочитана")
+    end
+    return true
+  elseif op == "assert_doc" then
+    local r = E.ui.state().reader
+    if not r then die("документ закрыт, ожидался " .. tostring(s.id)) end
+    if r.doc ~= s.id then
+      die("открыт " .. tostring(r.doc) .. " ≠ " .. tostring(s.id))
+    end
+    return true
+  elseif op == "assert_no_widget" then
+    if E.ui.widget_kind() then
+      die("виджет «" .. tostring(E.ui.widget_kind()) .. "» открыт, ждали закрытый")
+    end
+    return true
   elseif op == "assert_reader" then
     local want = (s.open ~= false)
     if E.ui.reader_open() ~= want then

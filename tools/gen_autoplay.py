@@ -175,6 +175,14 @@ add(op="close_reader")
 # ---------- S5: ёлка — ключик и подарок ----------
 to_zoom("zoom_tree")
 node("take_key_toy"); dismiss()
+# (р.19) Замечание автора: бирку Санты видно, только пока цела коробка —
+# забрал сотку, коробка исчезла вместе с биркой, и подсказку не перечитать.
+# Лечится архивом бумаг. Проверяем всю петлю: до прочтения архив о бирке
+# знать не должен, после вскрытия — обязан её отдать.
+add(op="assert_archive_missing", id="doc_santa"); neg("archive_unread_hidden")
+add(op="click_hs", id="hs_z_santa")
+add(op="assert_doc", id="doc_santa")
+add(op="close_reader")
 node("take_gift")
 # (аудит С3) Единственная точка игры, где документ открывается САМ и поверх
 # него сразу ложатся реплики (scene.doc_auto: take_gift → doc_postcard).
@@ -190,6 +198,18 @@ add(op="close_reader")                       # авто-открытка
 add(op="assert_reader", open=False)
 add(op="assert_item", id="hundred")
 neg("reader_under_dialog")
+
+# коробки в мире больше нет (hide_on done:take_gift) — а бирка обязана
+# читаться из архива, и читалка обязана вернуть игрока в список, не в комнату
+add(op="hud", id="docs")
+add(op="assert_widget", kind="docs")
+shot("ap_05b_docs_archive")
+add(op="archive_doc", id="doc_santa")
+add(op="assert_doc", id="doc_santa")
+add(op="close_reader")
+add(op="assert_widget", kind="docs")
+add(op="esc")
+add(op="assert_no_widget")
 
 # ---------- S6: ПК — негатив, код, доки ----------
 to_zoom("zoom_pc")
@@ -364,6 +384,14 @@ add(op="rmb_item", id="relic_fez")
 add(op="wait", s=0.3)
 shot("ap_15_crown_dialog")
 dismiss()
+
+# (р.19) второй кадр архива — уже под конец, когда бумаг много: панель
+# обязана перейти на две колонки и не выпасть за холст
+add(op="hud", id="docs")
+add(op="assert_widget", kind="docs")
+shot("ap_15b_docs_archive_full")
+add(op="esc")
+add(op="assert_no_widget")
 
 # ---------- S18: финал ----------
 node("reader_swipe"); dismiss()

@@ -202,7 +202,7 @@ local function fix_line(r)
   local fixed = { s = s,
                   e = (type(r.e) == "string") and r.e or DEF_EMO[s],
                   t = (type(r.t) == "string") and r.t or "…" }
-  io.stderr:write(("UI WARN: битая реплика s=%s e=%s t=%s → %s/%s\n"):format(
+  io.stderr:write(("UI WARN: битая реплика s=%s e=%s t=%s -> %s/%s\n"):format(
     tostring(r.s), tostring(r.e), type(r.t), fixed.s, fixed.e))
   return fixed
 end
@@ -346,13 +346,15 @@ end
 
 local function ans_line(k)
   -- bench_printed_ru / bench_seq_ru приходят из gen_puzzles СПИСКАМИ шагов;
-  -- склеиваем в строку-процедуру (разделитель « → », как исходно ждал код —
-  -- иначе gsub-замена получает таблицу и читалка листка стенда падает).
+  -- склеиваем в строку-процедуру (иначе gsub-замена получает таблицу и
+  -- читалка листка стенда падает). Разделитель « » », а не « → »: стрелки
+  -- нет ни в одном шрифте сборки, и процедура на листке читалась как
+  -- «П ☒ К1 ☒ …» — квадраты вместо стрелок (р.19, гейт tools/check_fonts.py).
   if k == "bench_printed_ru" then
-    return table.concat(P.answers.bench_printed_ru, " → ")
+    return table.concat(P.answers.bench_printed_ru, " » ")
   end
   if k == "bench_seq_ru" then
-    return table.concat(P.answers.bench_seq_ru, " → ")
+    return table.concat(P.answers.bench_seq_ru, " » ")
   end
   if k == "bench_fix_ru" then
     local i0 = P.answers.bench_fix_idx          -- 0-based индекс шага-опечатки
@@ -652,7 +654,11 @@ local function goals_draw()
     lg.setColor(C.brass)
     local dn, tot = 0, #P.goals
     for _, g in ipairs(P.goals) do if ST.flags[g.flag] then dn = dn + 1 end end
-    lg.print(T.ui.goals .. "  " .. dn .. "/" .. tot .. "  ▸", x + 14, y + 6)
+    -- (р.19) «▸» в PTSans нет — на плашке стоял квадрат-тофу. Рисуем треугольник.
+    local head = T.ui.goals .. "  " .. dn .. "/" .. tot
+    lg.print(head, x + 14, y + 6)
+    local tx = x + 14 + F.badge:getWidth(head) + 14
+    lg.polygon("fill", tx, y + 9, tx + 12, y + 17, tx, y + 25)
     lg.setColor(1, 1, 1)
     return
   end
@@ -666,8 +672,18 @@ local function goals_draw()
   lg.setFont(F.small)
   for i, g in ipairs(P.goals) do
     local done = ST.flags[g.flag]
+    local gy = y + 34 + (i - 1) * 30
     lg.setColor(done and C.ok or C.text)
-    lg.print((done and "✓ " or "· ") .. g.t, x + 16, y + 34 + (i - 1) * 30)
+    -- (р.19) «✓» в PTSans тоже нет: каждая закрытая цель показывала квадрат.
+    -- Галочка и точка — вектором, текст цели от единой левой границы.
+    if done then
+      lg.setLineWidth(3)
+      lg.line(x + 18, gy + 13, x + 23, gy + 19, x + 32, gy + 6)
+      lg.setLineWidth(1)
+    else
+      lg.circle("fill", x + 24, gy + 13, 3.5)
+    end
+    lg.print(g.t, x + 40, gy)
   end
   local rn = 0
   for _, r in ipairs(P.relics) do if ST.inv[r] then rn = rn + 1 end end
@@ -680,7 +696,11 @@ end
 local topic_order = {
   {"t_start", function() return not ST.flags.drawer_pried end},
   {"t_utility", function() return not ST.flags.utility_open end},
-  {"t_card", function() return not ST.flags.card_active end},
+  -- (р.19) цепочка карты разбита на три темы: раньше t_card держался до
+  -- card_active и повторял «лови сачком», когда игрок уже стоял перед ПИНом.
+  {"t_card", function() return not ST.inv.card end},
+  {"t_pc", function() return not ST.flags.pc_on end},
+  {"t_skud", function() return not ST.flags.card_active end},
   {"t_power", function() return not ST.flags.power_on end},
   {"t_alarm", function() return not ST.flags.alarm_off end},
   {"t_bolt", function() return not ST.flags.bolt_free end},
@@ -744,7 +764,8 @@ local function read_save(path)
     return nil, "битый файл"
   end
   if blob.version ~= SAVE_VERSION then
-    return nil, string.format("версия %s ≠ %d", tostring(blob.version), SAVE_VERSION)
+    -- без «≠»: символа нет в Neucha, а строка может уйти в тост (гейт шрифтов)
+    return nil, string.format("версия %s, нужна %d", tostring(blob.version), SAVE_VERSION)
   end
   return blob
 end
@@ -980,6 +1001,66 @@ local function keypad_geom()
   return 770, 360, 120, 88
 end
 
+-- Архив бумаг (р.19). Панель на 2 колонки по 9 строк — ровно под 17 бумаг
+-- из scene.doc_list, с запасом на одну. Геометрия в одном месте: рисование
+-- и клик обязаны читать её отсюда (docs/LESSONS.md — координаты не дублировать).
+-- Только ПРОЧИТАННОЕ и в порядке scene.doc_list: архив не оглавление
+-- ненайденного — иначе он сам стал бы спойлером (канон, AGENTS.md §1).
+local function docs_list()
+  local out = {}
+  for _, did in ipairs((ui.scene_json and ui.scene_json.doc_list) or {}) do
+    if ST.read[did] and T.docs[did] then out[#out + 1] = did end
+  end
+  return out
+end
+-- Панель растёт под содержимое: на четырёх бумагах фикс 1240x780 выглядел
+-- как пустой ангар. До 9 бумаг — одна колонка, дальше вторая (всего 17).
+-- Колонки уравнены (ceil(n/2)), а не «первая под завязку»: на десяти бумагах
+-- заполненная девятка плюс одинокая строка справа читались как поломка.
+-- Возвращает x, y, w, h, колонок, строк в колонке.
+local function docs_geom()
+  local n = #docs_list()
+  local cols = (n > 9) and 2 or 1
+  local per = (cols == 2) and math.ceil(n / 2) or n
+  local rows = math.max(3, per)
+  local pw = 80 + cols * 560 + (cols - 1) * 40
+  local ph = 90 + rows * 62 + 74
+  return (1920 - pw) / 2, (1080 - ph) / 2, pw, ph, cols, per
+end
+-- Прямоугольник i-й строки (1-based): сперва левая колонка сверху вниз.
+local function docs_slot(i)
+  local px, py, _, _, _, per = docs_geom()
+  return px + 40 + math.floor((i - 1) / math.max(1, per)) * 600,
+         py + 90 + ((i - 1) % math.max(1, per)) * 62, 560, 52
+end
+-- Значок бумаги/бланка вектором: в PTSans нет ни 🗎, ни ⚿ — с раунда 4 на
+-- рабочем столе Иры вместо иконок стояли квадраты-тофу (видно на
+-- work/shots/ap_06_pc_desktop.png). Заодно бланк СКУД теперь отличим от
+-- своей же читаемой копии не только хвостом «— ЗАПОЛНИТЬ».
+local function doc_icon(x, y, form)
+  lg.setColor(0.86, 0.84, 0.78)
+  lg.rectangle("fill", x, y, 21, 27, 3, 3)
+  lg.setColor(0.32, 0.30, 0.27); lg.setLineWidth(2)
+  lg.rectangle("line", x, y, 21, 27, 3, 3); lg.setLineWidth(1)
+  lg.setColor(0.45, 0.43, 0.40)
+  for k = 0, 3 do lg.line(x + 5, y + 7 + k * 5, x + 16, y + 7 + k * 5) end
+  if form then                       -- карандаш поверх бланка
+    lg.setColor(C.brass); lg.setLineWidth(4)
+    lg.line(x + 6, y + 25, x + 22, y + 6); lg.setLineWidth(1)
+    lg.setColor(0.20, 0.18, 0.16)
+    lg.circle("fill", x + 6, y + 25, 2.5)
+  end
+end
+-- Гаунтлету: где лежит строка бумаги (мир-координаты) — жать он будет сам,
+-- через настоящий ui.mousepressed. Так тест не держит копию координат и не
+-- ломается от порядка прочтения; nil — бумаги в архиве нет.
+function ui.docs_slot_of(doc_id)
+  for i, did in ipairs(docs_list()) do
+    if did == doc_id then return docs_slot(i) end
+  end
+  return nil
+end
+
 local function widget_draw()
   if not widget then return end
   local w = widget
@@ -1033,11 +1114,41 @@ local function widget_draw()
       lg.setColor(0.13, 0.17, 0.25)
       lg.rectangle("fill", 420, iy, 585, 52, 8, 8)
       lg.setColor(C.panel_line); lg.rectangle("line", 420, iy, 585, 52, 8, 8)
-      lg.setColor(C.text)
-      local label = it.form and ("⚿  " .. T.docs.doc_skud_blank.title:gsub(" %(экран%)", "") .. " — ЗАПОЛНИТЬ")
-        or ("🗎  " .. T.docs[it.d].title:gsub(" %(экран%)", ""))
-      lg.print(label, 436, iy + 12)
+      doc_icon(436, iy + 13, it.form)
+      lg.setFont(F.dlg); lg.setColor(C.text)
+      local label = it.form and (T.docs.doc_skud_blank.title:gsub(" %(экран%)", "") .. " — ЗАПОЛНИТЬ")
+        or (T.docs[it.d].title:gsub(" %(экран%)", ""))
+      lg.print(label, 474, iy + 12)
     end
+    lg.setColor(1, 1, 1)
+  elseif w.kind == "docs" then
+    local px, py, pw, ph = docs_geom()
+    lg.setColor(C.panel); lg.rectangle("fill", px, py, pw, ph, 16, 16)
+    lg.setColor(C.panel_line); lg.setLineWidth(2)
+    lg.rectangle("line", px, py, pw, ph, 16, 16); lg.setLineWidth(1)
+    lg.setFont(F.h2); lg.setColor(C.brass)
+    lg.printf(T.ui.docs_title, px, py + 20, pw, "center")
+    local list = docs_list()
+    w.docs_items = list
+    if #list == 0 then
+      lg.setFont(F.dlg); lg.setColor(C.dim)
+      lg.printf(T.ui.docs_empty, px + 60, py + 130, pw - 120, "center")
+    end
+    for i, did in ipairs(list) do
+      local ix, iy, iw, ih = docs_slot(i)
+      lg.setColor(0.13, 0.17, 0.25)
+      lg.rectangle("fill", ix, iy, iw, ih, 8, 8)
+      lg.setColor(C.panel_line); lg.rectangle("line", ix, iy, iw, ih, 8, 8)
+      doc_icon(ix + 16, iy + 13, false)
+      local label = T.docs[did].title:gsub(" %(экран%)", "")
+      -- длинные заголовки не режем, а мельчим: обрезка многоточием на
+      -- кириллице требует utf8-смещений и всё равно съедает смысл строки
+      local fnt = (F.dlg:getWidth(label) <= iw - 70) and F.dlg or F.small
+      lg.setFont(fnt); lg.setColor(C.text)
+      lg.print(label, ix + 54, iy + (ih - fnt:getHeight()) / 2)
+    end
+    lg.setFont(F.small); lg.setColor(C.dim)
+    lg.printf(T.ui.docs_help, px, py + ph - 54, pw, "center")
     lg.setColor(1, 1, 1)
   elseif w.kind == "form" then
     local x, y = 660, 280
@@ -1129,6 +1240,22 @@ local function pc_click(x, y)
       else
         ui.open_doc(it.d)
       end
+      return true
+    end
+  end
+  return false
+end
+
+-- Клик по строке архива открывает читалку ПОВЕРХ архива: порядок отрисовки
+-- (widget_draw → reader_draw) и порядок ввода в ui.mousepressed совпадают,
+-- поэтому закрытие бумаги возвращает игрока в список, а не в комнату.
+local function docs_click(x, y)
+  -- список берём заново, а не из кэша отрисовки: клик обязан работать и до
+  -- первого draw (headless-прогоны гаунтлета кликают быстрее, чем рисуют)
+  for i, did in ipairs(widget.docs_items or docs_list()) do
+    local ix, iy, iw, ih = docs_slot(i)
+    if x >= ix and x < ix + iw and y >= iy and y < iy + ih then
+      ui.open_doc(did)
       return true
     end
   end
@@ -1346,6 +1473,10 @@ local function hud_buttons()
     {id = "hint", x = 1640, y = 12, w = 250, h = 48, t = T.ui.hint_btn},
     {id = "pause", x = 1560, y = 12, w = 64, h = 48, t = "II"},
     {id = "zones", x = 1414, y = 12, w = 130, h = 48, t = "ЗОНЫ"},
+    -- (р.19) АРХИВ БУМАГ. Замечание автора: бирка Санты читается только пока
+    -- коробка цела; забрал сотку — коробка исчезла, и подсказку не перечитать.
+    -- Кнопка живёт в той же полосе HUD, слева от «ЗОНЫ» (зазор 16, как у прочих).
+    {id = "docs", x = 1238, y = 12, w = 160, h = 48, t = T.ui.docs_btn},
   }
 end
 local function hud_draw()
@@ -1356,10 +1487,22 @@ local function hud_draw()
     lg.rectangle("fill", b.x + ox, b.y + oy, b.w, b.h, 10, 10)
     lg.setColor(C.panel_line)
     lg.rectangle("line", b.x + ox, b.y + oy, b.w, b.h, 10, 10)
-    lg.setColor(b.id == "hint" and C.steel or C.text)
+    -- пустой архив помечен тусклой надписью: кнопка есть всегда (иначе она
+    -- появлялась бы «из ниоткуда»), но врать о содержимом не должна
+    if b.id == "hint" then lg.setColor(C.steel)
+    elseif b.id == "docs" and not next(ST.read) then lg.setColor(C.dim)
+    else lg.setColor(C.text) end
     lg.printf(b.t, b.x + ox, b.y + 10 + oy, b.w, "center")
   end
   lg.setColor(1, 1, 1)
+end
+-- (р.19) Прямоугольник кнопки HUD по id — гаунтлету, чтобы он жал ровно те
+-- же пиксели, что и человек, и не хранил копию координат у себя.
+function ui.hud_button_rect(id)
+  for _, b in ipairs(hud_buttons()) do
+    if b.id == id then return b.x, b.y, b.w, b.h end
+  end
+  return nil
 end
 
 -- ================= idle =================
@@ -1656,6 +1799,7 @@ function ui.mousepressed(x, y, btn)
     if btn == 2 then ui.close_widget(); snd("zoom_out"); return end
     if widget.kind == "keypad" then keypad_click(x, y)
     elseif widget.kind == "pc" then pc_click(x, y)
+    elseif widget.kind == "docs" then docs_click(x, y)
     elseif widget.kind == "form" then form_click(x, y) end
     return
   end
@@ -1664,6 +1808,7 @@ function ui.mousepressed(x, y, btn)
     if x >= b.x and x < b.x + b.w and y >= b.y and y < b.y + b.h then
       if b.id == "hint" then ui.hint()
       elseif b.id == "zones" then ui.zones_toggle()
+      elseif b.id == "docs" then ui.open_widget("docs"); return  -- звук уже там
       else menu = "pause" end
       snd("ui_click")
       return
