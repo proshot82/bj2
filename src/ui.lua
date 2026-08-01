@@ -224,6 +224,20 @@ local function dlg_next()
 end
 
 function ui.dialog_active() return dlg.cur ~= nil or #dlg.queue > 0 end
+-- (видео 2.0.5) геттеры для зрительских опов автоплея (talk / read_doc):
+-- текст текущей реплики — чтобы пауза соответствовала длине чтения; метрика
+-- страницы читалки — номер, всего страниц, байтовая длина текста страницы.
+function ui.dialog_line() return dlg.cur and dlg.cur.t or "" end
+function ui.hint_ready() return SC.time() - hint.last >= 45.1 end
+function ui.reader_info()
+  if not reader then return nil end
+  local d = T.docs[reader.doc]
+  local chars = 0
+  for _, raw in ipairs(d.pages[reader.page]) do
+    chars = chars + #tostring(raw)
+  end
+  return reader.page, #d.pages, chars
+end
 -- (аудит В4) спикер берётся из активной реплики, а если кадр обновления ещё
 -- не наступил — из головы очереди: утверждение не должно зависеть от того,
 -- успел ли пройти dlg_update между кликом и проверкой

@@ -6,6 +6,10 @@ local E            -- env: ui, scenes, state, texts, puzzles, scene
 local steps, ip = {}, 1
 local step_t = 0          -- время на текущем шаге (вотчдог)
 local pace = 0            -- троттлинг между действиями
+-- (видео 2.0.5) честный такт: паузы и ожидания декрементируются реальным dt
+-- кадра (кламп 0.05..0.5), а не фиксированными 0.05 за тик — иначе под
+-- faketime или при просадке FPS ожидания и вотчдог расходятся в разы.
+local last_tick = 0.05
 local shots_dir = "work/shots"
 local pending_shot = nil  -- имя скрина, ждущего кадра
 local shot_stage = 0
@@ -185,6 +189,54 @@ local function exec(s)
   elseif op == "dismiss_all" then
     if dismiss_once() then return false end
     return true
+  elseif op == "talk" then
+    -- (видео 2.0.5) зрительский темп: реплика висит столько, сколько её
+    -- печатать (40 симв/с) и читать, потом клик «дальше». Вотчдог шага
+    -- сбрасывается вручную — у опа свой сторож на 60 с суммарно.
+    step_t = 0
+    s._total = (s._total or 0) + last_tick
+    if s._total > 20 then die("talk: одна реплика висит дольше 20с") end
+    if not E.ui.dialog_active() then return true end
+    if s._pause == nil then
+      local txt = E.ui.dialog_line() or ""
+      s._pause = math.min(7.5, 0.9 + (#txt / 1.7) * 0.062)
+    end
+    s._pause = s._pause - last_tick
+    if s._pause <= 0 then dismiss_once(); s._pause = nil; s._total = 0 end
+    return false
+  elseif op == "hint_ready" then
+    -- (видео 2.0.5) дождаться истечения кулдауна Предка и нажать совет —
+    -- без этого в кадр попадала бы служебная кулдаун-реплика.
+    step_t = 0
+    s._total = (s._total or 0) + last_tick
+    if s._total > 75 then die("hint_ready: кулдаун не истёк за 75с") end
+    if E.ui.dialog_active() then dismiss_once(); return false end
+    if E.ui.hint_ready() then E.ui.hint(); return true end
+    return false
+  elseif op == "read_doc" then
+    -- (видео 2.0.5) листать читалку с паузой на чтение каждой страницы;
+    -- ЛКМ листает, на последней странице ЛКМ закрывает (семантика ui).
+    step_t = 0
+    s._total = (s._total or 0) + last_tick
+    if s._total > 25 then die("read_doc: одна страница/реплика висит дольше 25с") end
+    if E.ui.dialog_active() then
+      -- реплики поверх читалки (авто-открытка) читаются в темпе talk
+      if s._dp == nil then
+        local txt = E.ui.dialog_line() or ""
+        s._dp = math.min(7.5, 0.9 + (#txt / 1.7) * 0.062)
+      end
+      s._dp = s._dp - last_tick
+      if s._dp <= 0 then dismiss_once(); s._dp = nil; s._total = 0 end
+      return false
+    end
+    if not E.ui.reader_open() then return true end
+    if s._pause == nil then
+      local _, _, chars = E.ui.reader_info()
+      s._pause = math.min(14, 3.0 + (chars / 1.7) * 0.028)
+    end
+    s._pause = s._pause - last_tick
+    if s._pause <= 0 then click(1200, 500, 1); s._pause = nil; s._total = 0 end
+    return false
   elseif op == "close_reader" then
     -- (аудит С3) реплики теперь разбираются раньше читалки — ровно как рисуются.
     -- Значит ПКМ по документу под очередью реплик уйдёт в диалог, а не в
@@ -238,6 +290,30 @@ local function exec(s)
     return true
   elseif op == "rmb_hs" then
     s.btn = 2; s.op = "click_hs"; return false
+  elseif op == "look_hs" then
+    -- (видео 2.0.5) ПКМ-осмотр look-зоны: центр может быть перехвачен
+    -- интерактивной зоной (rank-приоритет в scenes.hit — «Ручка и замок»
+    -- под «Толкнуть дверь»), поэтому точка ищется перебором по сетке 5×5,
+    -- пока hit не вернёт саму зону — так целился бы и живой игрок.
+    if E.ui.dialog_active() then dismiss_once(); return false end
+    local cx, cy, h = hs_center(s.id)
+    if not cx then return false end       -- ждём появления (вотчдог поймает)
+    local r = (E.scenes.mode() == "day" and h.rect_day) and h.rect_day or h.rect
+    local px, py
+    for gy = 1, 5 do
+      for gx = 1, 5 do
+        local x = r[1] + r[3] * gx / 6
+        local y = r[2] + r[4] * gy / 6
+        local hh = E.scenes.hit(x, y)
+        if hh and hh.id == s.id then px, py = x, y; break end
+      end
+      if px then break end
+    end
+    if not px then
+      die("look_hs: у зоны " .. s.id .. " нет точки, куда можно ткнуть")
+    end
+    click(px, py, 2)
+    return true
   elseif op == "click_item" or op == "rmb_item" then
     if E.ui.dialog_active() then dismiss_once(); return false end
     local idx
@@ -511,6 +587,7 @@ function ap.update(dt)
   step_t = step_t + dt
   pace = pace - dt
   if pace > 0 then return end
+  last_tick = math.min(0.5, math.max(0.05, dt))
   pace = 0.05
   if step_t > 10 then
     local s = steps[ip]
@@ -547,7 +624,7 @@ function ap.update(dt)
   if r == true then
     ip = ip + 1; step_t = 0
   elseif r == "wait" then
-    s._w = s._w - 0.05
+    s._w = s._w - last_tick
     if s._w <= 0 then ip = ip + 1; step_t = 0 end
   elseif r == "shot" then
     -- pending установлен; ip двинется после снятия
