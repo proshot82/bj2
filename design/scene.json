@@ -2358,7 +2358,8 @@
      "name": "Замочек",
      "hide_on": [
       "wb_open"
-     ]
+     ],
+     "enter_zoom": "zoom_wb_drawer"
     },
     {
      "id": "hs_z_wb_drawer",

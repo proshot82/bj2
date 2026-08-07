@@ -258,6 +258,7 @@ look(  "zoom_workbench", "hs_z_vise")
 add(op="click_hs", id="hs_z_journal")         # журнал испытаний
 read()
 node("open_workbench")
+cur = "zoom_wb_drawer"                        # (р.22) enter_zoom открыл кадр сам
 to_zoom("zoom_wb_drawer")                     # полнокадровый ящик (р.19)
 add(op="wait", s=1.5)
 add(op="click_hs", id="hs_z_wb_wrench")       # leave_zoom закроет кадр сам

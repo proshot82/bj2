@@ -271,6 +271,7 @@ to_zoom("zoom_workbench")
 shot("zoom_verstak", zoom="zoom_workbench")
 read_hs("hs_z_journal", "zoom_workbench", "doc_journal", "doc_zhurnal")
 node("open_workbench"); dismiss()
+cur = "zoom_wb_drawer"                     # (р.22) enter_zoom открыл кадр сам
 # (раунд 19, зам.3) ящик верстака — полнокадровый зум, ключ впечатан в арт
 to_zoom("zoom_wb_drawer")
 shot("zoom_yaschik_verstaka", zoom="zoom_wb_drawer")

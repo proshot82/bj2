@@ -274,6 +274,13 @@ def _blob(state=None, view=None, version=SAVE_V):
             "settings": {}, "hint_idx": {}}
 
 
+def _plant_as(name, blob):
+    def pre(home):
+        with open(os.path.join(home, name), "w", encoding="utf-8") as fh:
+            json.dump(blob, fh, ensure_ascii=False)
+    return pre
+
+
 def _plant(blob):
     def pre(home):
         with open(os.path.join(home, "save_bj2.json"), "w", encoding="utf-8") as fh:
@@ -322,6 +329,13 @@ AP_CASES = [
      _from_title({"op": "assert_title", "open": False}),
      ["победа недостижима", TAIL],
      {"pre": _plant(_blob(state={"done": _all_nodes()}))}),
+    ("Р23 прогресс из .tmp старой схемы поднимается",
+     # у жертв Windows-бага весь прогресс лежал в save_bj2.json.tmp: кнопка
+     # «Продолжить» обязана появиться, а предмет из .tmp — оказаться в карманах
+     _from_title({"op": "assert_title", "open": False},
+                 {"op": "assert_item", "id": "card"}),
+     [TAIL],
+     {"pre": _plant_as("save_bj2.json.tmp", _blob(state={"inv": ["card"]}))}),
     ("В4 подменённый спикер роняет гаунтлет", b_wrong_speaker, "спикер", {}),
     ("В3 обрыв сценария не печатает успех", b_no_quit,
      "сценарий исчерпан без op quit", {}),
@@ -665,6 +679,77 @@ def case_leave_zoom():
             print("     " + line)
 
 
+EZ_NEG = "Р22 заглушенный enter_zoom роняет гаунтлет"
+EZ_ANCHOR = "if h.enter_zoom then"
+EZ_BROKEN = "if h.enter_zoom and false then"
+
+
+def case_enter_zoom():
+    """(р.22) авто-вход в ящик после ключа: признак глушится мутацией ui.lua,
+    укороченный прогон до assert_view zoom_wb_drawer обязан упасть."""
+    if not LOVE:
+        SKIPPED.append(EZ_NEG)
+        print(f"[ПРОПУСК] {EZ_NEG}: love не найден в PATH")
+        return
+    if not os.path.exists(AP):
+        SKIPPED.append(EZ_NEG)
+        print(f"[ПРОПУСК] {EZ_NEG}: нет {AP} — сперва gen_autoplay.py")
+        return
+    doc = json.load(open(AP, encoding="utf-8"))
+    steps = doc["steps"] if isinstance(doc, dict) else doc
+    cut = None
+    for i, st in enumerate(steps):
+        if st.get("op") == "click_hs" and st.get("id") == "hs_z_padlock":
+            for j in range(i + 1, len(steps)):
+                if steps[j].get("op") == "assert_view":
+                    cut = j
+                    break
+            break
+    if cut is None:
+        SKIPPED.append(EZ_NEG)
+        print(f"[ПРОПУСК] {EZ_NEG}: в сценарии нет клика замка с "
+              f"последующим assert_view — негатив ослеп")
+        return
+    src = open(LZ_SRC, encoding="utf-8").read()
+    if src.count(EZ_ANCHOR) != 1:
+        SKIPPED.append(EZ_NEG)
+        print(f"[ПРОПУСК] {EZ_NEG}: якорь в {LZ_SRC} встречается "
+              f"{src.count(EZ_ANCHOR)} раз(а), ждали 1 — негатив ослеп")
+        return
+    before = md5(LZ_SRC)
+    tmp = tempfile.mkdtemp(prefix="ez_neg_")
+    shutil.copy2(LZ_SRC, os.path.join(tmp, "ui.lua"))
+    path = os.path.join(tmp, "neg.json")
+    json.dump({"steps": [dict(x) for x in steps[:cut + 1]]},
+              open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    home = os.path.expanduser("~/.local/share/love/BrassJanissary2")
+    shutil.rmtree(home, ignore_errors=True)
+    try:
+        open(LZ_SRC, "w", encoding="utf-8").write(
+            src.replace(EZ_ANCHOR, EZ_BROKEN, 1))
+        rc, out = run(["xvfb-run", "-a", "-s", "-screen 0 1920x1080x24",
+                       "env", "SDL_AUDIODRIVER=dummy",
+                       LOVE, ".", "--autoplay", path])
+    finally:
+        shutil.copy2(os.path.join(tmp, "ui.lua"), LZ_SRC)
+        shutil.rmtree(tmp, ignore_errors=True)
+        shutil.rmtree(home, ignore_errors=True)
+    if md5(LZ_SRC) != before:
+        FAILED.append(f"НЕ ВОССТАНОВЛЕН {LZ_SRC}")
+        print(f"[ПРОВАЛ] {LZ_SRC} не восстановлен после мутации!")
+    said_ok = "AUTOPLAY OK" in out
+    named = "вид zoom_workbench" in out          # застряли в родительском зуме
+    ok = (not said_ok) and named
+    (PASSED if ok else FAILED).append(EZ_NEG)
+    print(f"[{'OK  ' if ok else 'ПРОВАЛ'}] {EZ_NEG}: rc={rc} "
+          f"успех={'да' if said_ok else 'нет'} (ждали нет), застрявший вид "
+          f"{'назван' if named else 'НЕ НАЗВАН'}")
+    if not ok:
+        print("     ---- хвост прогона ----")
+        for line in out.strip().splitlines()[-10:]:
+            print("     " + line)
+
+
 def main():
     before = {p: md5(p) for p in FILES}
     tmp = tempfile.mkdtemp(prefix="negatives_")
@@ -711,10 +796,12 @@ def main():
     if "--fast" in sys.argv:
         SKIPPED.append(SMOKE_NEG)
         SKIPPED.append(LZ_NEG)
-        print("[ПРОПУСК] движковые негативы смока и leave_zoom — режим --fast")
+        SKIPPED.append(EZ_NEG)
+        print("[ПРОПУСК] движковые негативы смока, leave_zoom и enter_zoom — режим --fast")
     else:
         case_smoke_teeth()
         case_leave_zoom()
+        case_enter_zoom()
 
     print(f"\nнегативов: {len(PASSED)} OK, {len(FAILED)} провалов, "
           f"{len(SKIPPED)} пропущено")

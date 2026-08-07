@@ -267,6 +267,8 @@ add(op="assert_flag", f="card_active")
 # ---------- S9: верстак ----------
 to_zoom("zoom_workbench")
 node("open_workbench"); dismiss()
+cur = "zoom_wb_drawer"                       # (р.22) enter_zoom открыл кадр сам
+add(op="assert_view", id="zoom_wb_drawer")   # (р.22) гейт enter_zoom
 node("take_wrench"); dismiss()               # клик по ключу в кадре ящика
 cur = "B"                                    # (р.19) leave_zoom закрыл кадр сам
 add(op="assert_view", id="B")                # (р.19) гейт leave_zoom
@@ -535,6 +537,10 @@ zooms_visited = {st["id"] for st in steps if st.get("op") == "click_hs"}
 zoom_entries = {e[1] for e in entry.values()}
 zoom_cov = {z for z, (v, hs, r) in entry.items()
             if any(st.get("op") == "click_hs" and st["id"] == hs for st in steps)}
+# (р.22) зумы, куда сценарий входит авто-переходом enter_zoom (ящик верстака),
+# подтверждаются не кликом входа, а assert_view — засчитываем и их
+zoom_cov |= {st["id"] for st in steps
+             if st.get("op") == "assert_view" and st["id"] in S["zooms"]}
 
 assert len(shots) >= 14, "мало скринов"
 assert len(negatives) >= 7, "мало негативов"

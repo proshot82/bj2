@@ -745,15 +745,21 @@ function ui.hint()
 end
 
 -- ================= сейвы =================
--- (аудит F02) Атомарная запись: во временный файл -> подмена через ОС; прежний
--- сейв уходит в .bak. Прерванная запись (вылет/питание/диск) не оставит усечённый
--- рабочий сейв. os.rename в пределах save-каталога атомарен (один том).
+-- (аудит F02; р.23) Схема «tmp + os.rename» выброшена: на реальной Windows
+-- os.rename/os.remove берут путь в ANSI-кодировке системы, а getSaveDirectory
+-- отдаёт UTF-8 — при кириллице в профиле пользователя обе операции молча
+-- проваливались: .tmp писался, основной сейв не появлялся никогда, и
+-- «Сохранить и выйти» не сохранял ничего (замечание автора р.23; в облаке и
+-- под wine пути ASCII — гаунтлеты были слепы). Теперь только
+-- unicode-безопасный love.filesystem: прежний сейв копируется в .bak, затем
+-- основной перезаписывается. Обрыв на перезаписи оставит битый основной —
+-- его страхует .bak, который загрузчик и так умеет подхватывать (F01/С1).
 local function atomic_write(path, data)
-  if not love.filesystem.write(path .. ".tmp", data) then return false end
-  local dir = love.filesystem.getSaveDirectory()
-  os.remove(dir .. "/" .. path .. ".bak")
-  os.rename(dir .. "/" .. path, dir .. "/" .. path .. ".bak")  -- прежний -> .bak (может отсутствовать)
-  return os.rename(dir .. "/" .. path .. ".tmp", dir .. "/" .. path)
+  local prev = love.filesystem.read(path)
+  if prev then love.filesystem.write(path .. ".bak", prev) end
+  local ok = love.filesystem.write(path, data)
+  love.filesystem.remove(path .. ".tmp")   -- хвост старой схемы, если остался
+  return ok
 end
 
 local SAVE_VERSION = 3
@@ -761,9 +767,18 @@ local SAVE_VERSION = 3
 function ui.save()
   local blob = {version = SAVE_VERSION, state = ST:serialize(), view = SC.view(),
                 settings = settings, hint_idx = hint.topic_idx}
-  atomic_write(savefile, json.encode(blob))
+  local ok = atomic_write(savefile, json.encode(blob))
+  -- (р.23) провал записи больше не молчит: игрок узнаёт сразу, а не на титуле
+  if not ok then ui.toast("Не удалось сохранить игру") end
+  return ok
 end
-function ui.has_save() return love.filesystem.getInfo(savefile) ~= nil end
+-- (р.23) has_save видит и .bak, и .tmp: у жертв старой схемы на Windows весь
+-- прогресс лежал в .tmp — кнопка «Продолжить» обязана появиться и для них
+function ui.has_save()
+  return love.filesystem.getInfo(savefile) ~= nil
+      or love.filesystem.getInfo(savefile .. ".bak") ~= nil
+      or love.filesystem.getInfo(savefile .. ".tmp") ~= nil
+end
 
 -- (аудит F01/С1) Защищённое чтение. Битый JSON, отсутствие .state или ЧУЖАЯ
 -- версия формата не роняют игру и не подсовывают состояние от другой сборки:
@@ -861,6 +876,12 @@ function ui.load_save()
     -- причина от основного файла информативнее: .bak обычно просто нет
     if bak then blob, why = bak, nil
     elseif why == "нет файла" then why = why_bak end
+  end
+  if not blob then
+    -- (р.23) спасение прогресса, застрявшего в .tmp у старой схемы на Windows:
+    -- PhysFS писал .tmp честно, а os.rename до основного его не доносил
+    local tmp = read_save(savefile .. ".tmp")
+    if tmp then blob, why = tmp, nil end
   end
   if not blob then
     print("сейв: отвергнут — " .. tostring(why))
@@ -1453,7 +1474,9 @@ local function menu_click(x, y)
         settings_from = menu; menu = "settings"
       elseif b.id == "quit" then love.event.quit()
       elseif b.id == "resume" then menu = nil
-      elseif b.id == "savequit" then ui.save(); menu = "title"
+      elseif b.id == "savequit" then
+        -- (р.23) на титул — только если сейв реально записан
+        if ui.save() then menu = "title" end
       elseif b.id == "back" then
         menu = settings_from
         if settings_from == nil then menu = "pause" end
@@ -1613,6 +1636,20 @@ end
 -- Применяет предмет item к хотспоту h. Узел срабатывает ТОЛЬКО если предмет
 -- входит в его требования и остальные условия выполнены; иначе — «не подходит»
 -- или намёк-fail (если предмет верный, но чего-то ещё не хватает).
+-- (р.19/р.22) Переходы после срабатывания узла. leave_zoom: кадр зума
+-- закрывается сам (разводник впечатан в арт ящика — после взятия его там
+-- быть не должно). enter_zoom: открывается указанный зум (ящик верстака:
+-- родитель рисует ящик закрытым, и без авто-входа отклик на ключ был почти
+-- невидим — замечание автора р.22). Оба признака сторожатся негативами.
+local function fire_zoom_transitions(h)
+  if h.leave_zoom and SC.view().kind == "zoom" then
+    snd("zoom_out"); SC.leave_zoom()
+  end
+  if h.enter_zoom then
+    snd("zoom_in"); SC.goto_zoom(h.enter_zoom)
+  end
+end
+
 function ui.use_item_on(item, h)
   idle_timer = 0
   local node = h.node
@@ -1627,6 +1664,7 @@ function ui.use_item_on(item, h)
         if select(1, ST:fire(node)) then
           say_node(node, "do"); ui.after_fire(node)
           inv.selected = nil
+          fire_zoom_transitions(h)
         end
       else
         -- предмет верный, но не хватает другого предмета/флага — намёк
@@ -1775,12 +1813,7 @@ local function world_click(x, y, btn)
     local fired = select(1, ST:fire(h.node))
     if fired then
       say_node(h.node, "do"); ui.after_fire(h.node)
-      -- (раунд 19, зам.3) признак leave_zoom: после срабатывания узла кадр
-      -- зума закрывается сам (разводник впечатан в арт ящика — после взятия
-      -- его там быть не должно). Сторожится негативом (семья 6).
-      if h.leave_zoom and SC.view().kind == "zoom" then
-        snd("zoom_out"); SC.leave_zoom()
-      end
+      fire_zoom_transitions(h)
     end
     return
   end
