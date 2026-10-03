@@ -2,3 +2,5 @@ work/
 dist/
 *.love
 *.bak-*
+__pycache__/
+node_modules/
