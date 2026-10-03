@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Осмотр арта: сетки координат на вайдах/зумах, контакт-листы катаутов.
-Выход: /home/claude/bj2/work/inspect/
+Выход: work/inspect/ (от корня репозитория).
+(р.24) Пути были вшиты как /home/claude/bj2/… — на любой другой машине
+скрипт падал на открытии шрифта; теперь считаются от расположения файла.
 """
 import os
 from PIL import Image, ImageDraw, ImageFont
 
-GFX = "/home/claude/bj2/assets/gfx"
-OUT = "/home/claude/bj2/work/inspect"
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+GFX = os.path.join(ROOT, "assets/gfx")
+OUT = os.path.join(ROOT, "work/inspect")
 os.makedirs(OUT, exist_ok=True)
 
-FONT_B = ImageFont.truetype("/home/claude/bj2/assets/fonts/PTSans-Bold.ttf", 30)
-FONT_S = ImageFont.truetype("/home/claude/bj2/assets/fonts/PTSans-Bold.ttf", 20)
+FONT_B = ImageFont.truetype(os.path.join(ROOT, "assets/fonts/PTSans-Bold.ttf"), 30)
+FONT_S = ImageFont.truetype(os.path.join(ROOT, "assets/fonts/PTSans-Bold.ttf"), 20)
 
 def grid(src, dst, step=100, major=500):
     im = Image.open(src).convert("RGB")

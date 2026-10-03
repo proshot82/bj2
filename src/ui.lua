@@ -7,6 +7,12 @@ local utf8 = require("utf8")
 local T, P, ST, SC, IMG, AUD, F
 local settings = {music = true, sound = true, fullscreen = false, noshake = false, fasttext = false}
 local savefile = "save_bj2.json"
+-- (р.24) Веб-версия (love.js в браузере). Окном и выходом там владеет
+-- браузер: «Выход» на титуле заморозил бы вкладку, а полный экран из игры
+-- срабатывает только со следующего клика и рассинхронизируется с Esc
+-- браузера. Поэтому в вебе этих двух пунктов нет (полный экран — F11 или
+-- кнопкой на странице, см. web/index.html).
+local WEB = love.system.getOS() == "Web"
 
 -- палитра
 local C = {
@@ -37,7 +43,7 @@ function ui.init(texts, puzzles, state, scenes_mod, images, audio, fonts)
   T, P, ST, SC, IMG, AUD, F = texts, puzzles, state, scenes_mod, images, audio, fonts
   SC.set_fonts(fonts)
   ui.load_settings()                                    -- (аудит F09) отдельный settings-файл
-  love.window.setFullscreen(settings.fullscreen or false)
+  if not WEB then love.window.setFullscreen(settings.fullscreen or false) end
 end
 
 function ui.state() return {dlg = dlg, widget = widget, reader = reader,
@@ -744,6 +750,19 @@ function ui.hint()
   push_lines({T.hints.topics[topic][tier]})
 end
 
+-- (р.24) Сброс состояния интерфейса при старте партии («Начать» и
+-- «Продолжить»). Раньше выбранный предмет переживал «Сохранить и выйти»:
+-- новая игра начиналась с пустыми карманами, но с подписью «Линейка» под
+-- ними и иконкой у курсора, а первый клик по комнате отвечал «Не то. Это
+-- сюда не применить.» вместо обычной реакции.
+local function reset_transient()
+  inv.selected = nil
+  widget, reader, victory_stage = nil, nil, nil
+  dlg.queue, dlg.cur = {}, nil
+  dlg.shown, dlg.t, dlg.blip_t = 0, 0, 0
+  idle_timer = 0
+end
+
 -- ================= сейвы =================
 -- (аудит F02; р.23) Схема «tmp + os.rename» выброшена: на реальной Windows
 -- os.rename/os.remove берут путь в ANSI-кодировке системы, а getSaveDirectory
@@ -754,8 +773,14 @@ end
 -- unicode-безопасный love.filesystem: прежний сейв копируется в .bak, затем
 -- основной перезаписывается. Обрыв на перезаписи оставит битый основной —
 -- его страхует .bak, который загрузчик и так умеет подхватывать (F01/С1).
+-- (р.24) Любое чтение — только после getInfo: в love.js (веб) чтение
+-- несуществующего файла не возвращает nil, а роняет движок целиком, и
+-- pcall это не ловит (C++-исключение в веб-сборке). На первом же запуске в
+-- браузере игра падала на отсутствующем settings_bj2.json.
+local function exists(path) return love.filesystem.getInfo(path) ~= nil end
+
 local function atomic_write(path, data)
-  local prev = love.filesystem.read(path)
+  local prev = exists(path) and love.filesystem.read(path)
   if prev then love.filesystem.write(path .. ".bak", prev) end
   local ok = love.filesystem.write(path, data)
   love.filesystem.remove(path .. ".tmp")   -- хвост старой схемы, если остался
@@ -786,7 +811,7 @@ end
 -- Возвращает blob либо nil и причину — причина нужна вызывающему, чтобы внятное
 -- «версия» не подменилось невнятным «нет файла» от резервной копии.
 local function read_save(path)
-  local s = love.filesystem.read(path)
+  local s = exists(path) and love.filesystem.read(path)
   if not s then return nil, "нет файла" end
   local ok, blob = pcall(json.decode, s)
   if not ok or type(blob) ~= "table" or type(blob.state) ~= "table" then
@@ -895,8 +920,11 @@ function ui.load_save()
   end
   ST:deserialize(blob.state)
   SC.reset_anims()                                          -- (аудит С2) метки не наследуются
-  for k, v in pairs(blob.settings or {}) do settings[k] = v end
-  love.window.setFullscreen(settings.fullscreen or false)   -- (аудит F04) применить оконный режим
+  reset_transient()                                         -- (р.24) хвосты прошлой партии
+  -- (р.24) Настройки сейва больше НЕ применяются. С аудита F09 ими владеет
+  -- settings_bj2.json, а копия в сейве — снимок на момент записи: выключил
+  -- музыку на титуле, нажал «Продолжить» — музыка снова играет, а файл
+  -- настроек говорит «выкл». Поле в сейве оставлено для совместимости формата.
   hint.topic_idx = type(blob.hint_idx) == "table" and blob.hint_idx or {}
   local note = restore_view(blob.view)
   if note then
@@ -917,7 +945,7 @@ function ui.save_settings()
   atomic_write(settings_file, json.encode(settings))
 end
 function ui.load_settings()
-  local s = love.filesystem.read(settings_file)
+  local s = exists(settings_file) and love.filesystem.read(settings_file)
   if not s then return end
   local ok, t = pcall(json.decode, s)
   if ok and type(t) == "table" then
@@ -1327,6 +1355,10 @@ end
 
 function ui.widget_key(key)
   if not widget then return false end
+  -- (р.24) Цифровой блок клавиатуры: LÖVE зовёт его клавиши kp0..kp9 и kpenter,
+  -- и код, набранный на нём, раньше молча пропадал — кейпад реагировал только
+  -- на верхний ряд цифр.
+  key = key:match("^kp(%d)$") or (key == "kpenter" and "return") or key
   if widget.kind == "keypad" then
     if key:match("^[0-9]$") and #widget.buf < 4 then
       widget.buf = widget.buf .. key; snd("ui_click")
@@ -1401,6 +1433,7 @@ local function draw_title_logo()
 end
 
 local title_btns
+local settings_from = "title"   -- откуда открыты настройки: title|pause
 local function menu_draw()
   if menu == nil then return end
   if menu == "title" then
@@ -1410,7 +1443,7 @@ local function menu_draw()
     local labels = {{"start", T.ui.title_start}}
     if ui.has_save() then labels[#labels + 1] = {"cont", T.ui.title_continue} end
     labels[#labels + 1] = {"settings", T.ui.title_settings}
-    labels[#labels + 1] = {"quit", T.ui.title_quit}
+    if not WEB then labels[#labels + 1] = {"quit", T.ui.title_quit} end
     lg.setFont(F.h2)
     for i, lb in ipairs(labels) do
       local bx, by, bw2, bh2 = 760, 560 + (i - 1) * 92, 400, 72
@@ -1420,6 +1453,12 @@ local function menu_draw()
       lg.setColor(C.text); lg.printf(lb[2], bx, by + 16, bw2, "center")
     end
   elseif menu == "pause" or menu == "settings" then
+    -- (р.24) Настройки, открытые с титула, лежат на титульном фоне. Раньше
+    -- за панелью проступал офис с HUD («БУМАГИ», «ЗОНЫ», «СОВЕТ ПРЕДКА») —
+    -- игра, которую игрок ещё не начинал.
+    if menu == "settings" and settings_from == "title" then
+      lg.setColor(1, 1, 1); lg.draw(IMG["ui/bg_title.png"], 0, 0)
+    end
     lg.setColor(0, 0, 0, 0.6); lg.rectangle("fill", 0, 0, 1920, 1080)
     lg.setColor(C.panel); lg.rectangle("fill", 660, 240, 600, 560, 14, 14)
     lg.setColor(C.panel_line); lg.rectangle("line", 660, 240, 600, 560, 14, 14)
@@ -1442,6 +1481,7 @@ local function menu_draw()
       local opts = {{"music", T.ui.music}, {"sound", T.ui.sound},
                     {"fullscreen", T.ui.fullscreen}, {"noshake", T.ui.noshake},
                     {"fasttext", T.ui.fasttext or "Быстрый текст"}}
+      if WEB then table.remove(opts, 3) end   -- (р.24) полный экран в вебе — у браузера
       for i, o in ipairs(opts) do
         local by = 350 + (i - 1) * 68
         title_btns[#title_btns + 1] = {id = "opt_" .. o[1], x = 720, y = by,
@@ -1460,7 +1500,15 @@ local function menu_draw()
   end
 end
 
-local settings_from = "title"
+-- (р.24) Идёт ли партия: пауза и настройки, открытые из паузы, — тоже партия.
+-- Нужно love.quit: раньше он сохранял, только если меню закрыто, и окно,
+-- закрытое из паузы, теряло всё после последнего автосейва (прочитанные
+-- бумаги, ход стенда, точку обзора).
+function ui.in_session()
+  if menu == "title" then return false end
+  if menu == "settings" and settings_from == "title" then return false end
+  return true
+end
 local function menu_click(x, y)
   for _, b in ipairs(title_btns or {}) do
     if x >= b.x and x < b.x + b.w and y >= b.y and y < b.y + b.h then
@@ -1496,10 +1544,10 @@ end
 function ui.new_game()
   ST:deserialize({})
   SC.reset_anims()   -- (аудит С2) метки идл-анимаций не переживают новую игру
+  reset_transient()  -- (р.24) выбранный предмет, очередь реплик, виджеты
   SC.goto_room("A")
   hint.topic_idx = {}
   hint_intro_done = false
-  victory_stage = nil
   push_lines(T.opening)
   mus_boot()
 end
@@ -1898,14 +1946,17 @@ function ui.keypressed(key)
     return
   end
   if key == "escape" then
-    -- (аудит С3) тот же порядок, что и у мыши: сперва верхний нарисованный слой
-    if ui.dialog_active() then dlg_click()
+    -- (аудит С3) тот же порядок, что и у мыши: сперва верхний нарисованный слой.
+    -- (р.24) Меню рисуется последним, значит и Esc достаётся ему первым — как и
+    -- клик (ui.mousepressed отдаёт его меню раньше всех). Раньше пауза, открытая
+    -- кнопкой «II» из зума, на Esc оставалась висеть, а зум под ней закрывался.
+    if menu == "pause" then menu = nil
+    elseif menu == "settings" then menu = settings_from or "pause"
+    elseif ui.dialog_active() then dlg_click()
     elseif reader then reader = nil
     elseif widget then ui.close_widget(); snd("zoom_out")
     elseif inv.selected then inv.selected = nil; snd("ui_click")
     elseif SC.view().kind == "zoom" then snd("zoom_out"); SC.leave_zoom()
-    elseif menu == "pause" then menu = nil
-    elseif menu == "settings" then menu = settings_from or "pause"
     else menu = "pause" end
     return
   end

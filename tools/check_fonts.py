@@ -21,7 +21,8 @@
 в бумагу с рукописной страницей (Neucha). Символ, живущий в одном шрифте из
 трёх, — мина замедленного действия. Дешевле держать общий знаменатель.
 
-Источники текста: design/texts.json целиком плюс строковые литералы Lua.
+Источники текста: design/texts.json и design/scene.json (р.24: имена зон,
+подписи щитка, бирки вентилей) целиком плюс строковые литералы Lua.
 src/autoplay.lua исключён сознательно — это тестовый стенд, его сообщения
 уходят в консоль (там «≠» законен), на экран не попадают.
 """
@@ -87,6 +88,29 @@ def texts_chars():
     return src
 
 
+def scene_chars():
+    """(р.24) design/scene.json целиком: имена зон уходят на hover-плашку
+    (PTSans), подписи щитка и бирки вентилей рисует движок. Раньше гейт их не
+    читал вовсе — «✓» в имени зоны проходил его насквозь. Остальные строки
+    файла — пути и идентификаторы, ASCII, им проверка ничего не стоит."""
+    src = {}
+    data = json.load(open("design/scene.json", encoding="utf-8"))
+
+    def walk(o, path):
+        if isinstance(o, str):
+            for ch in o:
+                src.setdefault(ch, path)
+        elif isinstance(o, dict):
+            for k, v in o.items():
+                walk(v, f"{path}/{k}")
+        elif isinstance(o, list):
+            for i, v in enumerate(o):
+                walk(v, f"{path}[{i}]")
+
+    walk(data, "scene")
+    return src
+
+
 def lua_chars():
     """Строковые литералы Lua. Комментарии не трогаем: они на экран не идут."""
     src = {}
@@ -112,7 +136,7 @@ def main():
             print(f"FONT GATE BROKEN: детектор не видит канарейку в {f}")
             sys.exit(1)
     src = {}
-    for d in (texts_chars(), lua_chars()):
+    for d in (texts_chars(), scene_chars(), lua_chars()):
         for ch, where in d.items():
             src.setdefault(ch, where)
     bad = {}

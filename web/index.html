@@ -1,0 +1,270 @@
+<!doctype html>
+<!--
+  Оболочка веб-версии (р.24). Шаблон: метки %%…%% подставляет tools/build_web.py,
+  руками собранный dist/web/index.html не править — он перезаписывается.
+  Рантайм — love.js (LÖVE 11.4 в WebAssembly, вариант compatibility).
+  Канвас растянут на всё окно CSS-ом: SDL в love.js тогда сам подгоняет под
+  него размер кадра и шлёт love.resize, а letterbox игры (main.lua) вписывает
+  мир 1920×1080 в любое окно.
+-->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="%%TITLE%% — юмористический point-and-click квест. Играть в браузере.">
+<title>%%TITLE%%</title>
+<style>
+  :root {
+    --bg: #000;
+    --panel: #16181f;
+    --line: #b8945a;
+    --brass: #d6b06a;
+    --text: #ede8db;
+    --dim: #a6a194;
+    --steel: #8cb3db;
+    --warn: #e8b04a;
+    --bad: #e5604f;
+  }
+  html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; }
+  body {
+    color: var(--text);
+    font: 16px/1.45 "PT Sans", "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  #canvas {
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    display: block; background: #000; outline: none;
+  }
+  #overlay {
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    padding: 16px; box-sizing: border-box; overflow-y: auto;
+    background: radial-gradient(ellipse at center, #1b1d26 0%, #07080b 75%);
+  }
+  #overlay.hidden { display: none; }
+  .card {
+    width: 100%; max-width: 640px; box-sizing: border-box;
+    background: var(--panel); border: 2px solid var(--line); border-radius: 14px;
+    padding: 28px 28px 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, .6);
+  }
+  h1 {
+    margin: 0 0 4px; font-size: clamp(26px, 5vw, 38px); line-height: 1.15;
+    color: var(--brass); letter-spacing: .02em;
+  }
+  .sub { margin: 0 0 16px; color: var(--dim); }
+  .age {
+    display: inline-block; margin-left: 6px; padding: 0 6px; border: 1px solid var(--dim);
+    border-radius: 4px; font-size: 13px; color: var(--dim); vertical-align: 2px;
+  }
+  p { margin: 0 0 12px; }
+  .bar { height: 10px; border-radius: 6px; background: #0b0c10; border: 1px solid #3a3d48; overflow: hidden; }
+  .bar > i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #8f6f3a, var(--brass)); transition: width .2s; }
+  #status { margin: 8px 0 18px; color: var(--dim); font-size: 14px; min-height: 1.45em; }
+  .buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+  button {
+    font: inherit; font-size: 18px; font-weight: 700; cursor: pointer;
+    border-radius: 10px; padding: 12px 22px; border: 2px solid var(--line);
+    background: #2a2416; color: var(--text);
+  }
+  button.secondary { background: transparent; font-weight: 400; font-size: 16px; }
+  button:disabled { opacity: .45; cursor: progress; }
+  button:not(:disabled):hover { background: #3a3120; }
+  button:focus-visible { outline: 2px solid var(--steel); outline-offset: 2px; }
+  .keys { margin: 0 0 12px; padding: 0; list-style: none; color: var(--text); font-size: 15px; }
+  .keys li { margin: 2px 0; }
+  kbd {
+    display: inline-block; min-width: 1.4em; padding: 0 6px; border-radius: 4px; text-align: center;
+    border: 1px solid #555a66; background: #0f1015; font: 13px/1.6 ui-monospace, Consolas, monospace;
+  }
+  .note { color: var(--dim); font-size: 14px; }
+  .warn { border-left: 3px solid var(--warn); padding: 6px 10px; background: rgba(232, 176, 74, .08); }
+  .err { border-left: 3px solid var(--bad); padding: 8px 10px; background: rgba(229, 96, 79, .1); color: var(--text); }
+  footer { margin-top: 16px; padding-top: 10px; border-top: 1px solid #2c2f39; color: #7d7a72; font-size: 12px; }
+  footer a { color: var(--steel); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<canvas id="canvas" tabindex="-1" oncontextmenu="event.preventDefault()"></canvas>
+
+<div id="overlay">
+  <div class="card" role="dialog" aria-labelledby="ttl">
+    <h1 id="ttl">%%TITLE%%</h1>
+    <p class="sub">Юмористический point-and-click квест <span class="age" title="пассивное курение в кадре">18+</span></p>
+    <p>Ночь с 31 декабря 2018-го на 1 января. Менеджер Лапидус заперт в офисе
+      ООО «ВАЛТЕК», и выбираться придётся головой. Советы даёт Предок — латунный янычар.</p>
+
+    <div class="bar" aria-hidden="true"><i id="bar"></i></div>
+    <div id="status" role="status" aria-live="polite">Загрузка…</div>
+
+    <div class="buttons">
+      <button id="play" disabled>Загрузка…</button>
+      <button id="playfs" class="secondary" disabled>Во весь экран</button>
+    </div>
+
+    <ul class="keys">
+      <li><kbd>ЛКМ</kbd> действие · <kbd>ПКМ</kbd> осмотр и «назад»</li>
+      <li><kbd>Esc</kbd> пауза · <kbd>Пробел</kbd> подсветить зоны · <kbd>F11</kbd> полный экран</li>
+    </ul>
+    <p class="note">Прогресс сохраняется в этом браузере сам. Очистка данных сайта
+      или режим инкогнито его не сохранят. Первая загрузка — около %%DATA_MB%% МБ,
+      дальше игра берётся из кэша.</p>
+    <p id="touchwarn" class="warn" hidden>Похоже, это телефон или планшет. Игра рассчитана
+      на компьютер с мышью и клавиатурой: правый клик и ввод цифр с клавиатуры здесь
+      недоступны, и пройти её до конца не получится.</p>
+    <p id="error" class="err" hidden></p>
+
+    <footer>
+      Движок <a href="https://love2d.org" target="_blank" rel="noopener">LÖVE</a> в браузере через
+      <a href="https://github.com/Davidobot/love.js" target="_blank" rel="noopener">love.js</a>.
+      <a href="licenses.txt" target="_blank">Лицензии</a> · сборка %%BUILD%%
+    </footer>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var overlay = document.getElementById("overlay");
+  var canvas = document.getElementById("canvas");
+  var bar = document.getElementById("bar");
+  var status = document.getElementById("status");
+  var play = document.getElementById("play");
+  var playfs = document.getElementById("playfs");
+  var errBox = document.getElementById("error");
+  var started = false, failed = false;
+
+  function setText(t) { status.textContent = t; }
+  function fail(msg) {
+    if (failed) return;
+    failed = true;
+    errBox.textContent = msg + " Обновите страницу (Ctrl+F5). Если не поможет — " +
+      "откройте игру в свежем Chrome, Edge или Firefox на компьютере.";
+    errBox.hidden = false;
+    play.disabled = playfs.disabled = true;
+    play.textContent = "Ошибка";
+    overlay.classList.remove("hidden");
+  }
+
+  // сенсорный экран без мыши — честное предупреждение до загрузки
+  if (window.matchMedia && matchMedia("(hover: none) and (pointer: coarse)").matches) {
+    document.getElementById("touchwarn").hidden = false;
+  }
+
+  // WebGL проверяется на ВРЕМЕННОМ канвасе: контекст игрового создаёт сам рантайм
+  (function () {
+    var c = document.createElement("canvas");
+    var gl = null;
+    try { gl = c.getContext("webgl") || c.getContext("experimental-webgl"); } catch (e) {}
+    if (!gl) fail("Браузер не дал WebGL — без него игра не запустится.");
+  })();
+  if (typeof WebAssembly !== "object") fail("Браузер не поддерживает WebAssembly.");
+
+  // пока висит заставка, клавиши не уходят в игру (Enter на титуле начал бы
+  // новую партию за спиной у игрока)
+  window.addEventListener("keydown", function (e) {
+    if (!started) {
+      if ((e.key === "Enter" || e.key === " ") && !play.disabled && document.activeElement !== playfs) {
+        e.preventDefault(); start(false);
+      }
+      e.stopImmediatePropagation();
+      return;
+    }
+    // пробел и стрелки не листают страницу
+    if ([" ", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(e.key) >= 0) e.preventDefault();
+  }, true);
+
+  canvas.addEventListener("webglcontextlost", function (e) {
+    e.preventDefault();
+    fail("Видеокарта сбросила графический контекст.");
+  }, false);
+
+  // Сейвы. Рантайм пишет каталог сохранений в IndexedDB только по beforeunload,
+  // а при закрытии вкладки асинхронная запись не успевает — терялся весь
+  // прогресс сессии. Поэтому синхронизация своя: раз в 3 с, при сворачивании
+  // вкладки и на pagehide. Строго после «BJ2 READY»: к этому моменту рантайм
+  // уже поднял старые сейвы из IndexedDB в память, а ранняя синхронизация
+  // записала бы поверх них пустой каталог. Module.FS выставляет build_web.py.
+  var gameReady = false, syncing = false, again = false;
+  function syncSaves() {
+    var fs = window.Module && window.Module.FS;
+    if (!gameReady || !fs) return;
+    if (syncing) { again = true; return; }
+    syncing = true;
+    fs.syncfs(false, function (err) {
+      syncing = false;
+      if (err) console.warn("сейвы: синхронизация не удалась", err);
+      if (again) { again = false; syncSaves(); }
+    });
+  }
+  setInterval(syncSaves, 3000);
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "hidden") syncSaves();
+  });
+  window.addEventListener("pagehide", syncSaves);
+
+  function ready() {
+    if (failed) return;
+    gameReady = true;
+    bar.style.width = "100%";
+    setText("Готово.");
+    play.disabled = playfs.disabled = false;
+    play.textContent = "Играть";
+    play.focus();
+  }
+
+  function start(fullscreen) {
+    if (play.disabled || started) return;
+    started = true;
+    overlay.classList.add("hidden");
+    if (fullscreen) {
+      var el = document.documentElement;
+      var rq = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (rq) { try { var p = rq.call(el); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+    }
+    window.focus();
+    canvas.focus();
+  }
+  play.addEventListener("click", function () { start(false); });
+  playfs.addEventListener("click", function () { start(true); });
+  window.addEventListener("click", function () { window.focus(); });
+
+  window.onerror = function (msg) {
+    if (!started || String(msg).indexOf("abort") >= 0) fail("Игра не запустилась: " + msg + ".");
+  };
+
+  // объект Module читают загрузчик game.js и рантайм love.js
+  window.Module = {
+    arguments: ["./game.love"],
+    INITIAL_MEMORY: %%MEMORY%%,
+    canvas: canvas,
+    // main.lua печатает «BJ2 READY» в конце love.load: ассеты в памяти, титул готов
+    print: function (t) { if (t === "BJ2 READY") ready(); else console.log(t); },
+    printErr: console.error.bind(console),
+    onAbort: function (what) { fail("Игра аварийно остановилась (" + what + ")."); },
+    setStatus: function (t) {
+      if (!t) { if (!gameReady) setText("Запуск: загружаю картинки и звук…"); return; }
+      var m = /\((\d+)\/(\d+)\)/.exec(t);
+      if (/^Downloading/.test(t) && m) {
+        var a = +m[1], b = +m[2] || 1;
+        bar.style.width = Math.min(100, a / b * 100).toFixed(1) + "%";
+        setText("Загрузка: " + (a / 1048576).toFixed(1) + " из " + (b / 1048576).toFixed(1) + " МБ");
+      } else if (/^Downloading/.test(t)) {
+        setText("Загрузка…");
+      } else if (/^Preparing|^All downloads|^Running/.test(t)) {
+        bar.style.width = "100%";
+        setText("Распаковка…");
+      }
+    },
+    totalDependencies: 0,
+    monitorRunDependencies: function (left) {
+      this.totalDependencies = Math.max(this.totalDependencies, left);
+    }
+  };
+  window.Module.setStatus("Downloading...");
+})();
+</script>
+<script src="game.js"></script>
+<script async src="love.js" onload="Love(Module)" onerror="document.getElementById('status').textContent='Не загрузился love.js — обновите страницу.'"></script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # ПОЛНЫЙ ТЕКСТ ИГРЫ — для ручной редактуры
 
-> ВАЖНО: файл сгенерирован. Правки вносить НЕ сюда, а в tools/gen_texts.py
+> ВАЖНО: файл сгенерирован (tools/gen_texts_dump.py). Правки вносить НЕ сюда, а в tools/gen_texts.py
 > (реплики/документы/UI) и tools/gen_scene.py (названия зон), затем перегенерация.
 > Данный файл — слепок design/texts.json + подписей зон для вычитки.
 
@@ -15,12 +15,18 @@
 - `ui.music`: Музыка
 - `ui.sound`: Звуки
 - `ui.fullscreen`: Полный экран
-- `ui.noshake`: Убрать тряску
+- `ui.noshake`: Убрать дрожь экрана
 - `ui.back`: Назад
 - `ui.goals`: ЦЕЛИ
 - `ui.secret_goal`: ??? %d/3
 - `ui.hint_btn`: СОВЕТ ПРЕДКА
 - `ui.inventory`: КАРМАНЫ
+- `ui.docs_btn`: БУМАГИ
+- `ui.docs_title`: ПРОЧИТАННЫЕ БУМАГИ
+- `ui.docs_empty`: Пока читать нечего. Всё прочитанное осядет здесь.
+- `ui.docs_help`: ЛКМ — перечитать · ПКМ или ESC — закрыть
+- `ui.arrow_to.A`: В офис
+- `ui.arrow_to.B`: В щитовую
 - `ui.combine_fail`: Это между собой не женится.
 - `ui.reader_close`: Закрыть [ПКМ]
 - `ui.form_send`: ОТПРАВИТЬ
@@ -138,7 +144,7 @@
 - `nodes.see_net.do[0].t`: Сачок-инвалид на шкафу. Без ручки. Допрыгнуть не смогу — гравитация и сколиоз против. А стремянку сломали еще в пандемию.
 - `nodes.see_net.do[1].s`: anc
 - `nodes.see_net.do[1].e`: stern
-- `nodes.see_net.do[1].t`: Смотри выше, слепец! Там сквозная вентиляция. Используй её как бойницу для штурма!
+- `nodes.see_net.do[1].t`: Сачок засел на верхотуре и смеётся над тобой. В моё время за такую дерзость вещи предавали анафеме.
 - `nodes.see_net.already[0].s`: lap
 - `nodes.see_net.already[0].e`: neutral
 - `nodes.see_net.already[0].t`: Сачок лежит и насмехается надо мной своим молчанием.
@@ -177,7 +183,7 @@
 - `nodes.fish_card.do[0].t`: Шурую своей вундервафлей… мимо… мимо… Опа, поймал! Пропуск Гены. Лег на дно так же уверенно, как его карьера.
 - `nodes.fish_card.do[1].s`: anc
 - `nodes.fish_card.do[1].e`: calm
-- `nodes.fish_card.do[1].t`: Трофей со дна морского. Теперь вдохни в него жизнь, некромант.
+- `nodes.fish_card.do[1].t`: Трофей со дна морского. Мокрый, но твой. Предки одобряют добычу даже из аквариума.
 - `nodes.fish_card.do[2].s`: lap
 - `nodes.fish_card.do[2].e`: neutral
 - `nodes.fish_card.do[2].t`: Пластик намок, но чип вроде цел. Гена, прощаю тебе тот съеденный йогурт, твой пропуск искупил твои грехи.
@@ -192,7 +198,7 @@
 - `nodes.pc_unlock.open[0].t`: Комп Иры. Скринсейвер мечется по экрану, олицетворяя мою тревожность.
 - `nodes.pc_unlock.open[1].s`: anc
 - `nodes.pc_unlock.open[1].e`: stern
-- `nodes.pc_unlock.open[1].t`: Замок из тайных рун. Ищи ключ к шифру на стенах крепости.
+- `nodes.pc_unlock.open[1].t`: Замок из тайных рун. Но руны эти не Ира выдумала — я видел такие же на казённой бумаге у самой двери. Там, где пишут, как не сломать шею.
 - `nodes.pc_unlock.do[0].s`: lap
 - `nodes.pc_unlock.do[0].e`: smug
 - `nodes.pc_unlock.do[0].t`: Бинго! ПИН подошел. Здравствуй, рабочий стол, пристанище пасьянса и боли.
@@ -204,7 +210,7 @@
 - `nodes.pc_unlock.fail_code[0].t`: Не тот пароль. Комп презрительно пискнул.
 - `nodes.pc_unlock.fail_code[1].s`: lap
 - `nodes.pc_unlock.fail_code[1].e`: tired
-- `nodes.pc_unlock.fail_code[1].t`: Опять мимо. Либо Ира гений криптографии, либо я не умею читать бумажки.
+- `nodes.pc_unlock.fail_code[1].t`: Опять мимо. Значки-то я вижу, а вот что каждый значит — написано где-то ещё. У двери, кажется.
 - `nodes.pc_unlock.already[0].s`: lap
 - `nodes.pc_unlock.already[0].e`: neutral
 - `nodes.pc_unlock.already[0].t`: Комп уже взломан. Большего из него не выжать.
@@ -256,9 +262,12 @@
 - `nodes.copy_pass.do[0].s`: lap
 - `nodes.copy_pass.do[0].e`: smug
 - `nodes.copy_pass.do[0].t`: Копир чихнул и выплюнул ксерокопию пропуска. Тепленькую. Единственное теплое существо в этом склепе.
-- `nodes.copy_pass.do[1].s`: anc
-- `nodes.copy_pass.do[1].e`: calm
-- `nodes.copy_pass.do[1].t`: Копия грамоты. Верно. Оригиналы имеют свойство тонуть в самый неподходящий момент.
+- `nodes.copy_pass.do[1].s`: lap
+- `nodes.copy_pass.do[1].e`: neutral
+- `nodes.copy_pass.do[1].t`: Зачем я это сделал? Низачем. Турникету нужна живая карта, а не бумажная тень. Просто у нас в конторе на каждый чих положено снять копию — рефлекс сильнее рассудка.
+- `nodes.copy_pass.do[2].s`: anc
+- `nodes.copy_pass.do[2].e`: calm
+- `nodes.copy_pass.do[2].t`: Не ищи здесь смысла, потомок. Так писари и выживают тысячу лет: бумага подшита — вопросов нет.
 - `nodes.copy_pass.fail[0].s`: lap
 - `nodes.copy_pass.fail[0].e`: neutral
 - `nodes.copy_pass.fail[0].t`: Копир обесточен. Да и копировать пока нечего, кроме своего отчаяния.
@@ -318,7 +327,7 @@
 - `nodes.take_wheel.do[0].t`: Сдираю маховик со стены прямо с почетной доской. Простите, идеалы компании, но мне надо выйти покурить. Желательно, домой.
 - `nodes.take_wheel.do[1].s`: anc
 - `nodes.take_wheel.do[1].e`: proud
-- `nodes.take_wheel.do[1].t`: Латунь! Священный металл! Верни его на место боевой славы!
+- `nodes.take_wheel.do[1].t`: Латунь! Священный металл нашего рода! В руках потомка он ещё послужит.
 - `nodes.take_wheel.already[0].s`: lap
 - `nodes.take_wheel.already[0].e`: neutral
 - `nodes.take_wheel.already[0].t`: Маховик снят. Осталось только пыльное пятно амбиций.
@@ -327,7 +336,7 @@
 - `nodes.install_wheel.do[0].t`: Накрутил маховик на шток «П». Сел, как родной. Собственно, он и есть родной.
 - `nodes.install_wheel.do[1].s`: anc
 - `nodes.install_wheel.do[1].e`: calm
-- `nodes.install_wheel.do[1].t`: Орудие к бою готово. Осталось узнать порядок залпов.
+- `nodes.install_wheel.do[1].t`: Маховик на месте, как венец на челе. Стенд признал в тебе хозяина.
 - `nodes.install_wheel.fail[0].s`: lap
 - `nodes.install_wheel.fail[0].e`: neutral
 - `nodes.install_wheel.fail[0].t`: Шток без вентиля. Пальцами не крутится, только мозоли натирает.
@@ -441,7 +450,7 @@
 - `nodes.bolt_free.do[1].t`: Ржавчина пала под натиском смекалки и грубой силы. Славная победа.
 - `nodes.bolt_free.fail[0].s`: lap
 - `nodes.bolt_free.fail[0].e`: angry
-- `nodes.bolt_free.fail[0].t`: Засов приржавел насмерть. Рвать руками — только геморрой заработаю. Нужна химия и рычаг.
+- `nodes.bolt_free.fail[0].t`: Засов приржавел насмерть. Рвать руками — только геморрой заработаю. Тут нужны литол и разводник: возьми их в карманах и примени к засову.
 - `nodes.bolt_free.already[0].s`: lap
 - `nodes.bolt_free.already[0].e`: neutral
 - `nodes.bolt_free.already[0].t`: Засов открыт. Пусть себе отдыхает.
@@ -510,7 +519,7 @@
 - `nodes.reader_swipe.do[1].t`: Бездушный страж пропустил тебя. Замок повержен.
 - `nodes.reader_swipe.fail[0].s`: lap
 - `nodes.reader_swipe.fail[0].e`: neutral
-- `nodes.reader_swipe.fail[0].t`: Считыватель не реагирует. Либо нет питания, либо пропуск — просто кусок пластика.
+- `nodes.reader_swipe.fail[0].t`: Считыватель молчит. Либо на нём нет питания, либо пропуск не оживлён — просто болванка. Оживляют карту на терминале СКУД, не тут.
 - `nodes.reader_swipe.already[0].s`: lap
 - `nodes.reader_swipe.already[0].e`: neutral
 - `nodes.reader_swipe.already[0].t`: Он уже горит зелёным. Хватит его тиранить.
@@ -721,6 +730,9 @@
 - `looks.hs_z_vise.look[0].s`: lap
 - `looks.hs_z_vise.look[0].e`: neutral
 - `looks.hs_z_vise.look[0].t`: Тиски. Символ давления руководства.
+- `looks.hs_z_wb_drawer_empty.look[0].s`: lap
+- `looks.hs_z_wb_drawer_empty.look[0].e`: neutral
+- `looks.hs_z_wb_drawer_empty.look[0].t`: Ящик верстака. Ключ я уже прибрал, остальное — гербарий из гаек, стружки и промасленной тряпки. Пусть дозревает.
 - `looks.hs_z_tinsel.look[0].s`: lap
 - `looks.hs_z_tinsel.look[0].e`: neutral
 - `looks.hs_z_tinsel.look[0].t`: Дождик свисает с полки. Грустно и некрасиво.
@@ -730,6 +742,9 @@
 - `looks.hs_z_hooks.look[0].s`: lap
 - `looks.hs_z_hooks.look[0].e`: neutral
 - `looks.hs_z_hooks.look[0].t`: Пустые крючки. Раньше тут висела швабра.
+- `looks.hs_z_hooks2.look[0].s`: lap
+- `looks.hs_z_hooks2.look[0].e`: neutral
+- `looks.hs_z_hooks2.look[0].t`: Ещё крючки. На них не висит ничего — как и на мне ответственности.
 - `looks.hs_z_rag.look[0].s`: lap
 - `looks.hs_z_rag.look[0].e`: neutral
 - `looks.hs_z_rag.look[0].t`: Половая тряпка. Воняет сыростью и безысходностью.
@@ -751,11 +766,30 @@
 - `nervous_suffix[2].s`: lap
 - `nervous_suffix[2].e`: worried
 - `nervous_suffix[2].t`: Пальцы так дрожат, что я бы сейчас взбил идеальный майонез без миксера.
+- `item_wrong[0].s`: lap
+- `item_wrong[0].e`: neutral
+- `item_wrong[0].t`: Не то. Это сюда не применить.
+- `item_wrong[1].s`: lap
+- `item_wrong[1].e`: tired
+- `item_wrong[1].t`: Ммм… нет. Не подходит от слова совсем.
+- `item_wrong[2].s`: lap
+- `item_wrong[2].e`: neutral
+- `item_wrong[2].t`: И как я себе это представлял? Не лезет.
+- `item_wrong[3].s`: lap
+- `item_wrong[3].e`: smug
+- `item_wrong[3].t`: Красиво, но бессмысленно. Не тот случай.
+- `item_wrong[4].s`: lap
+- `item_wrong[4].e`: worried
+- `item_wrong[4].t`: Не работает. Видимо, я опять что-то напутал.
 - `docs.doc_sticker.title`: Стикер под клавиатурой
 - `docs.doc_sticker.pages[0][0]`: жёлтый стикер, почерк Иры:
 - `docs.doc_sticker.pages[0][1]`: «ПИН (никому!!!):
 - `docs.doc_sticker.pages[0][2]`: {PIN_GLYPHS}
 - `docs.doc_sticker.pages[0][3]`: …я же не дура цифрами писать»
+- `docs.doc_sticker.pages[0][4]`: 
+- `docs.doc_sticker.pages[0][5]`: (значки знакомые. Такие же намалёваны
+- `docs.doc_sticker.pages[0][6]`: на казённом листке у входной двери —
+- `docs.doc_sticker.pages[0][7]`: том самом, про охрану труда)
 - `docs.doc_poster.title`: Плакат по охране труда
 - `docs.doc_poster.pages[0][0]`: ОХРАНА ТРУДА: ЗНАКИ УЧАСТКА
 - `docs.doc_poster.pages[0][1]`: (утв. в 1998, выцвело в 2003)
@@ -770,7 +804,7 @@
 - `docs.doc_karaoke.pages[0][0]`: КОРПОРАТИВ · СПИСОК ПЕСЕН
 - `docs.doc_karaoke.pages[0][1]`: 1. Ветер с моря дул — Ира
 - `docs.doc_karaoke.pages[0][2]`: 2. Владимирский централ — Гена (вычеркнуто)
-- `docs.doc_karaoke.pages[0][3]`: 3. トруба зовёт — Лапидус (почерк не мой!)
+- `docs.doc_karaoke.pages[0][3]`: 3. Труба зовёт — Лапидус (почерк не мой!)
 - `docs.doc_karaoke.pages[0][4]`: 4. Мурка (запрещена приказом №6)
 - `docs.doc_santa.title`: Бирки Тайного Санты
 - `docs.doc_santa.pages[0][0]`: «Кому: ЛАПИДУСУ. От: угадай :)»
@@ -791,7 +825,7 @@
 - `docs.doc_chat.title`: Чат отдела (экран)
 - `docs.doc_chat.pages[0][0]`: #валтек-продажи, 30 дек:
 - `docs.doc_chat.pages[0][1]`: Ира: код сейфа простой — {TOK:ira_rule}
-- `docs.doc_chat.pages[0][2]`: Гена: опять картой в аквариум 🤦
+- `docs.doc_chat.pages[0][2]`: Гена: опять картой в аквариум. фейспалм.жпг
 - `docs.doc_chat.pages[0][3]`: Ира: сигналку ставлю как всегда:
 - `docs.doc_chat.pages[0][4]`: Ира: {TOK:alarm_rule} — день, когда СБ приезжала, потом месяц
 - `docs.doc_chat.pages[0][5]`: Гена: только не как в тот раз))
@@ -878,7 +912,25 @@
 - `hints.topics.t_card[1].t`: В подсобке на шкафу лежит сачок без ручки. В офисе есть длинная указка. Стена между ними проницаема для идей и предметов.
 - `hints.topics.t_card[2].s`: anc
 - `hints.topics.t_card[2].e`: smug
-- `hints.topics.t_card[2].t`: Сбей сачок указкой через вентиляцию. Собери длинный сачок. Вылови пропуск и оживи его бумагами.
+- `hints.topics.t_card[2].t`: Сбей сачок указкой через вентиляцию. Собери длинный сачок. Вылови пропуск из аквариума.
+- `hints.topics.t_pc[0].s`: anc
+- `hints.topics.t_pc[0].e`: calm
+- `hints.topics.t_pc[0].t`: Машина Иры заперта четырьмя знаками. Знаки она записала — но не цифрами, а закорючками.
+- `hints.topics.t_pc[1].s`: anc
+- `hints.topics.t_pc[1].e`: stern
+- `hints.topics.t_pc[1].t`: Закорючки прячутся под её клавиатурой. А что каждая закорючка значит — вывешено на всеобщее обозрение: казённый листок на полотне входной двери.
+- `hints.topics.t_pc[2].s`: anc
+- `hints.topics.t_pc[2].e`: smug
+- `hints.topics.t_pc[2].t`: Загляни под клавиатуру Иры, потом прочти листок по охране труда на двери и переведи значки в цифры.
+- `hints.topics.t_skud[0].s`: anc
+- `hints.topics.t_skud[0].e`: calm
+- `hints.topics.t_skud[0].t`: Пластик Гены мёртв. Оживить его можно только бумагой — иначе страж у двери не признает.
+- `hints.topics.t_skud[1].s`: anc
+- `hints.topics.t_skud[1].e`: stern
+- `hints.topics.t_skud[1].t`: Форма СКУД-2 живёт во взломанном компьютере. Ей нужен номер карты и отдел владельца.
+- `hints.topics.t_skud[2].s`: anc
+- `hints.topics.t_skud[2].e`: smug
+- `hints.topics.t_skud[2].t`: Номер выбит на самой карте, отдел Гены — в реестре из ящика Иры и в приказе на компьютере. Заполни форму и отправь.
 - `hints.topics.t_power[0].s`: anc
 - `hints.topics.t_power[0].e`: calm
 - `hints.topics.t_power[0].t`: Энергия заперта в стальном ящике под трехгранный ключ.
@@ -935,7 +987,7 @@
 - `hints.topics.t_secret[2].t`: Найди ятаган, значок и феску. А потом поробуй копнуть коробку с феской еще разок. Там скрыто абсолютное величие.
 - `idle[0].s`: lap
 - `idle[0].e`: tired
-- `idle[0].t`: Тик-так. Часы на стене спешат на пять минут. Чтобы я быстрее ушел с работы. Не сработало.
+- `idle[0].t`: Тик-так. Мои часы всегда спешат на пять минут. Чтобы я быстрее ушёл с работы. Не сработало.
 - `idle[1].s`: lap
 - `idle[1].e`: worried
 - `idle[1].t`: В этой тишине я слышу, как мои карьерные перспективы бьются в конвульсиях.
@@ -1058,13 +1110,13 @@
 - `item_desc.card.t`: Пропуск Гены, №{TOK:card_number}. Пахнет рыбьим кормом и упущенными возможностями.
 - `item_desc.copy.s`: lap
 - `item_desc.copy.e`: neutral
-- `item_desc.copy.t`: Ксерокопия пропуска. Духовная пища для считывателя.
+- `item_desc.copy.t`: Ксерокопия пропуска. Ни одна дверь её не примет и ни один замок ею не откроется — это не предмет, это диагноз. Сувенир на память о конторе, где копия важнее оригинала.
 - `item_desc.key_toy.s`: lap
 - `item_desc.key_toy.e`: neutral
 - `item_desc.key_toy.t`: Маленький ключик. Висел на елке, прикидываясь игрушкой.
 - `item_desc.wrench.s`: lap
 - `item_desc.wrench.e`: neutral
-- `item_desc.wrench.t`: Разводной ключ. Решает проблемы, которые нельзя решить словами.
+- `item_desc.wrench.t`: Разводной ключ. Решает проблемы, которые нельзя решить словами. И железку подогнать под замок — тоже к нему.
 - `item_desc.wheel.s`: lap
 - `item_desc.wheel.e`: neutral
 - `item_desc.wheel.t`: Тяжелый латунный маховик. Раньше висел на стене, почесывая чье-то эго.
@@ -1073,7 +1125,7 @@
 - `item_desc.trikey.t`: Самопальный трехгранник. Ключ к сердцу электрощитка.
 - `item_desc.collector.s`: lap
 - `item_desc.collector.e`: neutral
-- `item_desc.collector.t`: Латунный коллектор. Снял со стенда мародерским методом.
+- `item_desc.collector.t`: Латунный коллектор. Снял со стенда мародерским методом. Сбоку — трёхгранный хвостовик: подогнать бы чем путным, вышел бы ключ.
 - `item_desc.grease.s`: lap
 - `item_desc.grease.e`: neutral
 - `item_desc.grease.t`: Банка литола. Универсальная мазь от скрипа и жизненных трудностей.
@@ -1118,52 +1170,50 @@
 - `glyph_names.snowflake`: снежинка
 
 ## Названия зон (hover-подписи)
-- `A/hs_reader`: Считыватель
 - `A/hs_alarm`: Сигнализация
+- `A/hs_reader`: Считыватель
 - `A/hs_phone`: Телефон
 - `A/hs_util_shaft`: Квадратный шток
+- `A/hs_pointer`: Магнитная указка
 - `A/hs_exit_sign`: Табличка EXIT
+- `A/hs_ruler`: Линейка
 - `A/hs_intercom`: Домофон
-- `A/hs_poster_ot`: Плакат по охране труда
 - `A/hs_red_button`: Красная кнопка
 - `A/hs_coffee_machine`: Кофемашина
-- `A/hs_ruler`: Линейка
+- `A/hs_karaoke`: Караоке-список
+- `A/hs_poster_ot`: Плакат по охране труда
 - `A/hs_lap_drawer`: Ящик стола
 - `A/hs_lap_drawer_pry`: Запертый ящик
 - `A/hs_extinguisher`: Огнетушитель
-- `A/hs_vent_office`: Вентрешётка
-- `A/hs_karaoke`: Караоке-список
 - `A/hs_calendar`: Календарь
-- `A/hs_wheel_wall`: Памятный маховик
-- `A/hs_pointer`: Магнитная указка
 - `A/hs_karaoke_sing`: Спеть
+- `A/hs_vent_office`: Вентрешётка
+- `A/hs_wheel_wall`: Памятный маховик
+- `A/hs_ira_tumba`: Кодовая тумба
 - `A/hs_flipchart`: Флипчарт
 - `A/hs_tree_base`: Под ёлкой
 - `A/hs_util_door`: Дверь щитовой
 - `A/hs_util_door_go`: В щитовую
-- `A/hs_ira_drawer_out`: Открытый ящик
+- `A/hs_kpi_board`: KPI-доска
 - `A/hs_copier`: Копир
-- `A/hs_aquarium`: Аквариум
-- `A/hs_ira_tumba`: Кодовая тумба
-- `A/hs_aq_tumba`: Тумба аквариума
 - `A/hs_sofa_under`: Под диваном
+- `A/hs_aquarium`: Аквариум
+- `A/hs_aq_tumba`: Тумба аквариума
 - `A/hs_ira_pc`: Компьютер
 - `A/hs_lap_desk`: Стол Лапидуса
-- `A/hs_kpi_board`: KPI-доска
+- `A/hs_table_mugs`: Журнальный столик
 - `A/hs_main_door`: Главная дверь
 - `A/hs_main_door_survey`: Осмотреть дверь
 - `A/hs_ira_desk`: Стол Иры
 - `A/hs_wardrobe`: Шкаф-гардероб
-- `A/hs_table_mugs`: Журнальный столик
-- `A/hs_tree`: Ёлка
 - `A/hs_sofa`: Диван
+- `A/hs_tree`: Ёлка
 - `A/hs_window`: Окно
 - `B/hs_shelf_grease`: Смазка
-- `B/hs_sink_valve`: Вентиль под раковиной
-- `B/hs_vent_util`: Вентрешётка
-- `B/hs_bucket`: Ведро
-- `B/hs_mop`: Швабра
 - `B/hs_net_top`: Верх шкафа
+- `B/hs_sink_valve`: Вентиль под раковиной
+- `B/hs_bucket`: Ведро
+- `B/hs_vent_util`: Вентрешётка
 - `B/hs_attic`: Антресоль
 - `B/hs_box_floor`: Коробка «НГ-2019»
 - `B/hs_box_search`: Коробка (ещё раз)
@@ -1177,10 +1227,10 @@
 - `B/hs_shelf`: Стеллаж
 - `B/hs_closet`: Шкаф уборщицы
 - `B/hs_b_door_office`: Дверь в офис
+- `zoom_tree/hs_z_santa`: Бирка Тайного Санты
 - `zoom_tree/hs_z_keytoy`: Ключик-«игрушка»
-- `zoom_tree/hs_z_santa`: Бирки Санты
+- `zoom_tree/hs_z_gift`: Развернуть подарок
 - `zoom_tree/hs_z_bin`: Корзина
-- `zoom_tree/hs_z_gift`: Подарок
 - `zoom_tree/hs_z_stand`: Крестовина
 - `zoom_tree/hs_z_balls`: Игрушки
 - `zoom_lap_drawer/hs_z_photos`: Фотки с корпоратива
@@ -1188,49 +1238,56 @@
 - `zoom_lap_drawer/hs_z_tray`: Лоток-органайзер
 - `zoom_aquarium/hs_z_glint`: Что-то блестит
 - `zoom_aquarium/hs_z_fish`: Рыбка
-- `zoom_aquarium/hs_z_weed`: Водоросли
 - `zoom_aquarium/hs_z_castle`: Замок
+- `zoom_aquarium/hs_z_weed`: Водоросли
 - `zoom_pc/hs_z_mouse`: Мышь
 - `zoom_pc/hs_z_pencils`: Карандашница
 - `zoom_pc/hs_z_sticker`: Стикер под клавиатурой
 - `zoom_pc/hs_z_screen`: Экран
 - `zoom_drawer_keypad/hs_z_slot`: Щель шредера
-- `zoom_drawer_keypad/hs_z_keypad`: Кейпад
 - `zoom_drawer_keypad/hs_z_mini_drawer`: Ящичек
+- `zoom_drawer_keypad/hs_ira_drawer_out`: Открытый ящик
+- `zoom_drawer_keypad/hs_z_keypad`: Кейпад
+- `zoom_ira_drawer/hs_z_ira_back`: Назад к тумбе
+- `zoom_ira_drawer/hs_z_registry`: Реестр отделов
 - `zoom_alarm/hs_z_alarm_tag`: Бирка монтажника
 - `zoom_alarm/hs_z_alarm_horn`: Сирена
 - `zoom_alarm/hs_z_alarm_pad`: Панель сигнализации
 - `zoom_exit_door/hs_z_keyhole`: Скважина
 - `zoom_exit_door/hs_z_bolt`: Засов
-- `zoom_exit_door/hs_z_handle_lock`: Ручка и замок
 - `zoom_exit_door/hs_z_reader_small`: Считыватель
 - `zoom_exit_door/hs_z_alarm_go`: Панель сигнализации
-- `zoom_exit_door/hs_z_intercom2`: Домофон
+- `zoom_exit_door/hs_z_handle_lock`: Ручка и замок
 - `zoom_exit_door/hs_z_plate`: Табличка
+- `zoom_exit_door/hs_z_intercom2`: Домофон
 - `zoom_exit_door/hs_z_door_push`: Толкнуть дверь
 - `zoom_panel/hs_z_ext_switch`: Рубильник
 - `zoom_panel/hs_z_schema`: Схема
 - `zoom_panel/hs_z_breaker_row`: Автоматы
-- `zoom_bench/hs_z_reset`: СБРОС
 - `zoom_bench/hs_z_hatch`: Лючок
-- `zoom_bench/hs_z_valve_k1`: К1
+- `zoom_bench/hs_z_reset`: СБРОС
+- `zoom_bench/hs_z_collector`: Коллектор в зажиме
 - `zoom_bench/hs_z_valve_k2`: К2
 - `zoom_bench/hs_z_valve_s`: С
 - `zoom_bench/hs_z_valve_p`: П
 - `zoom_bench/hs_z_valve_p_empty`: Голый шток «П»
+- `zoom_bench/hs_z_valve_k1`: К1
 - `zoom_bench/hs_z_gauge`: Манометр
-- `zoom_bench/hs_z_collector`: Коллектор в зажиме
 - `zoom_bench/hs_z_note`: Листок-инструкция
 - `zoom_bench/hs_z_pump`: Насос
 - `zoom_workbench/hs_z_padlock`: Замочек
-- `zoom_workbench/hs_z_journal`: Журнал испытаний
-- `zoom_workbench/hs_z_vise`: Тиски
 - `zoom_workbench/hs_z_wb_drawer`: Ящик верстака
+- `zoom_workbench/hs_z_wb_drawer_empty`: Ящик верстака
+- `zoom_workbench/hs_z_vise`: Тиски
+- `zoom_workbench/hs_z_journal`: Журнал испытаний
+- `zoom_wb_drawer/hs_z_wb_wrench`: Разводной ключ
 - `zoom_attic/hs_z_tinsel`: Мишура
 - `zoom_attic/hs_z_dust`: Пыльный след
 - `zoom_attic/hs_z_box_shelf`: Коробка «НГ-2019»
-- `zoom_closet/hs_z_rag`: Тряпка
 - `zoom_closet/hs_z_hooks`: Крючки
-- `zoom_closet/hs_z_medkit`: Аптечка
-- `zoom_closet/hs_z_bottles`: Бутыли
+- `zoom_closet/hs_z_hooks2`: Крючки
+- `zoom_closet/hs_z_rag`: Тряпка
 - `zoom_closet/hs_z_bucket2`: Ведро
+- `zoom_closet/hs_mop`: Швабра
+- `zoom_closet/hs_z_bottles`: Бутыли
+- `zoom_closet/hs_z_medkit`: Аптечка

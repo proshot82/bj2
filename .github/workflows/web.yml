@@ -1,0 +1,75 @@
+# Веб-версия «Латунного янычара 2.0» → GitHub Pages (р.24).
+#
+# Запуск только вручную — релизы по явной команде (AGENTS.md, правило 7):
+#   Actions → «Веб-версия (GitHub Pages)» → Run workflow.
+# Один раз заранее: Settings → Pages → Build and deployment → Source:
+# «GitHub Actions». Pages на приватном репозитории есть только на платных
+# планах GitHub; на бесплатном снимите галку «pages» — останется zip-артефакт
+# для itch.io или любого статического хостинга.
+#
+# Сборка: tools/build_web.py (love.js с LÖVE 11.5, фоны в JPEG) → dist/web/.
+name: Веб-версия (GitHub Pages)
+
+on:
+  workflow_dispatch:
+    inputs:
+      pages:
+        description: "Опубликовать на GitHub Pages (иначе — только zip-артефакт)"
+        type: boolean
+        default: true
+      lossless:
+        description: "Фоны оставить PNG (загрузка ~78 МБ вместо ~29 МБ)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Зависимости
+        run: python -m pip install --disable-pip-version-check pillow
+
+      - name: Сборка веб-версии
+        run: python tools/build_web.py --zip ${{ inputs.lossless && '--lossless' || '' }}
+
+      - name: Zip для itch.io и других хостингов
+        uses: actions/upload-artifact@v7
+        with:
+          name: BrassJanissary2-web
+          path: dist/BrassJanissary2-web.zip
+          retention-days: 30
+
+      - uses: actions/configure-pages@v6
+        if: inputs.pages
+
+      - uses: actions/upload-pages-artifact@v5
+        if: inputs.pages
+        with:
+          path: dist/web
+
+  deploy:
+    if: inputs.pages
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
