@@ -27,13 +27,24 @@
     --warn: #e8b04a;
     --bad: #e5604f;
   }
+  /* (р.26) Безопасная зона. В Telegram на весь экран углы занимают его кнопки
+     («Закрыть», «⋯»), а края — вырез и полоски системы; Telegram сообщает их
+     переменными --tg-safe-area-inset-* и --tg-content-safe-area-inset-*.
+     Вне Telegram переменных нет — отступы нулевые. */
+  :root {
+    --sa-t: calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px));
+    --sa-b: calc(var(--tg-safe-area-inset-bottom, 0px) + var(--tg-content-safe-area-inset-bottom, 0px));
+    --sa-l: calc(var(--tg-safe-area-inset-left, 0px) + var(--tg-content-safe-area-inset-left, 0px));
+    --sa-r: calc(var(--tg-safe-area-inset-right, 0px) + var(--tg-content-safe-area-inset-right, 0px));
+  }
   html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; }
   body {
     color: var(--text);
     font: 16px/1.45 "PT Sans", "Segoe UI", Roboto, system-ui, sans-serif;
   }
   #canvas {
-    position: fixed; inset: 0; width: 100%; height: 100%;
+    position: fixed; top: var(--sa-t); left: var(--sa-l);
+    width: calc(100% - var(--sa-l) - var(--sa-r)); height: calc(100% - var(--sa-t) - var(--sa-b));
     display: block; background: #000; outline: none;
     /* (р.25) палец на канвасе — только игре: без прокрутки, масштаба двойным
        тапом, выделения и меню по долгому касанию (долгое касание — это ПКМ) */
@@ -42,7 +53,8 @@
   }
   #overlay {
     position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
-    padding: 16px; box-sizing: border-box; overflow-y: auto;
+    padding: calc(16px + var(--sa-t)) calc(16px + var(--sa-r)) calc(16px + var(--sa-b)) calc(16px + var(--sa-l));
+    box-sizing: border-box; overflow-y: auto;
     background: radial-gradient(ellipse at center, #1b1d26 0%, #07080b 75%);
   }
   #overlay.hidden { display: none; }
@@ -119,7 +131,8 @@
       или режим инкогнито его не сохранят. Первая загрузка — около %%DATA_MB%% МБ,
       дальше игра берётся из кэша.</p>
     <p id="touchnote" class="tip" hidden>Похоже, это телефон или планшет — игра проходится
-      пальцем целиком. Держите экран горизонтально и включите «Во весь экран». На телефоне
+      пальцем целиком и открывается на весь экран. Играйте горизонтально: если держите
+      телефон вертикально, картинка ляжет набок сама — просто поверните его. На телефоне
       надписи мелковаты, удобнее планшет.</p>
     <p id="error" class="err" hidden></p>
 
@@ -157,10 +170,63 @@
 
   // (р.25) сенсорный экран без мыши: памятка касаний вместо мыши и клавиш.
   // Сама игра понимает палец: тап — ЛКМ, долгое касание — ПКМ (src/touch.lua).
-  if (window.matchMedia && matchMedia("(hover: none) and (pointer: coarse)").matches) {
+  // (р.26) Здесь же решается, что это телефон или планшет: игре уходит флаг
+  // --touch (портретное окно рисует кадр «лёжа», см. main.lua), «Играть»
+  // открывает весь экран сам, отдельная кнопка «Во весь экран» не нужна.
+  var TOUCH = !!(window.matchMedia && matchMedia("(hover: none) and (pointer: coarse)").matches);
+  if (TOUCH) {
     document.getElementById("keys-mouse").hidden = true;
     document.getElementById("keys-touch").hidden = false;
     document.getElementById("touchnote").hidden = false;
+    playfs.hidden = true;
+  }
+
+  // (р.26) Telegram Mini App. Параметры запуска Telegram кладёт в адрес после
+  // «#» (tgWebAppData, tgWebAppVersion, tgWebAppPlatform) — по ним и узнаём,
+  // что открыты внутри Telegram. Только тогда грузится его SDK: остальным
+  // игрокам незачем ходить на telegram.org. Внутри Telegram: весь экран сразу
+  // (Bot API 8.0+), свайп вниз больше не сворачивает игру (7.7+), рамка чёрная,
+  // а как только экран стал горизонтальным — ориентация фиксируется
+  // (lockOrientation держит ТЕКУЩУЮ; вертикальный телефон закрывает кадр «лёжа»).
+  var TG_LAUNCH = /(^|[#&])tgWebApp(Data|Platform|Version)=/.test(String(location.hash || ""));
+  var tg = null;
+  function tgAt(v) { try { return !!tg && tg.isVersionAtLeast(v); } catch (e) { return false; } }
+  function tgFullscreen() {
+    if (!tgAt("8.0") || tg.isFullscreen) return;
+    try { tg.requestFullscreen(); } catch (e) {}
+  }
+  function tgLock() {
+    if (!tgAt("8.0") || tg.isOrientationLocked) return;
+    if (window.innerWidth > window.innerHeight) { try { tg.lockOrientation(); } catch (e) {} }
+  }
+  // отступы Telegram меняют размер канваса без события resize окна, а рантайм
+  // подгоняет кадр под канвас именно по нему — шлём сами
+  function refit() { window.dispatchEvent(new Event("resize")); }
+  function tgInit() {
+    tg = window.Telegram && window.Telegram.WebApp;
+    if (!tg) return;
+    try { tg.ready(); tg.expand(); } catch (e) {}
+    if (tgAt("6.1")) { try { tg.setHeaderColor("#000000"); tg.setBackgroundColor("#000000"); } catch (e) {} }
+    if (tgAt("7.10")) { try { tg.setBottomBarColor("#000000"); } catch (e) {} }
+    if (tgAt("7.7")) { try { tg.disableVerticalSwipes(); } catch (e) {} }
+    if (tgAt("8.0")) {
+      try {
+        tg.onEvent("fullscreenChanged", function () { tgLock(); refit(); });
+        tg.onEvent("safeAreaChanged", refit);
+        tg.onEvent("contentSafeAreaChanged", refit);
+      } catch (e) {}
+    }
+    window.addEventListener("resize", tgLock);
+    tgFullscreen();
+    tgLock();
+    refit();
+  }
+  if (TG_LAUNCH) {
+    var tgs = document.createElement("script");
+    tgs.src = "https://telegram.org/js/telegram-web-app.js?63";
+    tgs.onload = tgInit;
+    tgs.onerror = function () { console.warn("Telegram SDK не загрузился — играем без его полноэкранного режима"); };
+    document.head.appendChild(tgs);
   }
 
   // WebGL проверяется на ВРЕМЕННОМ канвасе: контекст игрового создаёт сам рантайм
@@ -225,15 +291,32 @@
     play.focus();
   }
 
+  // (р.26) телефон в обычном браузере: весь экран и альбомная ориентация
+  // (Android Chrome; где браузер не умеет — молча остаёмся как есть, а
+  // горизонтальность держит кадр «лёжа» в самой игре)
+  function lockLandscape() {
+    try {
+      var o = screen.orientation;
+      if (o && o.lock) { var q = o.lock("landscape"); if (q && q.catch) q.catch(function () {}); }
+    } catch (e) {}
+  }
+  function goFullscreen(landscape) {
+    var el = document.documentElement;
+    var rq = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (!rq) return;
+    try {
+      var p = rq.call(el);
+      if (p && p.then) p.then(landscape ? lockLandscape : null, function () {});
+      else if (landscape) lockLandscape();
+    } catch (e) {}
+  }
   function start(fullscreen) {
     if (play.disabled || started) return;
     started = true;
     overlay.classList.add("hidden");
-    if (fullscreen) {
-      var el = document.documentElement;
-      var rq = el.requestFullscreen || el.webkitRequestFullscreen;
-      if (rq) { try { var p = rq.call(el); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
-    }
+    if (tg) tgFullscreen();                          // Telegram: его полноэкранный режим
+    else if (TOUCH) goFullscreen(true);              // телефон: весь экран всегда
+    else if (fullscreen) goFullscreen(false);        // компьютер: по кнопке
     window.focus();
     canvas.focus();
   }
@@ -247,7 +330,7 @@
 
   // объект Module читают загрузчик game.js и рантайм love.js
   window.Module = {
-    arguments: ["./game.love"],
+    arguments: TOUCH ? ["./game.love", "--touch"] : ["./game.love"],   // (р.26) см. main.lua
     INITIAL_MEMORY: %%MEMORY%%,
     canvas: canvas,
     // main.lua печатает «BJ2 READY» в конце love.load: ассеты в памяти, титул готов

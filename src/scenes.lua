@@ -9,7 +9,7 @@ local t_global = 0
 local frame_no = 0
 local hs_cache = {key = nil, list = nil}   -- (аудит F10) кеш хотспотов на кадр
 local snow = nil
-local LB = {sx = 1, sy = 1, ox = 0, oy = 0}   -- letterbox из main.lua
+local LB = {sx = 1, sy = 1, ox = 0, oy = 0, rot = false, w = 1920}   -- letterbox из main.lua
 
 function scenes.init(scene_json, state, images, texts)
   S, ST, IMG = scene_json, state, images
@@ -23,17 +23,31 @@ function scenes.init(scene_json, state, images, texts)
 end
 
 function scenes.set_letterbox(lb) LB = lb end
+-- (р.26) Кадр «лёжа». На сенсорном устройстве в портретном окне мир рисуется
+-- повёрнутым на 90° по часовой: длинная сторона экрана — ширина мира, игрок
+-- поворачивает телефон влево и играет горизонтально, даже если поворот экрана
+-- заблокирован. Кадр «лёжа» (vx, vy) живёт в экране (px, py) так:
+-- px = W − vy, py = vx, где W — ширина окна (main.lua: translate(W, 0) и
+-- rotate(π/2)). Здесь — обратный шаг: экранная точка → точка кадра «лёжа».
+-- Без поворота точка возвращается как есть.
+function scenes.unrotate(x, y)
+  if LB.rot then return y, LB.w - x end
+  return x, y
+end
+function scenes.rotated() return LB.rot == true end
 -- (аудит: смок в «кривом» разрешении) Обратный пересчёт мир → экран. Нужен
 -- автоплею: он обязан бить по окну теми же координатами, что и мышь игрока, —
 -- иначе letterbox не проверяет никто. Живёт здесь, а не в autoplay.lua, потому
 -- что LB известен только сцене, и второй экземпляр этой арифметики однажды
--- разъедется с первым.
+-- разъедется с первым. (р.26) С поворотом кадра — тоже здесь.
 function scenes.to_screen(wx, wy)
-  return wx * LB.sx + LB.ox, wy * LB.sy + LB.oy
+  local vx, vy = wx * LB.sx + LB.ox, wy * LB.sy + LB.oy
+  if LB.rot then return LB.w - vy, vx end
+  return vx, vy
 end
 -- мышь в МИРОВЫХ координатах (для индикатора «предмет в руке»)
 function scenes.mouse_world()
-  local mx, my = love.mouse.getPosition()
+  local mx, my = scenes.unrotate(love.mouse.getPosition())
   return (mx - LB.ox) / LB.sx, (my - LB.oy) / LB.sy
 end
 function scenes.view() return view end
@@ -190,9 +204,13 @@ local SNOW_PANES = {
 local function draw_snow()
   lg.setColor(1, 1, 1, 0.85)
   for _, p in ipairs(SNOW_PANES) do
-    -- scissor в ЭКРАННЫХ координатах: пересчёт из мировых через letterbox
-    lg.setScissor(LB.ox + p[1] * LB.sx, LB.oy + p[2] * LB.sy,
-                  p[3] * LB.sx, p[4] * LB.sy)
+    -- scissor в ЭКРАННЫХ координатах: углы стекла пересчитываются из мировых
+    -- тем же to_screen, что и клики (letterbox и, р.26, поворот кадра: на 90°
+    -- прямоугольник остаётся прямоугольником, меняются только углы)
+    local x0, y0 = scenes.to_screen(p[1], p[2])
+    local x1, y1 = scenes.to_screen(p[1] + p[3], p[2] + p[4])
+    lg.setScissor(math.min(x0, x1), math.min(y0, y1),
+                  math.abs(x1 - x0), math.abs(y1 - y0))
     for _, f in ipairs(snow) do
       lg.circle("fill", f.x, f.y, 2.1)
     end

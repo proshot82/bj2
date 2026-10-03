@@ -10,6 +10,11 @@ local S, P, T, ST
 local letter = {sx = 1, sy = 1, ox = 0, oy = 0}
 local AUTOPLAY = nil
 local HEADLESS = false   -- true в selftest/autoplay: там нужен os.exit, а не экран ошибки
+-- (р.26) Сенсорное устройство: веб-оболочка передаёт --touch на телефонах и
+-- планшетах (web/index.html). Тогда портретное окно рисует мир «лёжа» —
+-- игра всегда горизонтальная, даже при заблокированном повороте экрана.
+-- На компьютере флага нет, и окно любой формы ведёт себя как прежде.
+local TOUCH_DEVICE = false
 local cur_cursor = nil   -- (аудит F10) setCursor только при смене
 
 local function readfile(p)
@@ -188,6 +193,7 @@ function love.load(args)
   for i, a in ipairs(args or {}) do
     if a == "--selftest" then mode = "selftest" end
     if a == "--autoplay" then mode = "autoplay"; AUTOPLAY = args[i + 1] end
+    if a == "--touch" then TOUCH_DEVICE = true end
   end
   if mode == "selftest" then selftest() end
 
@@ -243,7 +249,9 @@ function love.load(args)
     HEADLESS = true
     local ap = require("src.autoplay")
     ap.start(AUTOPLAY, {ui = ui, scenes = scenes, state = ST,
-                        texts = T, puzzles = P, scene = S})
+                        texts = T, puzzles = P, scene = S,
+                        -- (р.26) сенсорный прогон объявляет себя телефоном сам
+                        set_touch_device = function(on) TOUCH_DEVICE = on end})
   end
   -- (р.24) Веб-оболочка (web/index.html) ловит эту строку в консоли и только
   -- тогда открывает кнопку «Играть»: до неё браузер ещё декодирует ассеты.
@@ -253,6 +261,11 @@ end
 -- ---------- letterbox ----------
 local function recalc_letterbox()
   local w, h = love.graphics.getDimensions()
+  -- (р.26) портретное окно сенсорного устройства: кадр «лёжа», мир вписывается
+  -- в длинную сторону (см. scenes.unrotate / scenes.to_screen)
+  letter.rot = TOUCH_DEVICE and h > w
+  letter.w = w
+  if letter.rot then w, h = h, w end
   local s = math.min(w / 1920, h / 1080)
   letter.sx, letter.sy = s, s
   letter.ox = (w - 1920 * s) / 2
@@ -262,6 +275,7 @@ function love.resize() recalc_letterbox() end
 -- scenes получает живую ссылку на letterbox (для scissor снега)
 
 local function to_world(x, y)
+  x, y = scenes.unrotate(x, y)   -- (р.26) экран → кадр «лёжа» (без поворота — как есть)
   return (x - letter.ox) / letter.sx, (y - letter.oy) / letter.sy
 end
 
@@ -295,6 +309,15 @@ function love.update(dt)
 end
 
 function love.draw()
+  local w, h = love.graphics.getDimensions()
+  love.graphics.push()
+  if letter.rot then
+    -- (р.26) кадр «лёжа»: поворот на 90° по часовой; дальше всё — и мир, и
+    -- полосы letterbox — рисуется в кадре размером h×w
+    love.graphics.translate(w, 0)
+    love.graphics.rotate(math.pi / 2)
+    w, h = h, w
+  end
   love.graphics.push()
   love.graphics.translate(letter.ox, letter.oy)
   love.graphics.scale(letter.sx, letter.sy)
@@ -304,7 +327,6 @@ function love.draw()
   ui.draw_overlays()
   love.graphics.pop()
   love.graphics.setColor(0, 0, 0)
-  local w, h = love.graphics.getDimensions()
   if letter.ox > 0 then
     love.graphics.rectangle("fill", 0, 0, letter.ox, h)
     love.graphics.rectangle("fill", w - letter.ox, 0, letter.ox + 1, h)
@@ -313,6 +335,7 @@ function love.draw()
     love.graphics.rectangle("fill", 0, 0, w, letter.oy)
     love.graphics.rectangle("fill", 0, h - letter.oy, w, letter.oy + 1)
   end
+  love.graphics.pop()
   love.graphics.setColor(1, 1, 1)
   touch.draw()   -- (р.25) кольцо удержания — поверх всего, в координатах окна
 end
