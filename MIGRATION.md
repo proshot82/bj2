@@ -79,7 +79,7 @@ letterbox. Дальше 1600×740 (телефон горизонтально) и
 
 ```bash
 python3 tools/build_web.py --zip --serve 8000 &  # dist/web/ + zip для itch.io, локальный сервер
-NODE_PATH=$(npm root -g) node tools/web_smoke.js http://127.0.0.1:8000/   # Chromium: сейв переживает закрытие браузера; сенсорный экран (р.25); телефон вертикально и Telegram (р.26)
+NODE_PATH=$(npm root -g) node tools/web_smoke.js http://127.0.0.1:8000/   # Chromium: сейв переживает закрытие браузера; сенсорный экран (р.25); телефон вертикально и Telegram (р.26); Telegram на iPhone — поворот (р.27)
 ```
 
 Публикация на GitHub Pages — только вручную, workflow `.github/workflows/web.yml`
