@@ -3,6 +3,7 @@ local ui = {}
 local lg = love.graphics
 local json = require("src.json")
 local utf8 = require("utf8")
+local touch = require("src.touch")   -- (р.25) чем вводит игрок: подписи «касание»/«ЛКМ»
 
 local T, P, ST, SC, IMG, AUD, F
 local settings = {music = true, sound = true, fullscreen = false, noshake = false, fasttext = false}
@@ -342,7 +343,8 @@ local function dlg_draw()
   lg.printf(cur.t:sub(1, bend), tx + 26, ty + 30, tw - 52, "left")
   lg.setFont(F.small)
   lg.setColor(C.dim)
-  lg.printf(dlg.shown < full and "…" or "[ЛКМ] дальше", tx + 26,
+  lg.printf(dlg.shown < full and "…" or
+    (touch.used() and "Коснитесь — дальше" or "[ЛКМ] дальше"), tx + 26,
     ty + 200, tw - 52, "right")
   lg.setColor(1, 1, 1)
 end
@@ -554,8 +556,15 @@ local function reader_draw()
   lg.setFont(F.small)
   lg.setColor(C.dim)
   local pg = (#d.pages > 1) and
-    ("стр. " .. reader.page .. "/" .. #d.pages .. "  [ЛКМ]  ·  ") or ""
-  lg.printf(pg .. T.ui.reader_close, x + 90, y + 900, 1220, "center")
+    ("стр. " .. reader.page .. "/" .. #d.pages .. (touch.used() and "  ·  " or "  [ЛКМ]  ·  "))
+    or ""
+  local foot = T.ui.reader_close
+  if touch.used() then
+    -- (р.25) касание листает, на последней странице — закрывает (ЛКМ так же);
+    -- долгое касание закрывает сразу, как ПКМ
+    foot = (reader.page < #d.pages) and T.ui.reader_touch_next or T.ui.reader_touch_close
+  end
+  lg.printf(pg .. foot, x + 90, y + 900, 1220, "center")
   lg.setColor(1, 1, 1)
 end
 
@@ -1037,7 +1046,8 @@ local function victory_draw()
   lg.printf(table.concat(lines, "\n"), 0, 430, 1920, "center")
   lg.setFont(F.small)
   lg.setColor(C.dim)
-  lg.printf("[Esc] — на титул", 0, 640, 1920, "center")
+  lg.printf(touch.used() and "Коснитесь экрана — на титул" or "Клик или [Esc] — на титул",
+    0, 640, 1920, "center")
   lg.setColor(1, 1, 1)
 end
 function ui.victory_done()
@@ -1046,6 +1056,18 @@ end
 function ui.reset_to_title()
   victory_stage = nil
   menu = "title"
+end
+-- (р.25) Уйти с финальной плашки можно кликом и касанием, не только Esc: на
+-- телефоне клавиатуры нет, и игрок застревал на победе. Первую секунду
+-- плашка клик не принимает — иначе последний тап по эпилогу проскакивал бы
+-- её не глядя (Esc — осознанное нажатие, ему пауза не нужна).
+local VICTORY_GRACE = 1.0
+local function victory_exit()
+  ui.save(); ui.reset_to_title()
+end
+local function victory_click()
+  local t0 = victory_stage.plate_t
+  if t0 and SC.time() - t0 >= VICTORY_GRACE then victory_exit() end
 end
 
 -- ================= ВИДЖЕТЫ =================
@@ -1062,6 +1084,87 @@ function ui.close_widget() widget = nil end
 -- Сетка 3x4: gx,gy — левый-верх первой кнопки; шаг = bw+10 / bh+10.
 local function keypad_geom()
   return 770, 360, 120, 88
+end
+
+-- (р.25) Сетка кнопок 3×4 — кейпад и цифры формы СКУД. Прямоугольники кнопок
+-- считаются ЗДЕСЬ и только здесь: рисование, клик и гаунтлет читают их
+-- отсюда. Раньше у кейпада формула сетки жила дважды — в отрисовке и в клике
+-- (docs/LESSONS.md: копия координат однажды разъедется с оригиналом).
+local KEYPAD_KEYS = {"1","2","3","4","5","6","7","8","9","C","0","OK"}
+local FORM_KEYS = {"1","2","3","4","5","6","7","8","9","C","0","BS"}   -- BS — стереть цифру
+local function pad_keys(x0, y0, bw, bh, keys)
+  local out = {}
+  for i, k in ipairs(keys) do
+    out[i] = {k = k, x = x0 + ((i - 1) % 3) * (bw + 10),
+              y = y0 + math.floor((i - 1) / 3) * (bh + 10), w = bw, h = bh}
+  end
+  return out
+end
+local function pad_hit(keys, x, y)
+  for _, b in ipairs(keys) do
+    if x >= b.x and x < b.x + b.w and y >= b.y and y < b.y + b.h then return b.k end
+  end
+  return nil
+end
+local function keypad_keys()
+  local x, y, bw, bh = keypad_geom()
+  return pad_keys(x, y, bw, bh, KEYPAD_KEYS)
+end
+
+-- (р.25) Форма СКУД: поля слева, экранные цифры справа — на телефоне
+-- клавиатуры нет, а номер карты раньше вводился только с неё. Всё, что
+-- кликается, отдаёт эта функция; рисование, form_click и гаунтлет
+-- (ui.form_rect) берут прямоугольники отсюда, и до первого кадра тоже.
+local function form_geom()
+  local pw, ph = 1040, 528
+  local x, y = (1920 - pw) / 2, (1080 - ph) / 2
+  local sbw = F.h2:getWidth(T.ui.form_send) + 90
+  return {
+    x = x, y = y, w = pw, h = ph,
+    no = {x + 210, y + 100, 330, 52},              -- поле «№ карты»
+    dept = {x + 210, y + 176, 330, 52},            -- «Отдел»: левая/правая половина
+    send = {x + 40 + (540 - sbw) / 2, y + 420, sbw, 68},
+    keys = pad_keys(x + 620, y + 100, 120, 84, FORM_KEYS),
+  }
+end
+-- Гаунтлету: прямоугольник элемента формы по имени — «no», «dept_prev»,
+-- «dept_next», «send» или подпись кнопки («0»…«9», «C», «BS»).
+function ui.form_rect(id)
+  local g = form_geom()
+  local d = g.dept
+  if id == "no" or id == "send" then
+    local r = g[id]; return r[1], r[2], r[3], r[4]
+  elseif id == "dept_prev" then return d[1], d[2], d[3] / 2, d[4]
+  elseif id == "dept_next" then return d[1] + d[3] / 2, d[2], d[3] / 2, d[4] end
+  for _, b in ipairs(g.keys) do
+    if b.k == id then return b.x, b.y, b.w, b.h end
+  end
+  return nil
+end
+
+-- Кнопки сетки: крупные цифры, служебные клавиши выделены цветом.
+local function pad_draw(keys)
+  lg.setFont(F.h2)
+  local fh = F.h2:getHeight()
+  for _, b in ipairs(keys) do
+    local spec = (b.k == "C" or b.k == "OK" or b.k == "BS")
+    lg.setColor(spec and 0.22 or 0.17, spec and 0.19 or 0.18, 0.24)
+    lg.rectangle("fill", b.x, b.y, b.w, b.h, 10, 10)
+    lg.setColor(C.panel_line); lg.setLineWidth(2)
+    lg.rectangle("line", b.x, b.y, b.w, b.h, 10, 10); lg.setLineWidth(1)
+    if b.k == "BS" then
+      -- «стереть» вектором: стрелка-ярлык с крестом (глифа ⌫ нет в шрифтах)
+      local cx, cy = b.x + b.w / 2, b.y + b.h / 2
+      lg.setColor(C.text); lg.setLineWidth(3)
+      lg.polygon("line", cx - 30, cy, cx - 14, cy - 17, cx + 28, cy - 17,
+                 cx + 28, cy + 17, cx - 14, cy + 17)
+      lg.line(cx - 2, cy - 8, cx + 14, cy + 8); lg.line(cx - 2, cy + 8, cx + 14, cy - 8)
+      lg.setLineWidth(1)
+    else
+      lg.setColor(b.k == "OK" and C.ok or (b.k == "C" and C.bad or C.text))
+      lg.printf(b.k, b.x, b.y + (b.h - fh) / 2, b.w, "center")
+    end
+  end
 end
 
 -- Архив бумаг (р.19). Панель на 2 колонки по 9 строк — ровно под 17 бумаг
@@ -1145,20 +1248,7 @@ local function widget_draw()
     local shown = w.buf .. string.rep("_", 4 - #w.buf)
     lg.printf((shown:gsub(".", "%1 ")), x, y - 94, 3 * bw, "center")
     -- клавиши: КРУПНЫЕ цифры, C/OK выделены цветом
-    local keys = {"1","2","3","4","5","6","7","8","9","C","0","OK"}
-    lg.setFont(F.h2)
-    local fh = F.h2:getHeight()
-    for i, k in ipairs(keys) do
-      local kx = x + ((i - 1) % 3) * (bw + 10)
-      local ky = y + math.floor((i - 1) / 3) * (bh + 10)
-      local spec = (k == "C" or k == "OK")
-      lg.setColor(spec and 0.22 or 0.17, spec and 0.19 or 0.18, 0.24)
-      lg.rectangle("fill", kx, ky, bw, bh, 10, 10)
-      lg.setColor(C.panel_line); lg.setLineWidth(2)
-      lg.rectangle("line", kx, ky, bw, bh, 10, 10); lg.setLineWidth(1)
-      lg.setColor(k == "OK" and C.ok or (k == "C" and C.bad or C.text))
-      lg.printf(k, kx, ky + (bh - fh) / 2, bw, "center")
-    end
+    pad_draw(keypad_keys())
     lg.setColor(1, 1, 1)
   elseif w.kind == "pc" then
     -- после разблокировки: рабочий стол
@@ -1211,78 +1301,79 @@ local function widget_draw()
       lg.print(label, ix + 54, iy + (ih - fnt:getHeight()) / 2)
     end
     lg.setFont(F.small); lg.setColor(C.dim)
-    lg.printf(T.ui.docs_help, px, py + ph - 54, pw, "center")
+    lg.printf(touch.used() and T.ui.docs_help_touch or T.ui.docs_help,
+      px, py + ph - 54, pw, "center")
     lg.setColor(1, 1, 1)
   elseif w.kind == "form" then
-    local x, y = 660, 280
-    lg.setColor(C.panel); lg.rectangle("fill", x, y, 600, 440, 14, 14)
-    lg.setColor(C.panel_line); lg.rectangle("line", x, y, 600, 440, 14, 14)
+    local g = form_geom()
+    local x, y = g.x, g.y
+    lg.setColor(C.panel); lg.rectangle("fill", x, y, g.w, g.h, 14, 14)
+    lg.setColor(C.panel_line); lg.rectangle("line", x, y, g.w, g.h, 14, 14)
     lg.setFont(F.h2); lg.setColor(C.brass)
-    lg.printf("ФОРМА СКУД-2", x, y + 16, 600, "center")
+    lg.printf("ФОРМА СКУД-2", x, y + 18, g.w, "center")
     -- поле «№ карты» (кликабельно; активное поле — яркая рамка)
-    local f1 = (w.field == 1)
+    local r, f1 = g.no, (w.field == 1)
     lg.setFont(F.small); lg.setColor(C.text)
-    lg.print(T.ui.form_card_no .. ":", x + 40, y + 96)
-    lg.setColor(0.10, 0.12, 0.16); lg.rectangle("fill", x + 210, y + 84, 330, 52, 8, 8)
+    lg.print(T.ui.form_card_no .. ":", x + 40, r[2] + 12)
+    lg.setColor(0.10, 0.12, 0.16); lg.rectangle("fill", r[1], r[2], r[3], r[4], 8, 8)
     lg.setColor(f1 and C.ok or C.panel_line); lg.setLineWidth(f1 and 3 or 1)
-    lg.rectangle("line", x + 210, y + 84, 330, 52, 8, 8); lg.setLineWidth(1)
+    lg.rectangle("line", r[1], r[2], r[3], r[4], 8, 8); lg.setLineWidth(1)
     lg.setFont(F.dlg); lg.setColor(C.text)
-    lg.print(w.no .. string.rep("_", 6 - #w.no), x + 228, y + 90)
+    lg.print(w.no .. string.rep("_", 6 - #w.no), r[1] + 18, r[2] + 6)
     -- поле «Отдел» (◀ ▶, клик по половинам меняет)
-    local f2 = (w.field == 2)
+    local d, f2 = g.dept, (w.field == 2)
     lg.setFont(F.small); lg.setColor(C.text)
-    lg.print(T.ui.form_dept .. ":", x + 40, y + 172)
-    lg.setColor(0.10, 0.12, 0.16); lg.rectangle("fill", x + 210, y + 160, 330, 52, 8, 8)
+    lg.print(T.ui.form_dept .. ":", x + 40, d[2] + 12)
+    lg.setColor(0.10, 0.12, 0.16); lg.rectangle("fill", d[1], d[2], d[3], d[4], 8, 8)
     lg.setColor(f2 and C.ok or C.panel_line); lg.setLineWidth(f2 and 3 or 1)
-    lg.rectangle("line", x + 210, y + 160, 330, 52, 8, 8); lg.setLineWidth(1)
+    lg.rectangle("line", d[1], d[2], d[3], d[4], 8, 8); lg.setLineWidth(1)
     lg.setFont(F.dlg); lg.setColor(C.text)
-    lg.printf(P.tokens.depts[w.dept_i], x + 210, y + 166, 330, "center")
+    lg.printf(P.tokens.depts[w.dept_i], d[1], d[2] + 6, d[3], "center")
     -- стрелки ◀ ▶ — векторные (глифов треугольников нет в шрифте)
+    local my, rx = d[2] + d[4] / 2, d[1] + d[3]
     lg.setColor(C.brass)
-    lg.polygon("fill", x + 234, y + 186, x + 252, y + 172, x + 252, y + 200)
-    lg.polygon("fill", x + 516, y + 186, x + 498, y + 172, x + 498, y + 200)
-    -- подсказка ввода
+    lg.polygon("fill", d[1] + 24, my, d[1] + 42, my - 14, d[1] + 42, my + 14)
+    lg.polygon("fill", rx - 24, my, rx - 42, my - 14, rx - 42, my + 14)
+    -- подсказка ввода — под тем, чем игрок сейчас вводит (палец или мышь)
     lg.setFont(F.small); lg.setColor(C.dim)
-    lg.printf("Клик по полю — выбрать.  Цифры — с клавиатуры.  Tab — след. поле.",
-      x + 40, y + 234, 520, "left")
+    lg.printf(touch.used()
+      and "Номер — кнопками справа.\nОтдел — касание стрелок у названия."
+      or "Номер — кнопками справа или с клавиатуры.\nОтдел — клик по стрелкам у названия.\nTab — следующее поле.",
+      x + 40, y + 252, 540, "left")
+    -- экранные цифры (р.25): цифры всегда идут в номер карты
+    pad_draw(g.keys)
     -- кнопка ОТПРАВИТЬ: ширина под текст (getWidth) + центрирование
+    local s = g.send
     lg.setFont(F.h2)
-    local label = T.ui.form_send
-    local bw = F.h2:getWidth(label) + 90
-    local bx, by = x + (600 - bw) / 2, y + 322
-    w._send = {bx, by, bw, 68}
-    lg.setColor(0.16, 0.4, 0.2); lg.rectangle("fill", bx, by, bw, 68, 10, 10)
+    lg.setColor(0.16, 0.4, 0.2); lg.rectangle("fill", s[1], s[2], s[3], s[4], 10, 10)
     lg.setColor(C.ok); lg.setLineWidth(2)
-    lg.rectangle("line", bx, by, bw, 68, 10, 10); lg.setLineWidth(1)
-    lg.setColor(C.text); lg.printf(label, bx, by + 13, bw, "center")
+    lg.rectangle("line", s[1], s[2], s[3], s[4], 10, 10); lg.setLineWidth(1)
+    lg.setColor(C.text); lg.printf(T.ui.form_send, s[1], s[2] + 13, s[3], "center")
     lg.setColor(1, 1, 1)
   end
 end
 
-local function keypad_click(x, y)
-  local kx0, ky0, bw, bh = keypad_geom()
-  local keys = {"1","2","3","4","5","6","7","8","9","C","0","OK"}
-  for i, k in ipairs(keys) do
-    local kx = kx0 + ((i - 1) % 3) * (bw + 10)
-    local ky = ky0 + math.floor((i - 1) / 3) * (bh + 10)
-    if x >= kx and x < kx + bw and y >= ky and y < ky + bh then
-      if k == "C" then widget.buf = ""; snd("ui_click")
-      elseif k == "OK" then
-        local ok, why = ST:try_code(widget.node, widget.buf)
-        if ok then
-          snd("beep_ok"); sting("sting_solved"); say_node(widget.node, "do")
-          ui.after_fire(widget.node); ui.close_widget()
-        else
-          snd("beep_err"); widget.buf = ""
-          say_node(widget.node, "fail_code")
-        end
-      else
-        if #widget.buf < 4 then widget.buf = widget.buf .. k; snd("ui_click") end
-      end
-      return true
+local function keypad_press(k)
+  if k == "C" then widget.buf = ""; snd("ui_click")
+  elseif k == "OK" then
+    local ok, why = ST:try_code(widget.node, widget.buf)
+    if ok then
+      snd("beep_ok"); sting("sting_solved"); say_node(widget.node, "do")
+      ui.after_fire(widget.node); ui.close_widget()
+    else
+      snd("beep_err"); widget.buf = ""
+      say_node(widget.node, "fail_code")
     end
+  else
+    if #widget.buf < 4 then widget.buf = widget.buf .. k; snd("ui_click") end
   end
-  return false
+end
+
+local function keypad_click(x, y)
+  local k = pad_hit(keypad_keys(), x, y)
+  if not k then return false end
+  keypad_press(k)
+  return true
 end
 
 local function pc_click(x, y)
@@ -1325,10 +1416,13 @@ local function docs_click(x, y)
   return false
 end
 
+local function in_rect(r, x, y)
+  return x >= r[1] and x < r[1] + r[3] and y >= r[2] and y < r[2] + r[4]
+end
+
 local function form_click(x, y)
-  local wx, wy = 660, 280
-  local b = widget._send
-  if b and x >= b[1] and x < b[1] + b[3] and y >= b[2] and y < b[2] + b[4] then
+  local g = form_geom()
+  if in_rect(g.send, x, y) then
     local ok, why = ST:try_form(widget.no, P.tokens.depts[widget.dept_i])
     if ok then
       snd("beep_ok"); sting("sting_solved"); say_node("skud_form", "do")
@@ -1339,14 +1433,25 @@ local function form_click(x, y)
     end
     return true
   end
-  -- клик по полю «№ карты» активирует его (цифры вводятся с клавиатуры)
-  if x >= wx + 210 and x < wx + 540 and y >= wy + 84 and y < wy + 136 then
+  -- (р.25) экранные цифры: всегда в номер карты (другого числового поля нет)
+  local k = pad_hit(g.keys, x, y)
+  if k then
+    widget.field = 1
+    if k == "C" then widget.no = ""
+    elseif k == "BS" then widget.no = widget.no:sub(1, -2)
+    elseif #widget.no < 6 then widget.no = widget.no .. k end
+    snd("ui_click")
+    return true
+  end
+  -- клик по полю «№ карты» активирует его (для ввода с клавиатуры)
+  local d = g.dept
+  if in_rect(g.no, x, y) then
     widget.field = 1; snd("ui_click")
   -- клик по полю «Отдел»: левая/правая половина = меняет ◀ / ▶
-  elseif x >= wx + 210 and x < wx + 540 and y >= wy + 160 and y < wy + 212 then
+  elseif in_rect(d, x, y) then
     widget.field = 2
     local depts = P.tokens.depts
-    if x < wx + 375 then widget.dept_i = (widget.dept_i - 2) % #depts + 1
+    if x < d[1] + d[3] / 2 then widget.dept_i = (widget.dept_i - 2) % #depts + 1
     else widget.dept_i = widget.dept_i % #depts + 1 end
     snd("ui_click")
   end
@@ -1363,9 +1468,7 @@ function ui.widget_key(key)
     if key:match("^[0-9]$") and #widget.buf < 4 then
       widget.buf = widget.buf .. key; snd("ui_click")
     elseif key == "backspace" then widget.buf = widget.buf:sub(1, -2)
-    elseif key == "return" then
-      local kx, ky, bw, bh = keypad_geom()
-      keypad_click(kx + 2 * (bw + 10) + bw / 2, ky + 3 * (bh + 10) + bh / 2)
+    elseif key == "return" then keypad_press("OK")
     end
     return true
   elseif widget.kind == "form" then
@@ -1434,6 +1537,15 @@ end
 
 local title_btns
 local settings_from = "title"   -- откуда открыты настройки: title|pause
+-- (р.25) Прямоугольник кнопки меню по id (start, cont, resume, back…) из
+-- последней отрисовки — сенсорному гаунтлету: у пальца нет Esc, и «назад»
+-- из паузы и настроек он жмёт кнопкой, как живой игрок на телефоне.
+function ui.menu_button_rect(id)
+  for _, b in ipairs(title_btns or {}) do
+    if b.id == id then return b.x, b.y, b.w, b.h end
+  end
+  return nil
+end
 local function menu_draw()
   if menu == nil then return end
   if menu == "title" then
@@ -1610,12 +1722,20 @@ function ui.update(dt)
   dlg_update(dt)
   idle_update(dt)
   mus_update(dt)
+  -- (р.25) момент, когда эпилог дочитан и показана финальная плашка
+  if victory_stage and not victory_stage.plate_t and not ui.dialog_active() then
+    victory_stage.plate_t = SC.time()
+  end
 end
 
 -- «предмет в руке»: иконка выбранного предмета у курсора (курсор-предмет)
 local function held_item_draw()
   if not inv.selected then return end
   if widget or reader or menu or ui.dialog_active() then return end
+  -- (р.25) у пальца нет курсора: иконка застыла бы там, где было последнее
+  -- касание (поверх кармана или посреди комнаты). Выбор и так виден — рамка
+  -- слота и подпись под карманами.
+  if touch.used() then return end
   local ic = IMG["icons/ic_" .. inv.selected:gsub("^relic_", "") .. ".png"]
   if not ic then return end
   local mx, my = SC.mouse_world()
@@ -1630,6 +1750,7 @@ end
 -- (аудит U01) имя объекта под курсором (узнаваемость p&c)
 local function hover_name_draw()
   if menu or reader or widget or victory_stage or ui.dialog_active() then return end
+  if touch.used() then return end   -- (р.25) наведения у пальца нет — плашка была бы залежалой
   local mx, my = SC.mouse_world()
   local h = SC.hit(mx, my)
   if not h or not h.name then return end
@@ -1876,7 +1997,7 @@ function ui.save_auto() ui.save() end
 
 function ui.mousepressed(x, y, btn)
   if menu then menu_click(x, y); return end
-  if victory_stage and not ui.dialog_active() then return end
+  if victory_stage and not ui.dialog_active() then victory_click(); return end
   -- (аудит С3) Порядок разбора обязан совпадать с порядком отрисовки, иначе
   -- клик получает не тот слой, который человек видит сверху. Рисуем виджет →
   -- читалку → диалог (см. draw_overlays), значит и ввод идёт сверху вниз:
@@ -1942,7 +2063,7 @@ function ui.keypressed(key)
     return
   end
   if victory_stage and not ui.dialog_active() then
-    if key == "escape" then ui.save(); ui.reset_to_title() end
+    if key == "escape" then victory_exit() end
     return
   end
   if key == "escape" then

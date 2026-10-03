@@ -12,6 +12,9 @@
   ночь и день · открытые вент-решётки · включённая гирлянда · диалог с Предком ·
   инвентарь (3+ предметов и с выбранным предметом) · момент применения предмета ·
   победа/эпилог · финальный титул.
+  (р.25) Сенсорный экран: кольцо долгого касания, подписи под палец на реплике,
+  читалке, форме СКУД (с экранными цифрами), легенде стенда и плашке победы —
+  кадры «sensor_*»: тот же экран, но последним вводом было касание.
 
 Скрины именуются "NN_имя" (двузначный номер = порядок в галерее). Коды в файл
 НЕ пишутся (op "code"/"form" без value — autoplay берёт ответ на рантайме).
@@ -164,6 +167,22 @@ to_zoom("zoom_exit_door")
 shot("zoom_exit_door_noch", zoom="zoom_exit_door")
 to_room("A")
 
+# (р.25) сенсорный экран: палец лежит в пустом месте — кольцо удержания
+# (кадр посреди удержания), потом реплика и бумага, открытые касанием
+add(op="finger_down", empty=True)
+add(op="wait", s=0.3)                        # кольцо растёт, после ПКМ замкнуто до отпускания
+shot("sensor_kolco_uderzhaniya")
+add(op="finger_up")
+add(op="tap", id="hs_window")                # реплика по касанию (окно — герринг)
+add(op="wait", s=3.0)
+shot("sensor_replika")
+dismiss()
+add(op="tap", id="hs_karaoke")              # бумага без ответов головоломок
+add(op="wait", s=0.15)
+shot("sensor_chitalka")
+add(op="hold", empty=True)                   # долгое касание закрывает бумагу
+# подписи вернутся к мыши сами — на первом же клике мышью (read_hs ниже)
+
 read_hs("hs_poster_ot", "A", "doc_poster", "doc_plakat_ot")
 read_hs("hs_calendar", "A", "doc_calendar", "doc_kalendar")
 read_hs("hs_karaoke", "A", "doc_karaoke", "doc_karaoke")
@@ -234,6 +253,10 @@ pc_doc(5, "doc_skud_blank", "doc_forma_skud_blank")
 add(op="click", x=700, y=170 + 5 * 62 + 26)
 add(op="assert_widget", kind="form")
 shot("widget_forma_skud")
+dismiss()
+add(op="tap", x=815, y=402)                  # (р.25) касание поля «№ карты»
+add(op="wait", s=0.1)
+shot("sensor_forma_skud")
 add(op="form"); dismiss()
 add(op="assert_flag", f="card_active")
 
@@ -289,6 +312,9 @@ add(op="click_item", id="wrench")
 node("take_wheel"); dismiss()
 to_zoom("zoom_bench")
 shot("zoom_stend", zoom="zoom_bench")
+add(op="tap", empty=True)                    # (р.25) касание пустого места
+add(op="wait", s=0.1)
+shot("sensor_stend")
 read_hs("hs_z_note", "zoom_bench", "doc_bench_note", "doc_listok_stenda")
 node("install_wheel"); dismiss()
 add(op="bench_seq"); dismiss()
@@ -362,7 +388,13 @@ add(op="assert_flag", f="reader_green")
 to_zoom("zoom_exit_door")
 add(op="click_hs", id="hs_z_door_push")
 dismiss()
-add(op="wait", s=0.6)
+# (р.25) касание сразу после эпилога плашку не пропускает (секунда защиты от
+# проскока) и переводит подписи под палец; пробел возвращает их мыши
+add(op="tap", x=960, y=900)
+add(op="wait", s=0.3)
+shot("sensor_pobeda")
+add(op="key", k="space")
+add(op="wait", s=0.3)
 shot("pobeda_epilog")
 add(op="assert_steps_ge", n=40)
 add(op="esc"); add(op="wait", s=0.4)

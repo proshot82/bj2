@@ -24,7 +24,12 @@ local terminal_seen = false
 local badge_total, badge_checked = 0, 0
 
 local function die(msg)
-  log:write("AUTOPLAY FAIL @step " .. ip .. ": " .. msg .. "\n")
+  -- (р.25) метка шага-сторожа (tag) — в строке падения: негатив обязан знать,
+  -- КАКОЙ сторож поймал порчу, а не только что прогон упал где-то рядом
+  local s = steps[ip]
+  local tag = type(s) == "table" and s.tag
+  log:write("AUTOPLAY FAIL @step " .. ip .. (tag and (" [" .. tag .. "]") or "") ..
+            ": " .. msg .. "\n")
   os.exit(1)
 end
 
@@ -63,6 +68,35 @@ function ap.start(path, env)
 end
 
 -- ---------- примитивы ----------
+-- (р.25) Палец. Касание входит в игру тем же путём, что у живого игрока: SDL
+-- присылает его как ЛКМ с istouch=true — love.mousepressed на касании,
+-- love.mousereleased на отпускании (проверено на love.js в Chromium). Тап —
+-- оба сразу; удержание — касание, выдержка ПО ЧАСАМ ИГРЫ и отпускание, а
+-- сценарий тем временем стоит, как стоял бы человек с пальцем на экране.
+-- Выдержка 0,6 с — порог распознавателя (0,45 с) с запасом; сам порог
+-- автоплей не читает, а проверяет снаружи: медленный тап 0,25 с обязан
+-- остаться ЛКМ, удержание 0,6 с — стать ПКМ (шаги r25_* в gen_autoplay.py).
+local TOUCH_HOLD = 0.6
+local input_mode = "mouse"   -- op input: в режиме touch каждый клик сценария — палец
+local holding = nil          -- палец на экране: {rx, ry, t_end} — где и когда отпустить
+
+local touches = 0            -- касаний за прогон (в отчёт DONE)
+
+local function finger_down(x, y)
+  local sx, sy = E.scenes.to_screen(x, y)
+  touches = touches + 1
+  love.mousepressed(sx, sy, 1, true)
+  return sx, sy
+end
+local function tap(x, y)
+  local sx, sy = finger_down(x, y)
+  love.mousereleased(sx, sy, 1, true)
+end
+local function hold(x, y, dur)
+  local sx, sy = finger_down(x, y)
+  holding = {rx = sx, ry = sy, t_end = love.timer.getTime() + (dur or TOUCH_HOLD)}
+end
+
 -- (аудит: смок в «кривом» разрешении) Клик идёт ЧЕРЕЗ ОКНО, а не прямо в UI.
 -- Раньше здесь стояло E.ui.mousepressed(x, y) — то есть автоплей входил в игру
 -- на ступеньку ниже игрока и перепрыгивал love.mousepressed вместе с пересчётом
@@ -71,11 +105,24 @@ end
 -- Теперь мировая точка переводится в экранную сценой и отдаётся в love.mousepressed
 -- — тот же вход, что у настоящей мыши. При 1920×1080 масштаб единичный и сдвиг
 -- нулевой, так что основной гаунтлет ведёт себя в точности как прежде.
+-- (р.25) У мыши, как у настоящей, за нажатием идёт отпускание (игра его
+-- не слушает — клик мыши срабатывает на нажатии). В режиме touch ЛКМ — тап,
+-- ПКМ — удержание пальца.
 local function click(x, y, btn)
+  if input_mode == "touch" then
+    if (btn or 1) == 2 then hold(x, y) else tap(x, y) end
+    return
+  end
   local sx, sy = E.scenes.to_screen(x, y)
   love.mousepressed(sx, sy, btn or 1)
+  love.mousereleased(sx, sy, btn or 1)
 end
-local function key(k) E.ui.keypressed(k) end
+-- (р.25) Клавиша — тоже через вход окна (love.keypressed), как у игрока:
+-- там main.lua возвращает подписи «мышь/клавиатура» после касаний.
+local function key(k)
+  if input_mode == "touch" then die("клавиша «" .. tostring(k) .. "» в сенсорном прогоне — у пальца клавиатуры нет") end
+  love.keypressed(k)
+end
 
 local function dismiss_once()
   if E.ui.dialog_active() then click(1200, 900, 1); return true end
@@ -85,6 +132,51 @@ end
 local function hs_center(id)
   local cx, cy, h = E.scenes.hotspot_center(id)
   return cx, cy, h
+end
+
+-- (р.25) Точка мира без зон и без кнопок интерфейса — сюда палец кладут для
+-- «ПКМ в пустоту»: снять выбор предмета, выйти из зума, закрыть виджет.
+-- Сетка начинается правее плашки целей и ниже полосы HUD и карманов.
+local function empty_point()
+  for gy = 1000, 160, -60 do
+    for gx = 420, 1860, 60 do
+      if not E.scenes.hit(gx, gy) then return gx, gy end
+    end
+  end
+  die("нет пустой точки мира для долгого касания")
+end
+
+-- (р.25) Кнопка формы СКУД по имени — её же прямоугольником (ui.form_rect),
+-- без копии координат у себя.
+local function form_press(id)
+  local x, y, w, h = E.ui.form_rect(id)
+  if not x then die("в форме нет кнопки «" .. tostring(id) .. "»") end
+  click(x + w / 2, y + h / 2, 1)
+end
+
+-- (р.25) Esc в сенсорном прогоне. Клавиатуры у пальца нет, поэтому шаг esc
+-- делается тем, чем его заменил бы игрок на телефоне, — в том же порядке
+-- слоёв, что и ui.keypressed: пауза → настройки → реплика → читалка, виджет,
+-- выбор предмета, зум (всё это — ПКМ, то есть удержание) → иначе кнопка «II».
+local function touch_escape()
+  local st = E.ui.state()
+  if st.menu == "title" then return end                -- Esc на титуле ничего не делает
+  if E.ui.victory_done() then tap(960, 540); return end
+  local function btn(id)
+    local x, y, w, h = E.ui.menu_button_rect(id)
+    if not x then die("нет кнопки меню «" .. id .. "» — сенсорному Esc нечего жать") end
+    tap(x + w / 2, y + h / 2)
+  end
+  if st.menu == "pause" then btn("resume")
+  elseif st.menu == "settings" then btn("back")
+  elseif E.ui.dialog_active() then tap(1200, 900)
+  elseif st.reader or st.widget or st.inv.selected or E.scenes.view().kind == "zoom" then
+    local x, y = empty_point()
+    hold(x, y)
+  else
+    local x, y, w, h = E.ui.hud_button_rect("pause")
+    tap(x + w / 2, y + h / 2)
+  end
 end
 
 -- клик по клавише кейпада (реальные координаты виджета)
@@ -179,7 +271,60 @@ local function exec(s)
   local op = s.op
   if op == "click" then click(s.x, s.y, s.btn or 1); return true
   elseif op == "key" then key(s.k); return true
-  elseif op == "esc" then key("escape"); return true
+  elseif op == "esc" then
+    if input_mode == "touch" then touch_escape() else key("escape") end
+    return true
+  -- ---- (р.25) сенсорный ввод ----
+  elseif op == "input" then
+    -- режим ввода сценария: touch — дальше каждый клик делает палец (ЛКМ —
+    -- тап, ПКМ — удержание), esc — сенсорной заменой; mouse — обратно мышь
+    if s.mode ~= "touch" and s.mode ~= "mouse" then
+      die("input: неизвестный режим " .. tostring(s.mode))
+    end
+    input_mode = s.mode
+    info("ввод: " .. s.mode)
+    return true
+  elseif op == "finger_down" or op == "finger_up" then
+    -- палец кладётся и снимается РАЗНЫМИ шагами — между ними можно ждать и
+    -- снимать кадр (галерея: кольцо удержания). Отпускание — там же.
+    if op == "finger_up" then
+      if not s._at then die("finger_up без finger_down") end
+      love.mousereleased(s._at[1], s._at[2], 1, true)
+      return true
+    end
+    local x, y = s.x, s.y
+    if s.empty then x, y = empty_point() end
+    local sx, sy = finger_down(x, y)
+    for j = ip + 1, #steps do                    -- ближайший finger_up знает, где отпускать
+      if steps[j].op == "finger_up" then steps[j]._at = {sx, sy}; break end
+    end
+    return true
+  elseif op == "tap" or op == "hold" or op == "drag" then
+    -- явный жест пальцем независимо от режима: tap — касание и сразу
+    -- отпускание; hold — удержание s секунд (по умолчанию 0,6); drag — палец
+    -- касается и уезжает на dx,dy мира, отпускание через s секунд там же.
+    -- Цель: зона (id), карман (item), пустое место (empty) или точка x,y.
+    if E.ui.dialog_active() then dismiss_once(); return false end
+    local x, y
+    if s.id then
+      x, y = hs_center(s.id)
+      if not x then die(op .. ": нет зоны " .. s.id) end
+    elseif s.item then
+      for i, id in ipairs(E.state.inv_order) do
+        if id == s.item then x, y = 20 + (i - 1) * 76 + 34, 8 + 34 end
+      end
+      if not x then die(op .. ": нет предмета " .. s.item) end
+    elseif s.empty then x, y = empty_point()
+    else x, y = s.x, s.y end
+    if op == "tap" then tap(x, y)
+    elseif op == "hold" then hold(x, y, s.s)
+    else
+      local sx, sy = finger_down(x, y)
+      local mx, my = E.scenes.to_screen(x + (s.dx or 0), y + (s.dy or 0))
+      love.mousemoved(mx, my, mx - sx, my - sy, true)
+      holding = {rx = mx, ry = my, t_end = love.timer.getTime() + (s.s or TOUCH_HOLD)}
+    end
+    return true
   elseif op == "wait" then
     s._w = (s._w or s.s or 0.5)
     return "wait"
@@ -339,32 +484,60 @@ local function exec(s)
       local n = E.state.nodes[s.node]
       ans = E.puzzles.answers[n.lock.id]
     end
-    if s.kp then
+    if s.kp and input_mode ~= "touch" then
       -- (р.24) набор с цифрового блока: kp0..kp9 + kpenter через настоящий
       -- keypressed — так, как его шлёт LÖVE с NumPad
       for ch in tostring(ans):gmatch(".") do key("kp" .. ch) end
       key("kpenter")
     else
-      keypad_type(ans)
+      keypad_type(ans)          -- (р.25) в сенсорном прогоне — пальцем по кнопкам
     end
     return true
   elseif op == "form" then
+    -- Номер карты — экранными цифрами (via=pad, р.25) или с клавиатуры (по
+    -- умолчанию, как прежде); у пальца клавиатуры нет — в режиме touch всегда
+    -- кнопки. Без no — верный номер из ответов (на рантайме, в файл не
+    -- пишется) и отдел из ответов. submit=false — не отправлять: между
+    -- набором и отправкой встаёт assert_form_len.
     if E.ui.dialog_active() then dismiss_once(); return false end
     if E.ui.widget_kind() ~= "form" then die("форма не открыта") end
-    for _ = 1, 10 do key("backspace") end
+    local pad = (s.via == "pad") or input_mode == "touch"
     local no = s.no or tostring(E.puzzles.answers.skud.card_number)
-    for ch in no:gmatch(".") do key(ch) end
+    if pad then
+      form_press("C")
+      for ch in no:gmatch(".") do form_press(ch) end
+    else
+      for _ = 1, 10 do key("backspace") end
+      for ch in no:gmatch(".") do key(ch) end
+    end
     if not s.no then
-      -- верная отправка: выставить отдел из ответов (форма сброшена на 1)
-      key("tab")
       local depts = E.puzzles.tokens.depts
       local want
       for i, d in ipairs(depts) do
         if d == E.puzzles.answers.skud.dept then want = i end
       end
-      for _ = 1, (want - 1) % #depts do key("right") end
+      local n = (want - E.ui.state().widget.dept_i) % #depts
+      if pad then
+        for _ = 1, n do form_press("dept_next") end   -- правая половина поля
+      else
+        key("tab")
+        for _ = 1, n do key("right") end
+      end
     end
-    click(660 + 190 + 110, 280 + 310 + 32, 1)
+    if s.submit ~= false then form_press("send") end
+    return true
+  elseif op == "form_send" then
+    if E.ui.widget_kind() ~= "form" then die("форма не открыта") end
+    form_press("send")
+    return true
+  elseif op == "assert_form_len" then
+    -- (р.25) сколько знаков набрано в поле «№ карты» — длина, без самих цифр
+    local w = E.ui.state().widget
+    if not w or w.kind ~= "form" then die("форма не открыта") end
+    local want = s.n or #tostring(E.puzzles.answers.skud.card_number)
+    if #w.no ~= want then
+      die(("форма: в поле номера %d знаков, ожидалось %d"):format(#w.no, want))
+    end
     return true
   elseif op == "bench_seq" then
     if E.ui.dialog_active() then dismiss_once(); return false end
@@ -457,6 +630,13 @@ local function exec(s)
     local m = E.ui.state().menu            -- nil = меню закрыто
     if m ~= s.menu then
       die("меню " .. tostring(m) .. ", ожидалось " .. tostring(s.menu))
+    end
+    return true
+  elseif op == "assert_selection" then
+    -- (р.25) в карманах выбран именно этот предмет (тап по слоту = выбор)
+    local sel = E.ui.state().inv.selected
+    if sel ~= s.id then
+      die("выбран «" .. tostring(sel) .. "», ожидался «" .. tostring(s.id) .. "»")
     end
     return true
   elseif op == "assert_no_selection" then
@@ -598,8 +778,8 @@ local function exec(s)
       die(("бейдж-проверок с ожиданием %d < 2 — смена портрета не доказана")
           :format(badge_checked))
     end
-    info(("DONE steps=%d бейджей=%d/%d"):format(E.state.steps,
-         badge_checked, badge_total))
+    info(("DONE steps=%d бейджей=%d/%d касаний=%d ввод=%s"):format(E.state.steps,
+         badge_checked, badge_total, touches, input_mode))
     print("AUTOPLAY OK")
     os.exit(s.code or 0)
   else
@@ -631,6 +811,16 @@ function ap.update(dt)
       if ps.badge then badge_check(imgdata, ps.badge) end
     end)
     ip = ip + 1; step_t = 0
+    return
+  end
+  -- (р.25) палец лежит на экране: держим до срока по часам игры и отпускаем
+  -- там, где он сейчас. Следующий шаг — только после отпускания.
+  if holding then
+    if love.timer.getTime() >= holding.t_end then
+      local h = holding
+      holding = nil
+      love.mousereleased(h.rx, h.ry, 1, true)
+    end
     return
   end
   local s = steps[ip]

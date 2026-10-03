@@ -30,6 +30,9 @@
 - `ui.combine_fail`: Это между собой не женится.
 - `ui.reader_close`: Закрыть [ПКМ]
 - `ui.form_send`: ОТПРАВИТЬ
+- `ui.docs_help_touch`: Касание — перечитать · долгое касание — закрыть
+- `ui.reader_touch_next`: Касание — дальше  ·  долгое — закрыть
+- `ui.reader_touch_close`: Касание — закрыть
 - `ui.form_card_no`: № карты
 - `ui.form_dept`: Отдел
 - `ui.yes`: Да

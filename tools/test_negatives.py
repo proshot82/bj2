@@ -30,7 +30,12 @@
     место. Свою собственную слепоту гейт сторожит канарейкой сам.
   * исходник → гаунтлет (р.19, р.22, р.24): признак или фикс в src/ui.lua
     глушится точечной мутацией, и укороченный прогон обязан упасть на своём
-    сторожевом шаге (leave_zoom, enter_zoom, регресс интерфейса р.24).
+    сторожевом шаге (leave_zoom, enter_zoom, регресс интерфейса р.24);
+  * исходник → гаунтлет и юнит-тест (р.25, сенсорный ввод): порог удержания,
+    распознаватель в обход, мышиный ПКМ в распознавателе, сдвиг пальца,
+    касание мимо letterbox, экранные цифры формы, уход с победы кликом и его
+    защита от проскока. Кусок сценария вырезается до сторожа и гоняется на
+    подложенном сейве; у каждой вырезки — позитивный контроль без порчи.
 
 Запуск из корня репозитория:  python3 tools/test_negatives.py
                               python3 tools/test_negatives.py --fast  (без движка)
@@ -515,8 +520,12 @@ def case_click_path():
     name = "смок: клик автоплея идёт через окно, а не мимо letterbox"
     src = open(APLUA, encoding="utf-8").read()
     live = _click_through_window(src)
-    broken = _click_through_window(
-        src.replace("love.mousepressed(sx, sy", "E.ui.mousepressed(x, y", 1))
+    # (р.25) порча — строго в теле click: с пальцем (finger_down) вызов
+    # love.mousepressed(sx, sy… есть и выше по файлу, и подмена первого
+    # вхождения в файле уходила мимо проверяемой функции
+    body = _click_body(src)
+    broken = _click_through_window(src.replace(
+        body, body.replace("love.mousepressed(sx, sy", "E.ui.mousepressed(x, y", 1), 1))
     ok = live and not broken
     (PASSED if ok else FAILED).append(name)
     print(f"[{'OK  ' if ok else 'ПРОВАЛ'}] {name}: живой исходник "
@@ -875,6 +884,248 @@ def case_r24(name, src_path, anchor, broken, tag, guard_op, marker):
             print("     " + line)
 
 
+# ---------------- семья 8: исходник Lua → гаунтлет (сенсорный ввод, р.25) ----------------
+# Сенсорный ввод сторожат шаги r25_* основного сценария и целый прогон пальцем
+# (work/ap_touch.json). Каждый кейс возвращает баг точечной порчей исходника,
+# прогон обязан упасть на своём стороже и назвать причину.
+#
+# Чтобы не гонять по минуте префикс до середины игры, кейс берёт из сценария
+# только нужный кусок — от его начала до сторожа — и подкладывает сейв с
+# состоянием, в котором этот кусок стоит в настоящем прогоне (прецедент —
+# кейсы С1). Кусок не копия: он вырезается из work/autoplay_full.json, и правка
+# сценария доходит сюда сама. Подложенный сейв — уже не настоящая игра, поэтому
+# у каждой вырезки есть ПОЗИТИВНЫЙ КОНТРОЛЬ: без порчи тот же прогон обязан
+# дойти до конца куска (все утверждения прошли — маркер TAIL) и не дать маркер
+# порчи. Без контроля кейс зеленел бы и на сломанном сейве.
+TOUCH_AP = "work/ap_touch.json"
+TOUCH_SRC = "src/touch.lua"
+TOUCH_TEST = ["luajit", "tools/test_touch.lua"]
+
+
+def _steps(path):
+    doc = json.load(open(path, encoding="utf-8"))
+    return doc["steps"] if isinstance(doc, dict) else doc
+
+
+def _cut(start, tag, op):
+    """кусок основного сценария: от шага start(step)==True (ищется назад от
+    сторожа) до сторожа — первого шага op с меткой tag — включительно.
+    Кадры выброшены: мини-прогон не должен затирать кадры гаунтлета."""
+    st = _steps(AP)
+    g = next((j for j, s in enumerate(st)
+              if s.get("tag") == tag and s.get("op") == op), None)
+    if g is None:
+        return None
+    f = next((i for i in range(g, -1, -1) if start(st[i])), None)
+    if f is None:
+        return None
+    return [dict(s) for s in st[f:g + 1] if s.get("op") not in ("shot", "shot_badge")]
+
+
+def _boot():
+    """титул → «ПРОДОЛЖИТЬ» по подложенному сейву"""
+    return [{"op": "wait", "s": 0.8}, {"op": "continue_game"},
+            {"op": "wait", "s": 0.6}, {"op": "dismiss_all"}]
+
+
+# состояния, в которых куски стоят в настоящем прогоне (только имена узлов и
+# флагов — ответов здесь нет)
+SAVE_R25 = _blob(state={"flags": ["surveyed"], "inv": ["ruler"],
+                        "done": ["survey_door", "take_ruler"], "steps": 2})
+SAVE_FORM = _blob(state={"flags": ["surveyed", "pc_on"], "inv": ["ruler", "card"],
+                         "done": ["survey_door", "take_ruler", "pc_unlock", "fish_card"],
+                         "steps": 20},
+                  view={"kind": "zoom", "room": "A", "zoom": "zoom_pc"})
+SAVE_WIN = _blob(state={"flags": ["surveyed", "reader_green", "alarm_off",
+                                  "bolt_free", "calm_down"], "steps": 60},
+                 view={"kind": "zoom", "room": "A", "zoom": "zoom_exit_door"})
+
+SLICES = {
+    # имя: (сейв, начало куска (ищется назад от сторожа), метка сторожа,
+    #       op сторожа, ops, без которых кусок не тот)
+    "r25": (SAVE_R25, lambda s: s.get("op") == "tap" and s.get("tag") == "r25_tap",
+            "r25_mouse_rmb", "assert_view", {"tap", "hold", "drag", "click"}),
+    "form": (SAVE_FORM, lambda s: s.get("op") == "click_hs" and s.get("id") == "hs_z_screen",
+             "r25_form_pad", "assert_form_len", {"form", "assert_widget"}),
+    "win": (SAVE_WIN, lambda s: s.get("op") == "click_hs" and s.get("id") == "hs_z_door_push",
+            "r25_victory", "assert_title", {"click", "assert_flag"}),
+}
+
+
+def _run_engine(steps, pre=None):
+    tmp = tempfile.mkdtemp(prefix="r25_neg_")
+    path = os.path.join(tmp, "neg.json")
+    json.dump({"steps": steps}, open(path, "w", encoding="utf-8"),
+              ensure_ascii=False, indent=1)
+    home = os.path.expanduser("~/.local/share/love/BrassJanissary2")
+    shutil.rmtree(home, ignore_errors=True)
+    if pre:
+        os.makedirs(home, exist_ok=True)
+        pre(home)
+    try:
+        return run(["xvfb-run", "-a", "-s", "-screen 0 1920x1080x24",
+                    "env", "SDL_AUDIODRIVER=dummy", LOVE, ".", "--autoplay", path])
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+        shutil.rmtree(home, ignore_errors=True)
+
+
+def _mutated(muts, fn):
+    """muts: [(файл, якорь, порча)] — каждый якорь обязан встретиться ровно
+    раз; fn() выполняется на испорченных исходниках, оригиналы
+    восстанавливаются со сверкой md5. None — якорь не найден (негатив ослеп)."""
+    srcs = {}
+    for p, anchor, _ in muts:
+        srcs.setdefault(p, open(p, encoding="utf-8").read())
+        if srcs[p].count(anchor) != 1:
+            return None, f"якорь в {p} встречается {srcs[p].count(anchor)} раз(а), ждали 1"
+    sums = {p: md5(p) for p in srcs}
+    tmp = tempfile.mkdtemp(prefix="r25_src_")
+    for p in srcs:
+        shutil.copy2(p, os.path.join(tmp, p.replace("/", "__")))
+    try:
+        broken = dict(srcs)
+        for p, anchor, bad in muts:
+            broken[p] = broken[p].replace(anchor, bad, 1)
+        for p, text in broken.items():
+            open(p, "w", encoding="utf-8").write(text)
+        return fn(), None
+    finally:
+        for p in srcs:
+            shutil.copy2(os.path.join(tmp, p.replace("/", "__")), p)
+        shutil.rmtree(tmp, ignore_errors=True)
+        for p, m in sums.items():
+            if md5(p) != m:
+                FAILED.append(f"НЕ ВОССТАНОВЛЕН {p}")
+                print(f"[ПРОВАЛ] {p} не восстановлен после мутации!")
+
+
+_CONTROLLED = set()
+
+
+def _control(key, steps, pre):
+    """позитивный контроль куска: без порчи прогон доходит до конца куска"""
+    if key in _CONTROLLED:
+        return True
+    name = f"Р25 контроль: кусок «{key}» на подложенном сейве проходит без порчи"
+    rc, out = _run_engine(steps, pre)
+    ok = TAIL in out and "AUTOPLAY OK" not in out
+    (PASSED if ok else FAILED).append(name)
+    print(f"[{'OK  ' if ok else 'ПРОВАЛ'}] {name}: "
+          f"{'дошёл до конца куска' if ok else 'НЕ ДОШЁЛ'}")
+    if not ok:
+        print("     ---- хвост прогона ----")
+        for line in out.strip().splitlines()[-10:]:
+            print("     " + line)
+    _CONTROLLED.add(key)
+    return ok
+
+
+def case_r25(name, muts, where, marker):
+    """where: ключ SLICES (кусок + сейв) либо "touch" — префикс сенсорного
+    прогона до первого утверждения спикера"""
+    if not LOVE:
+        SKIPPED.append(name)
+        print(f"[ПРОПУСК] {name}: love не найден в PATH")
+        return
+    if where == "touch":
+        if not os.path.exists(TOUCH_AP):
+            SKIPPED.append(name)
+            print(f"[ПРОПУСК] {name}: нет {TOUCH_AP} — сперва gen_autoplay.py")
+            return
+        st = _steps(TOUCH_AP)
+        k = next((i for i, s in enumerate(st) if s.get("op") == "assert_speaker"), None)
+        steps, pre = [dict(s) for s in st[:k + 1]], None
+    else:
+        save, start, tag, op, need = SLICES[where]
+        cut = _cut(start, tag, op) if os.path.exists(AP) else None
+        # кусок обязан быть тем самым: без своих ops он проверял бы пустоту, а
+        # позитивный контроль на пустом куске зеленеет (так и было при отладке)
+        lost = need - {s.get("op") for s in cut} if cut else need
+        if not cut or lost:
+            SKIPPED.append(name)
+            print(f"[ПРОПУСК] {name}: в {AP} нет куска до сторожа {tag}/{op}"
+                  + (f" (нет ops {sorted(lost)})" if cut else "") + " — негатив ослеп")
+            return
+        steps, pre = _boot() + cut, _plant(save)
+        if not _control(where, steps, pre):
+            SKIPPED.append(name)
+            print(f"[ПРОПУСК] {name}: контроль куска «{where}» не прошёл — "
+                  f"падение под порчей ничего бы не доказало")
+            return
+    res, why = _mutated(muts, lambda: _run_engine(steps, pre))
+    if res is None:
+        SKIPPED.append(name)
+        print(f"[ПРОПУСК] {name}: {why} — негатив ослеп")
+        return
+    rc, out = res
+    said_ok = "AUTOPLAY OK" in out
+    named = marker in out
+    ok = (not said_ok) and named
+    (PASSED if ok else FAILED).append(name)
+    print(f"[{'OK  ' if ok else 'ПРОВАЛ'}] {name}: rc={rc} "
+          f"успех={'да' if said_ok else 'нет'} (ждали нет), маркер {marker!r} "
+          f"{'найден' if named else 'НЕ НАЙДЕН'}")
+    if not ok:
+        print("     ---- хвост прогона ----")
+        for line in out.strip().splitlines()[-10:]:
+            print("     " + line)
+
+
+PRESS_ANCHOR = "  if istouch then touch.pressed(x, y); return end\n"
+R25_CASES = [
+    # (имя, [(файл, якорь, порча)], где, маркер падения)
+    ("Р25 медленный тап 0,25 с стал ПКМ (порог 0,1 с) — гаунтлет падает",
+     [(TOUCH_SRC, "  HOLD = 0.45,", "  HOLD = 0.1,")],
+     "r25", "[r25_slow_tap]: вид A ≠ zoom_exit_door"),
+    ("Р25 касание мимо распознавателя (удержание = ЛКМ) — гаунтлет падает",
+     [(MAIN, PRESS_ANCHOR, "")],
+     "r25", "[r25_hold_zoom]: вид zoom_exit_door ≠ A"),
+    ("Р25 мышиный ПКМ ушёл в распознаватель касаний — гаунтлет падает",
+     [(MAIN, PRESS_ANCHOR,
+       "  if istouch or btn == 2 then touch.pressed(x, y); return end\n")],
+     "r25", "[r25_mouse_rmb]: вид zoom_exit_door ≠ A"),
+    ("Р25 сдвиг пальца не отменяет тап — гаунтлет падает",
+     [(TOUCH_SRC, "  return dx * dx + dy * dy > touch.SLOP * touch.SLOP\n",
+       "  return false\n")],
+     "r25", "[r25_drag]: вид zoom_exit_door ≠ A"),
+    ("Р25 касание мимо letterbox — сенсорный гаунтлет падает",
+     [(MAIN, "touch.init(press)\n",
+       "touch.init(function(x, y, b) ui.mousepressed(x, y, b) end)\n")],
+     "touch", "спикер"),
+    ("Р25 экранные цифры формы не вводят номер — гаунтлет падает",
+     [("src/ui.lua", "    elseif #widget.no < 6 then widget.no = widget.no .. k end\n",
+       "    elseif false then widget.no = widget.no .. k end\n")],
+     "form", "[r25_form_pad]: форма: в поле номера 0 знаков"),
+    ("Р25 клик не уводит с экрана победы — гаунтлет падает",
+     [("src/ui.lua",
+       "  if victory_stage and not ui.dialog_active() then victory_click(); return end\n",
+       "  if victory_stage and not ui.dialog_active() then return end\n")],
+     "win", "[r25_victory]: титул снят, ожидалось показан"),
+    ("Р25 плашка победы без защиты от проскока — гаунтлет падает",
+     [("src/ui.lua", "local VICTORY_GRACE = 1.0\n", "local VICTORY_GRACE = 0\n")],
+     "win", "[r25_victory_grace]: титул показан, ожидалось снят"),
+]
+
+TT_NEG = "Р25 юнит-тест касаний ловит ЛКМ вместо ПКМ"
+
+
+def case_touch_unit():
+    """(р.25) tools/test_touch.lua обязан упасть, если удержание шлёт ЛКМ."""
+    res, why = _mutated([(TOUCH_SRC, "    emit(g.x, g.y, 2)\n", "    emit(g.x, g.y, 1)\n")],
+                        lambda: run(TOUCH_TEST))
+    if res is None:
+        SKIPPED.append(TT_NEG)
+        print(f"[ПРОПУСК] {TT_NEG}: {why} — негатив ослеп")
+        return
+    rc, out = res
+    said = "TOUCH TEST FAIL" in out
+    ok = rc != 0 and said
+    (PASSED if ok else FAILED).append(TT_NEG)
+    print(f"[{'OK  ' if ok else 'ПРОВАЛ'}] {TT_NEG}: rc={rc} ожидалось≠0, "
+          f"маркер {'найден' if said else 'НЕ НАЙДЕН'}")
+
+
 def main():
     before = {p: md5(p) for p in FILES}
     tmp = tempfile.mkdtemp(prefix="negatives_")
@@ -918,19 +1169,23 @@ def main():
 
     case_click_path()                 # статика, движок не нужен
     case_font_gate_lua()              # статика, движок не нужен
+    case_touch_unit()                 # (р.25) юнит-тест касаний, движок не нужен
     if "--fast" in sys.argv:
         SKIPPED.append(SMOKE_NEG)
         SKIPPED.append(LZ_NEG)
         SKIPPED.append(EZ_NEG)
         SKIPPED.extend(c[0] for c in R24_CASES)
-        print("[ПРОПУСК] движковые негативы смока, leave_zoom, enter_zoom и "
-              "регресса р.24 — режим --fast")
+        SKIPPED.extend(c[0] for c in R25_CASES)
+        print("[ПРОПУСК] движковые негативы смока, leave_zoom, enter_zoom, "
+              "регресса р.24 и сенсорного ввода р.25 — режим --fast")
     else:
         case_smoke_teeth()
         case_leave_zoom()
         case_enter_zoom()
         for c in R24_CASES:
             case_r24(*c)
+        for c in R25_CASES:
+            case_r25(*c)
 
     print(f"\nнегативов: {len(PASSED)} OK, {len(FAILED)} провалов, "
           f"{len(SKIPPED)} пропущено")
