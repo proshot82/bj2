@@ -1,6 +1,7 @@
 -- src/scenes.lua — представление мира: фоны, катауты, хит-тест, идл-анимации
 local scenes = {}
 local lg = love.graphics
+local touch = require("src.touch")   -- (р.25) подпись легенды стенда под палец
 
 local S, ST, IMG   -- scene.json, state, кэш картинок
 local view = {kind = "room", room = "A", zoom = nil}
@@ -407,13 +408,18 @@ function scenes.draw_zoom_engine(zid)
     lg.setLineWidth(1)
     lg.setColor(0.2, 0.75, 0.3, frac >= 0.99 and 1 or 0)
     lg.circle("fill", g.cx, g.cy, 10)
-    -- легенда управления вентилями
-    lg.setColor(0, 0, 0, 0.55)
-    lg.rectangle("fill", 560, 1016, 800, 44, 10, 10)
-    lg.setColor(0.9, 0.88, 0.8)
+    -- легенда управления вентилями; (р.25) на сенсорном экране ПКМ — это
+    -- долгое касание, и легенда говорит так. Плашка не уже прежних 800 px:
+    -- мышиный вариант выглядит ровно как раньше (по нему мерит gates.py).
+    local legend = touch.used()
+      and "Касание — по часовой (+)   ·   долгое касание — против часовой (-)"
+      or "ЛКМ — по часовой (+)   ·   ПКМ — против часовой (-)"
     lg.setFont(FontS.small)
-    lg.printf("ЛКМ — по часовой (+)   ·   ПКМ — против часовой (-)",
-      560, 1026, 800, "center")
+    local lw = math.max(800, FontS.small:getWidth(legend) + 60)
+    lg.setColor(0, 0, 0, 0.55)
+    lg.rectangle("fill", 960 - lw / 2, 1016, lw, 44, 10, 10)
+    lg.setColor(0.9, 0.88, 0.8)
+    lg.printf(legend, 960 - lw / 2, 1026, lw, "center")
     lg.setColor(1, 1, 1, 1)
   elseif zid == "zoom_pc" then
     if not ST.flags.pc_on then

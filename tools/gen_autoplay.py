@@ -168,6 +168,62 @@ add(op="assert_setting", k="music", v=True)
 add(op="esc"); add(op="esc")                 # настройки → пауза → игра
 add(op="assert_menu", menu=None)
 
+# ---------- Р25: сенсорный ввод — тап, удержание, сдвиг пальца ----------
+# Палец входит в игру как у живого игрока: ЛКМ с istouch=true через
+# love.mousepressed/mousereleased (src/autoplay.lua, ops tap/hold/drag).
+# Порог удержания проверяется СНАРУЖИ и с двух сторон: медленный тап 0,25 с
+# обязан остаться ЛКМ, удержание 0,6 с — стать ПКМ. Механика «выбрать предмет
+# → применить» (раунд 4) не тронута: тап по карману выбирает, удержание
+# снимает выбор, как ПКМ мыши. Шаги с меткой tag сторожат негативы в
+# tools/test_negatives.py — поэтому сегмент стоит рано, в коротком префиксе.
+_DOOR = "hs_main_door"                       # вход в зум выходной двери (комната A)
+assert any(h["id"] == _DOOR and h.get("goto") == "zoom_exit_door"
+           for h in S["rooms"]["A"]["hotspots"]), "зона входа в зум двери сменилась"
+
+
+def _empty_in(view):
+    """точка без зон в кадре по ДАННЫМ (все прямоугольники, и дневные) — та же
+    сетка, что у пустой точки автоплея, но независимый расчёт: тут не
+    scenes.hit, а сырые rect из scene.json"""
+    hs = (S["zooms"].get(view) or S["rooms"][view])["hotspots"]
+    rects = [r for h in hs for r in (h.get("rect"), h.get("rect_day")) if r]
+    for gy in range(1000, 159, -60):
+        for gx in range(420, 1861, 60):
+            if not any(r[0] <= gx < r[0] + r[2] and r[1] <= gy < r[1] + r[3]
+                       for r in rects):
+                return gx, gy
+    sys.exit("FAIL: в кадре %s нет пустой точки" % view)
+
+
+_RULER = TXT["item_desc"]["ruler"]["t"][:24]
+add(op="tap", id=_DOOR, tag="r25_tap")                 # тап = ЛКМ: вход в зум
+add(op="assert_view", id="zoom_exit_door", tag="r25_tap")
+add(op="hold", empty=True, tag="r25_hold_zoom")       # удержание в пустоте = ПКМ: выход
+add(op="assert_view", id="A", tag="r25_hold_zoom")
+add(op="hold", id=_DOOR, s=0.25, tag="r25_slow_tap")  # медленный тап — всё ещё ЛКМ
+add(op="assert_view", id="zoom_exit_door", tag="r25_slow_tap")
+add(op="hold", empty=True)
+add(op="assert_view", id="A")
+add(op="hold", id=_DOOR)                               # удержание на двери = ПКМ: в зум не входит
+add(op="assert_view", id="A")
+add(op="drag", id=_DOOR, dx=90, dy=0, s=0.2, tag="r25_drag")  # палец уехал — ни тапа, ни ПКМ
+add(op="assert_view", id="A", tag="r25_drag")
+add(op="tap", item="ruler")                            # тап по карману — выбор предмета
+add(op="assert_selection", id="ruler")
+add(op="hold", id=_DOOR)                               # удержание с предметом = ПКМ: выбор снят
+add(op="assert_no_selection")
+add(op="assert_view", id="A")
+add(op="hold", item="ruler")                           # удержание на кармане = описание
+add(op="assert_line", sub=_RULER)
+add(op="assert_no_selection")
+dismiss()
+# Мышь — прежняя: ПКМ срабатывает на нажатии, без ожидания распознавателя
+_EX, _EY = _empty_in("zoom_exit_door")
+add(op="click_hs", id=_DOOR)
+add(op="assert_view", id="zoom_exit_door")
+add(op="click", x=_EX, y=_EY, btn=2, tag="r25_mouse_rmb")
+add(op="assert_view", id="A", tag="r25_mouse_rmb")
+
 node("pry_drawer"); dismiss()
 to_zoom("zoom_lap_drawer")
 node("take_handle"); dismiss()
@@ -294,10 +350,13 @@ add(op="assert_widget", kind="pc")
 add(op="click", x=700, y=170 + 5 * 62 + 26)  # пункт 6: ФОРМА
 add(op="assert_widget", kind="form")
 shot("round4_04_form_skud")                   # форма СКУД
-add(op="form", no="000000"); dismiss(); neg("form_000000")
+add(op="form", no="000000"); dismiss(); neg("form_000000")   # клавиатурой, как прежде
 add(op="assert_not_flag", f="card_active")
 add(op="assert_widget", kind="form")         # форма жива, поле сброшено
-add(op="form"); dismiss()
+# (р.25) верный номер — экранными цифрами формы: на телефоне клавиатуры нет
+add(op="form", via="pad", submit=False, tag="r25_form_pad")
+add(op="assert_form_len", tag="r25_form_pad")
+add(op="form_send"); dismiss()
 add(op="assert_flag", f="card_active")
 
 # ---------- S9: верстак ----------
@@ -450,14 +509,22 @@ add(op="assert_flag", f="reader_green")
 to_zoom("zoom_exit_door")
 add(op="click_hs", id="hs_z_door_push")
 dismiss()
+# (р.25) Плашка победы только что показана: клик в первую секунду не уводит
+# с неё — последний тап по эпилогу не должен проскакивать итоги не глядя
+add(op="click", x=960, y=540, tag="r25_victory_grace")
+add(op="assert_title", open=False, tag="r25_victory_grace")
 add(op="wait", s=0.5)
 shot("ap_16_victory")
 # (аудит В3) терминальное условие утверждается явно: без этого шага op quit
 # откажется печатать успех — прогон, оборвавшийся до финала, обязан падать
 add(op="assert_flag", f="victory")
 add(op="assert_steps_ge", n=40)
-add(op="esc")
+# (р.25) уйти с плашки — кликом (на телефоне касанием), не только Esc; Esc
+# остаётся и проверяется letterbox-смоком (там этот шаг заменён на esc)
+add(op="wait", s=0.6)
+add(op="click", x=960, y=540, tag="r25_victory")
 add(op="wait", s=0.4)
+add(op="assert_title", tag="r25_victory")
 shot("ap_17_title_end")
 
 # ---------- S19: вторая игра в том же процессе (аудит С2) ----------
@@ -619,6 +686,12 @@ print("автоспикер: +%d утверждений, всего по сце�
 smoke = [st for st in steps if st.get("op") != "shot"]
 smoke = [dict(st, name="smoke_" + st["name"]) if st.get("op") == "shot_badge"
          else st for st in smoke]
+# (р.25) Основной прогон уходит с победы кликом; Esc с плашки — прежний путь —
+# проверяется здесь, чтобы не остаться без покрытия.
+_vic = [i for i, st in enumerate(smoke)
+        if st.get("tag") == "r25_victory" and st.get("op") == "click"]
+assert len(_vic) == 1, "нет клика ухода с победы — смоку нечего заменить на Esc"
+smoke[_vic[0]] = {"op": "esc", "tag": "r25_victory"}
 
 # Геометрии подобраны так, чтобы полосы легли в обе стороны и масштаб выходил
 # дробным: letterbox всегда вписывает мир по МЕНЬШЕЙ стороне, поэтому одна из
@@ -652,3 +725,39 @@ json.dump({"steps": smoke}, open("work/ap_smoke.json", "w",
           encoding="utf-8"), ensure_ascii=False, indent=1)
 print("смок letterbox: шагов=%d, размеров %s, кадров с бейджем %d"
       % (len(smoke), " → ".join("%dx%d" % g for g in GEOM), _badges))
+
+# ---------- сенсорный гаунтлет (р.25) ----------
+# Доказательство проходимости на телефоне: ВСЯ игра от титула до победы — одним
+# пальцем, без мыши и клавиатуры. Сценарий выводится из полного, как и смок, и
+# разойтись с игрой не может. Первый шаг переключает автоплей в режим touch:
+# каждый клик сценария делает палец (ЛКМ — тап, ПКМ — удержание), Esc — тем,
+# чем его заменил бы игрок на телефоне (кнопка «II», «Назад», «Вернуться»,
+# удержание в пустоте), код и номер формы — экранными кнопками; клавиатурный
+# шаг в этом режиме роняет прогон. Окна «телефонные»: 1600×740 (19,5:9 —
+# полосы слева/справа) с самого титула, с середины — планшетные 1366×1024
+# (4:3 — полосы сверху/снизу), так что каждое касание идёт через letterbox.
+# Кадры выброшены (пиксельные гейты меряют 1920×1080), два бейджа оставлены —
+# их требует op quit — с префиксом touch_.
+TGEOM = [(1600, 740), (1366, 1024)]
+_tsrc = [st for st in steps if st.get("op") != "shot"]
+_tsrc = [dict(st, name="touch_" + st["name"]) if st.get("op") == "shot_badge"
+         else st for st in _tsrc]
+_tq = [i for i, st in enumerate(_tsrc) if st.get("op") == "dismiss_all"]
+_tmid = _tq[len(_tq) // 2]
+touch = [{"op": "input", "mode": "touch"},
+         {"op": "resize", "w": TGEOM[0][0], "h": TGEOM[0][1]}]
+for i, st in enumerate(_tsrc):
+    touch.append(st)
+    if i == _tmid:
+        touch.append({"op": "resize", "w": TGEOM[1][0], "h": TGEOM[1][1]})
+assert touch[-1]["op"] == "quit", "сенсорный прогон обязан заканчиваться op quit"
+assert sum(1 for st in touch if st.get("op") == "shot_badge") >= 2, \
+    "в сенсорном прогоне меньше двух бейджей — op quit не засчитает финал"
+_tops = {st["op"] for st in touch}
+assert "key" not in _tops, "клавиатурный шаг в сенсорном прогоне"
+_trmb = sum(1 for st in touch if st.get("btn") == 2 or st.get("op") in
+            ("rmb_item", "close_reader", "esc", "hold", "bench_seq"))
+json.dump({"steps": touch}, open("work/ap_touch.json", "w",
+          encoding="utf-8"), ensure_ascii=False, indent=1)
+print("сенсорный: шагов=%d, окна %s, шагов с удержанием/«назад» ≥%d"
+      % (len(touch), " → ".join("%dx%d" % g for g in TGEOM), _trmb))

@@ -3,6 +3,7 @@ local json = require("src.json")
 local State = require("src.core.state")
 local scenes = require("src.scenes")
 local ui = require("src.ui")
+local touch = require("src.touch")
 
 local IMG, AUD, F = {}, {}, {}
 local S, P, T, ST
@@ -264,10 +265,20 @@ local function to_world(x, y)
   return (x - letter.ox) / letter.sx, (y - letter.oy) / letter.sy
 end
 
+-- Клик экранной точкой. Один вход и для мыши, и для распознанного касания:
+-- пересчёт через letterbox, точки на чёрных полосах мимо мира.
+local function press(x, y, btn)
+  local wx, wy = to_world(x, y)
+  if wx < 0 or wx >= 1920 or wy < 0 or wy >= 1080 then return end
+  ui.mousepressed(wx, wy, btn)
+end
+touch.init(press)
+
 -- ---------- цикл ----------
 function love.update(dt)
   recalc_letterbox()
   scenes.set_letterbox(letter)
+  touch.update(dt)   -- (р.25) удержание пальца: ПКМ, как только выйдет срок
   if not ui.in_menu() then scenes.update(dt) end
   ui.update(dt)
   local ap = package.loaded["src.autoplay"]
@@ -303,15 +314,30 @@ function love.draw()
     love.graphics.rectangle("fill", 0, h - letter.oy, w, letter.oy + 1)
   end
   love.graphics.setColor(1, 1, 1)
+  touch.draw()   -- (р.25) кольцо удержания — поверх всего, в координатах окна
 end
 
-function love.mousepressed(x, y, btn)
-  local wx, wy = to_world(x, y)
-  if wx < 0 or wx >= 1920 or wy < 0 or wy >= 1080 then return end
-  ui.mousepressed(wx, wy, btn)
+-- (р.25) Касание SDL присылает сюда же — ЛКМ с istouch=true (на love.js в
+-- браузере проверено в Chromium; сенсорный экран под Windows SDL отдаёт так
+-- же, но на живом устройстве это не проверялось). Его разбирает распознаватель
+-- src/touch.lua: тап = ЛКМ, удержание = ПКМ, сдвиг пальца — отмена. Мышь идёт
+-- прежним путём: клик срабатывает на нажатии, как и раньше.
+function love.mousepressed(x, y, btn, istouch)
+  if istouch then touch.pressed(x, y); return end
+  touch.mouse()
+  press(x, y, btn)
+end
+
+function love.mousereleased(x, y, btn, istouch)
+  if istouch then touch.released(x, y) end
+end
+
+function love.mousemoved(x, y, dx, dy, istouch)
+  if istouch then touch.moved(x, y) end
 end
 
 function love.keypressed(key)
+  touch.mouse()
   ui.keypressed(key)
 end
 
