@@ -733,28 +733,46 @@ print("смок letterbox: шагов=%d, размеров %s, кадров с �
 # каждый клик сценария делает палец (ЛКМ — тап, ПКМ — удержание), Esc — тем,
 # чем его заменил бы игрок на телефоне (кнопка «II», «Назад», «Вернуться»,
 # удержание в пустоте), код и номер формы — экранными кнопками; клавиатурный
-# шаг в этом режиме роняет прогон. Окна «телефонные»: 1600×740 (19,5:9 —
-# полосы слева/справа) с самого титула, с середины — планшетные 1366×1024
-# (4:3 — полосы сверху/снизу), так что каждое касание идёт через letterbox.
-# Кадры выброшены (пиксельные гейты меряют 1920×1080), два бейджа оставлены —
-# их требует op quit — с префиксом touch_.
-TGEOM = [(1600, 740), (1366, 1024)]
+# шаг в этом режиме роняет прогон. (р.26) Прогон объявляет себя сенсорным
+# устройством (op touch_device — как флаг --touch от веб-оболочки) и почти всю
+# игру, включая оба бейджа, идёт в портретном окне телефона 960×2080 (9:19,5):
+# кадр «лёжа», каждое касание проходит обратный поворот и letterbox. После
+# бейджей — 1600×740 (телефон горизонтально, полосы слева/справа), под конец —
+# 1366×1024 (планшет 4:3, полосы сверху/снизу); там кадр стоит, и это тоже
+# утверждается. Кадры выброшены (пиксельные гейты меряют 1920×1080), два
+# бейджа оставлены — их требует op quit — с префиксом touch_.
+TGEOM = [(960, 2080), (1600, 740), (1366, 1024)]
 _tsrc = [st for st in steps if st.get("op") != "shot"]
 _tsrc = [dict(st, name="touch_" + st["name"]) if st.get("op") == "shot_badge"
          else st for st in _tsrc]
 _tq = [i for i, st in enumerate(_tsrc) if st.get("op") == "dismiss_all"]
-_tmid = _tq[len(_tq) // 2]
+_tbadge = max(i for i, st in enumerate(_tsrc) if st.get("op") == "shot_badge")
+_tland = min(i for i in _tq if i > _tbadge)              # первая тихая точка после бейджей
+_ttab = _tq[(_tq.index(_tland) + len(_tq)) // 2]         # середина оставшегося
 touch = [{"op": "input", "mode": "touch"},
-         {"op": "resize", "w": TGEOM[0][0], "h": TGEOM[0][1]}]
+         {"op": "touch_device", "on": True},
+         {"op": "resize", "w": TGEOM[0][0], "h": TGEOM[0][1]},
+         {"op": "assert_rotated", "on": True, "tag": "r26_portrait"}]
+_first_sp = True
 for i, st in enumerate(_tsrc):
+    if _first_sp and st.get("op") == "assert_speaker":
+        # первое утверждение спикера — сторож кадра «лёжа» для негативов р.26
+        st = dict(st, tag="r26_portrait")
+        _first_sp = False
     touch.append(st)
-    if i == _tmid:
+    if i == _tland:
         touch.append({"op": "resize", "w": TGEOM[1][0], "h": TGEOM[1][1]})
+        touch.append({"op": "assert_rotated", "on": False})
+    if i == _ttab:
+        touch.append({"op": "resize", "w": TGEOM[2][0], "h": TGEOM[2][1]})
 assert touch[-1]["op"] == "quit", "сенсорный прогон обязан заканчиваться op quit"
 assert sum(1 for st in touch if st.get("op") == "shot_badge") >= 2, \
     "в сенсорном прогоне меньше двух бейджей — op quit не засчитает финал"
 _tops = {st["op"] for st in touch}
 assert "key" not in _tops, "клавиатурный шаг в сенсорном прогоне"
+_tb = [i for i, st in enumerate(touch) if st.get("op") == "shot_badge"]
+_tl = [i for i, st in enumerate(touch) if st.get("op") == "resize" and st["w"] == TGEOM[1][0]]
+assert _tb and _tl and max(_tb) < _tl[0], "бейджи обязаны сниматься в кадре «лёжа»"
 _trmb = sum(1 for st in touch if st.get("btn") == 2 or st.get("op") in
             ("rmb_item", "close_reader", "esc", "hold", "bench_seq"))
 json.dump({"steps": touch}, open("work/ap_touch.json", "w",

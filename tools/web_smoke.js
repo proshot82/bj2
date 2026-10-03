@@ -12,6 +12,12 @@
 // застревал на минимуме окна 960×540 — кадр сплющивался), тап обязан работать
 // как ЛКМ (вход в зум), удержание — как ПКМ (выход из зума); страница вместо
 // клавиш показывает памятку касаний.
+// (р.26) Четвёртый запуск — телефон вертикально (412×915): игра получает флаг
+// --touch и рисует кадр «лёжа»; тап по месту, где «НАЧАТЬ» стоит ТОЛЬКО в
+// повёрнутом кадре, обязан начать партию. Пятый — «внутри Telegram»: адрес с
+// параметрами запуска Mini App, SDK telegram.org подменён записывающей
+// заглушкой; оболочка обязана попросить весь экран, отключить свайп-закрытие,
+// зафиксировать горизонталь и отступить канвасом от кнопок Telegram.
 // Кадры кладутся в work/web_shots/ — смотреть глазами (урок №7, LESSONS.md).
 //
 // Запуск (нужны Node и Playwright с Chromium; в облачном контейнере они есть):
@@ -95,6 +101,8 @@ async function boot(page, tag) {
   const deskKeys = await page.evaluate(() => [!document.getElementById("keys-mouse").hidden,
                                               !document.getElementById("touchnote").hidden]);
   check(deskKeys[0] && !deskKeys[1], "компьютер: клавиши мыши, памятки касаний нет");
+  const noTg = await page.evaluate(() => typeof window.Telegram === "undefined");
+  check(noTg, "вне Telegram его SDK не грузится");
   await page.screenshot({ path: `${OUT}/web_02_title.png` });
   check(await brightness(page, 0, 0, 1920, 1080) > 0.05, "титул нарисован (кадр не чёрный)");
 
@@ -185,6 +193,91 @@ async function boot(page, tag) {
   const dZoom = await shotDiff(tp, room0, zoom), dBack = await shotDiff(tp, room0, room1);
   check(dZoom > 0.08, `тап = ЛКМ: вход в зум (кадр сменился на ${(dZoom * 100).toFixed(1)} %)`);
   check(dBack < dZoom / 3, `удержание = ПКМ: выход из зума (от комнаты ${(dBack * 100).toFixed(1)} %, от зума ${(dZoom * 100).toFixed(1)} %)`);
+  await tctx.close();
+
+  // ---- запуск 4 (р.26): телефон вертикально — кадр «лёжа» ----
+  // Окно 412×915: игра (флаг --touch) рисует мир повёрнутым на 90° по часовой,
+  // во всю длинную сторону. Точка «НАЧАТЬ» считается по повороту: экран
+  // px = W − vy, py = vx, где (vx, vy) — точка кадра «лёжа» 915×412. Без
+  // поворота эта же точка экрана — мир (860, 540), над кнопкой: мимо.
+  const PW = 412, PH = 915;
+  const PS = Math.min(PH / 1920, PW / 1080), POX = (PH - 1920 * PS) / 2, POY = (PW - 1080 * PS) / 2;
+  const WP = (x, y) => [PW - (POY + y * PS), POX + x * PS];
+  const pctx = await browser.newContext({ viewport: { width: PW, height: PH },
+                                          hasTouch: true, isMobile: true, deviceScaleFactor: 2 });
+  const pp = await pctx.newPage();
+  watch(pp);
+  await pp.goto(URL_, { waitUntil: "load" });
+  await pp.waitForSelector("#play:not([disabled])", { timeout: 180000 });
+  await pp.tap("#play");
+  await pp.waitForTimeout(1500);
+  const pcv = await pp.evaluate(() => { const c = document.getElementById("canvas"); return [c.width, c.height]; });
+  check(pcv[0] === PW && pcv[1] === PH, `канвас под вертикальную вкладку: ${pcv[0]}×${pcv[1]}`);
+  const ptitle = await pp.screenshot({ path: `${OUT}/web_10_portrait_title.png` });
+  const pcdp = await pctx.newCDPSession(pp);
+  const [psx, psy] = WP(960, 596);                 // «НАЧАТЬ» в кадре «лёжа»
+  await pcdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: psx, y: psy }] });
+  await pp.waitForTimeout(40);
+  await pcdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  await pp.waitForTimeout(2500);
+  const pgame = await pp.screenshot({ path: `${OUT}/web_11_portrait_game.png` });
+  const dStart = await shotDiff(pp, ptitle, pgame);
+  check(dStart > 0.08, `вертикальный телефон: кадр «лёжа», тап по повёрнутой «НАЧАТЬ» начал партию (кадр сменился на ${(dStart * 100).toFixed(1)} %)`);
+  await pctx.close();
+
+  // ---- запуск 5 (р.26): внутри Telegram (Mini App) ----
+  // Telegram передаёт параметры запуска после «#»; SDK telegram.org подменён
+  // заглушкой, которая записывает вызовы и, как настоящий Telegram, на весь
+  // экран выставляет отступ под свои кнопки (--tg-content-safe-area-inset-top).
+  const TG_INSET = 40;
+  const TG_MOCK = `(function () {
+    var calls = [], handlers = {};
+    function fire(e) { (handlers[e] || []).forEach(function (f) { f(); }); }
+    var wa = {
+      _calls: calls, isFullscreen: false, isOrientationLocked: false,
+      isVersionAtLeast: function (v) {
+        var a = String(v).split("."), b = [8, 0];
+        for (var i = 0; i < 2; i++) { var x = +(a[i] || 0); if (x !== b[i]) return x < b[i]; }
+        return true;
+      },
+      ready: function () { calls.push("ready"); },
+      expand: function () { calls.push("expand"); },
+      setHeaderColor: function (c) { calls.push("header:" + c); },
+      setBackgroundColor: function (c) { calls.push("background:" + c); },
+      setBottomBarColor: function (c) { calls.push("bottombar:" + c); },
+      disableVerticalSwipes: function () { calls.push("disableVerticalSwipes"); },
+      requestFullscreen: function () {
+        calls.push("requestFullscreen"); wa.isFullscreen = true;
+        document.documentElement.style.setProperty("--tg-content-safe-area-inset-top", "${TG_INSET}px");
+        fire("fullscreenChanged"); fire("contentSafeAreaChanged");
+      },
+      lockOrientation: function () { calls.push("lockOrientation"); wa.isOrientationLocked = true; },
+      onEvent: function (e, f) { (handlers[e] = handlers[e] || []).push(f); }
+    };
+    window.Telegram = { WebApp: wa };
+  })();`;
+  const gctx = await browser.newContext({ viewport: { width: TW, height: TH },
+                                          hasTouch: true, isMobile: true, deviceScaleFactor: 2 });
+  await gctx.route(/telegram\.org\/js\/telegram-web-app\.js/, (r) =>
+    r.fulfill({ status: 200, contentType: "application/javascript", body: TG_MOCK }));
+  const gp = await gctx.newPage();
+  watch(gp);
+  await gp.goto(URL_ + "#tgWebAppData=query_id%3Dsmoke&tgWebAppVersion=8.0&tgWebAppPlatform=android",
+                { waitUntil: "load" });
+  await gp.waitForSelector("#play:not([disabled])", { timeout: 180000 });
+  await gp.tap("#play");
+  await gp.waitForTimeout(1500);
+  const tgCalls = await gp.evaluate(() => (window.Telegram && window.Telegram.WebApp._calls) || []);
+  const need = ["ready", "expand", "disableVerticalSwipes", "requestFullscreen", "lockOrientation"];
+  const lost = need.filter((c) => tgCalls.indexOf(c) < 0);
+  check(lost.length === 0, `Telegram: весь экран, свайп-закрытие отключено, горизонталь зафиксирована` +
+        (lost.length ? ` — НЕ вызвано: ${lost.join(", ")}` : ` (${tgCalls.join(", ")})`));
+  const gcv = await gp.evaluate(() => { const c = document.getElementById("canvas");
+    return [c.width, c.height, Math.round(c.getBoundingClientRect().top)]; });
+  check(gcv[1] === TH - TG_INSET && gcv[2] === TG_INSET,
+        `Telegram: канвас отступил от его кнопок — ${gcv[0]}×${gcv[1]}, сверху ${gcv[2]} px`);
+  await gp.screenshot({ path: `${OUT}/web_12_telegram.png` });
+  await gctx.close();
   await browser.close();
 
   check(errors.length === 0, `ошибок в консоли/странице: ${errors.length}` + (errors.length ? " — " + errors.slice(0, 3).join(" | ") : ""));

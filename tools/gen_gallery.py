@@ -15,6 +15,7 @@
   (р.25) Сенсорный экран: кольцо долгого касания, подписи под палец на реплике,
   читалке, форме СКУД (с экранными цифрами), легенде стенда и плашке победы —
   кадры «sensor_*»: тот же экран, но последним вводом было касание.
+  (р.26) Телефон вертикально: кадр «лёжа» в окне 960×2080.
 
 Скрины именуются "NN_имя" (двузначный номер = порядок в галерее). Коды в файл
 НЕ пишутся (op "code"/"form" без value — autoplay берёт ответ на рантайме).
@@ -181,6 +182,15 @@ add(op="tap", id="hs_karaoke")              # бумага без ответов
 add(op="wait", s=0.15)
 shot("sensor_chitalka")
 add(op="hold", empty=True)                   # долгое касание закрывает бумагу
+# (р.26) телефон вертикально: кадр «лёжа» (снег обязан остаться в стёклах)
+add(op="touch_device", on=True)
+add(op="resize", w=960, h=2080)
+add(op="assert_rotated", on=True)
+add(op="wait", s=0.3)
+shot("sensor_telefon_vertikalno")
+add(op="resize", w=1920, h=1080, restore=True)
+add(op="touch_device", on=False)
+add(op="assert_rotated", on=False)
 # подписи вернутся к мыши сами — на первом же клике мышью (read_hs ниже)
 
 read_hs("hs_poster_ot", "A", "doc_poster", "doc_plakat_ot")

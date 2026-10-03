@@ -225,8 +225,12 @@ local BADGE_REF = {                 -- держать синхронно с C.br
 }
 local function badge_check(imgdata, want)
   local w, h = imgdata:getDimensions()
-  local s = math.min(w / 1920, h / 1080)          -- как recalc_letterbox()
-  local ox, oy = (w - 1920 * s) / 2, (h - 1080 * s) / 2
+  -- (р.26) мир → экран — общим scenes.to_screen (letterbox и поворот кадра
+  -- «лёжа»): своя копия формулы отстала бы от поворота и смотрела мимо рамки.
+  -- Масштаб — по сдвигу на один мировой пиксель.
+  local ax, ay = E.scenes.to_screen(0, 0)
+  local bx, by = E.scenes.to_screen(1, 0)
+  local s = math.abs(bx - ax) + math.abs(by - ay)
   -- мировая полоса левой грани рамки портрета (24±дрожь, ширина линии 4):
   -- берём с запасом на дрожь плашки ±6 px
   local X0, X1, Y0, Y1 = 14, 40, 820, 1000
@@ -234,7 +238,8 @@ local function badge_check(imgdata, want)
   for name in pairs(BADGE_REF) do hit[name] = 0 end
   for wy = Y0, Y1 do
     for wx = X0, X1 do
-      local xx, yy = math.floor(ox + wx * s), math.floor(oy + wy * s)
+      local sx, sy = E.scenes.to_screen(wx, wy)
+      local xx, yy = math.floor(sx), math.floor(sy)
       if xx >= 0 and yy >= 0 and xx < w and yy < h then
         local r, g, b = imgdata:getPixel(xx, yy)
         local best, bd = nil, 1e9
@@ -283,6 +288,20 @@ local function exec(s)
     end
     input_mode = s.mode
     info("ввод: " .. s.mode)
+    return true
+  elseif op == "touch_device" then
+    -- (р.26) прогон объявляет себя сенсорным устройством — как веб-оболочка
+    -- флагом --touch на телефоне: портретное окно рисует кадр «лёжа»
+    E.set_touch_device(s.on ~= false)
+    return true
+  elseif op == "assert_rotated" then
+    -- кадр «лёжа» включён (или выключен) на самом деле: иначе сенсорный прогон
+    -- в портретном окне молча шёл бы без поворота и ничего бы не проверял
+    local want = (s.on ~= false)
+    if E.scenes.rotated() ~= want then
+      die("кадр " .. (E.scenes.rotated() and "лёжа" or "стоя") ..
+          ", ожидался " .. (want and "лёжа" or "стоя"))
+    end
     return true
   elseif op == "finger_down" or op == "finger_up" then
     -- палец кладётся и снимается РАЗНЫМИ шагами — между ними можно ждать и
@@ -742,14 +761,16 @@ local function exec(s)
     local w, h = love.graphics.getDimensions()
     if w == s.w and h == s.h then
       -- Тождественный letterbox означал бы, что проверять нечего: такой прогон
-      -- обязан падать, а не молча зеленеть.
+      -- обязан падать, а не молча зеленеть. (р.26) Кроме возврата окна к
+      -- 1920×1080 после «телефонного» кадра (restore=true): там тождество —
+      -- ровно то, что заказано.
       local px, py = E.scenes.to_screen(1920, 1080)
-      if px == 1920 and py == 1080 then
+      if px == 1920 and py == 1080 and not s.restore then
         die(("окно %dx%d, но letterbox тождественный — смоку нечего проверять")
             :format(w, h))
       end
-      info(("окно %dx%d, угол мира 1920,1080 → экран %.1f,%.1f")
-           :format(w, h, px, py))
+      info(("окно %dx%d, угол мира 1920,1080 → экран %.1f,%.1f%s")
+           :format(w, h, px, py, E.scenes.rotated() and ", кадр лёжа" or ""))
       return true
     end
     if not s.asked then
