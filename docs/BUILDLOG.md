@@ -418,3 +418,7 @@ day-only (флаг day_only в cutout_visible, минимально инвази
   третий запуск в сенсорном Chromium 915×412 (DPR 2): памятка вместо клавиш,
   канвас 915×412, тап вводит в зум, удержание выводит; негативы р.25 в
   `tools/test_negatives.py`.
+- Публикация: по слову автора 2026-10-03 PR #2 влит в master, веб-версия
+  выложена workflow «Веб-версия (GitHub Pages)» (запуск — из сессии Claude
+  через GitHub) на https://proshot82.github.io/bj2/. Windows-релиз не
+  собирался.
