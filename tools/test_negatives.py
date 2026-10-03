@@ -28,6 +28,9 @@
   * исходник → гейт шрифтов (р.19): тофу-глиф возвращается и в реплику, и в
     строковый литерал Lua — обе ветки разбора обязаны его поймать и назвать
     место. Свою собственную слепоту гейт сторожит канарейкой сам.
+  * исходник → гаунтлет (р.19, р.22, р.24): признак или фикс в src/ui.lua
+    глушится точечной мутацией, и укороченный прогон обязан упасть на своём
+    сторожевом шаге (leave_zoom, enter_zoom, регресс интерфейса р.24).
 
 Запуск из корня репозитория:  python3 tools/test_negatives.py
                               python3 tools/test_negatives.py --fast  (без движка)
@@ -112,6 +115,14 @@ def m_tofu_glyph(docs):
     _first_replica_holder(docs["design/texts.json"])[0]["t"] += " ✓"
 
 
+def m_tofu_zone_name(docs):
+    """(р.24) тот же «✓» — в имени зоны: имя уходит на hover-плашку PTSans.
+    До р.24 гейт шрифтов scene.json не читал, и такой символ проходил его."""
+    room = docs["design/scene.json"]["rooms"]["A"]
+    named = [h for h in room["hotspots"] if h.get("name")]
+    named[0]["name"] += " ✓"
+
+
 GATE2 = [sys.executable, "tools/validate_scene.py"]
 FONTGATE = [sys.executable, "tools/check_fonts.py"]
 
@@ -123,6 +134,8 @@ CASES = [
      "карта автоматов"),
     ("Р19 тофу-глиф в реплике роняет гейт шрифтов", m_tofu_glyph, FONTGATE,
      "FONT GATE FAIL"),
+    ("Р24 тофу-глиф в имени зоны роняет гейт шрифтов", m_tofu_zone_name, FONTGATE,
+     "(например scene/rooms/A/hotspots"),
 ]
 
 
@@ -435,10 +448,27 @@ def p_no_glyphs(np, Image, src, dst, names):
     Image.fromarray(a).save(p)
 
 
+def p_dark_b(np, Image, src, dst, names):
+    """(р.24) ночная подсобка затемнена примерно до 5 %: пол 8 % обязан
+    уронить гейт. До р.24 пол стоял с hard=False и только предупреждал."""
+    for nm in names:
+        shutil.copy2(os.path.join(src, nm), os.path.join(dst, nm))
+    p = os.path.join(dst, "ap_04_room_b.png")
+    a = np.array(Image.open(p).convert("RGB")).astype(float)
+    a[80:] *= 0.35                          # полоса HUD сверху цела — якорь не задет
+    Image.fromarray(a.clip(0, 255).astype(np.uint8)).save(p)
+
+
 GATES_CASES = [
-    ("В1 кадры шума не проходят пиксельные гейты", p_noise, "якорь", []),
+    # (р.24) маркер — текст ОШИБКИ якоря: просто «якорь» печатается строкой
+    # «[0] якорь: …» на каждом прогоне, и негатив оставался зелёным даже с
+    # выключенным якорем (шумовые кадры и так роняет WCAG-гейт)
+    ("В1 кадры шума не проходят пиксельные гейты", p_noise,
+     "пикселей палитры движка", []),
     ("В1 плашка без букв не проходит WCAG-гейт", p_no_glyphs,
      "глифов в зоне нет", ["ap_14_hint_badge.png"]),
+    ("Р24 подсобка темнее пола 8 % роняет гейт яркости", p_dark_b,
+     "яркость: комната B", ["ap_04_room_b.png"]),
 ]
 
 
@@ -750,6 +780,101 @@ def case_enter_zoom():
             print("     " + line)
 
 
+# ---------------- семья 7: исходник Lua → гаунтлет (регресс р.24) ----------------
+# Четыре находки ревью р.24 сторожатся утверждениями основного сценария (шаги с
+# меткой tag, см. блок «Р24» в gen_autoplay.py). Каждый кейс возвращает баг
+# точечной мутацией исходника и гоняет префикс сценария до сторожевого шага:
+# прогон обязан упасть и назвать причину. Механика та же, что у семьи 6.
+R24_CASES = [
+    # (имя, файл, якорь, порча, метка шага-сторожа, op сторожа, маркер падения)
+    ("Р24 выбранный предмет переживает «Продолжить» — гаунтлет падает",
+     "src/ui.lua",
+     "  reset_transient()                                         -- (р.24) хвосты прошлой партии",
+     "  -- reset_transient() вырезан негативом",
+     "r24_selection", "assert_no_selection", "выбран предмет"),
+    ("Р24 «Продолжить» откатывает настройки — гаунтлет падает",
+     "src/ui.lua",
+     "  -- (р.24) Настройки сейва больше НЕ применяются.",
+     "  for k, v in pairs(blob.settings or {}) do settings[k] = v end\n"
+     "  -- (р.24) Настройки сейва больше НЕ применяются.",
+     "r24_settings", "assert_setting", "настройка music"),
+    ("Р24 Esc закрывает зум под паузой — гаунтлет падает",
+     "src/ui.lua",
+     "    if menu == \"pause\" then menu = nil\n",
+     "    if false then menu = nil\n",
+     "r24_esc", "assert_menu", "меню pause"),
+    ("Р24 цифровой блок не вводит код — гаунтлет падает",
+     "src/ui.lua",
+     "  key = key:match(\"^kp(%d)$\") or (key == \"kpenter\" and \"return\") or key\n",
+     "  key = key\n",
+     "r24_numpad", "assert_flag", "нет флага pc_on"),
+]
+
+
+def case_r24(name, src_path, anchor, broken, tag, guard_op, marker):
+    if not LOVE:
+        SKIPPED.append(name)
+        print(f"[ПРОПУСК] {name}: love не найден в PATH")
+        return
+    if not os.path.exists(AP):
+        SKIPPED.append(name)
+        print(f"[ПРОПУСК] {name}: нет {AP} — сперва gen_autoplay.py")
+        return
+    doc = json.load(open(AP, encoding="utf-8"))
+    steps = doc["steps"] if isinstance(doc, dict) else doc
+    cut = None
+    for i, st in enumerate(steps):
+        if st.get("tag") == tag:
+            # сторож — первый шаг нужного op начиная с помеченного
+            for j in range(i, len(steps)):
+                if steps[j].get("op") == guard_op:
+                    cut = j
+                    break
+            break
+    if cut is None:
+        SKIPPED.append(name)
+        print(f"[ПРОПУСК] {name}: в сценарии нет шага с меткой {tag} и "
+              f"сторожем {guard_op} — негатив ослеп")
+        return
+    src = open(src_path, encoding="utf-8").read()
+    if src.count(anchor) != 1:
+        SKIPPED.append(name)
+        print(f"[ПРОПУСК] {name}: якорь в {src_path} встречается "
+              f"{src.count(anchor)} раз(а), ждали 1 — негатив ослеп")
+        return
+    before = md5(src_path)
+    tmp = tempfile.mkdtemp(prefix="r24_neg_")
+    shutil.copy2(src_path, os.path.join(tmp, "orig.lua"))
+    path = os.path.join(tmp, "neg.json")
+    json.dump({"steps": [dict(x) for x in steps[:cut + 1]]},
+              open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    home = os.path.expanduser("~/.local/share/love/BrassJanissary2")
+    shutil.rmtree(home, ignore_errors=True)
+    try:
+        open(src_path, "w", encoding="utf-8").write(src.replace(anchor, broken, 1))
+        rc, out = run(["xvfb-run", "-a", "-s", "-screen 0 1920x1080x24",
+                       "env", "SDL_AUDIODRIVER=dummy",
+                       LOVE, ".", "--autoplay", path])
+    finally:
+        shutil.copy2(os.path.join(tmp, "orig.lua"), src_path)
+        shutil.rmtree(tmp, ignore_errors=True)
+        shutil.rmtree(home, ignore_errors=True)
+    if md5(src_path) != before:
+        FAILED.append(f"НЕ ВОССТАНОВЛЕН {src_path}")
+        print(f"[ПРОВАЛ] {src_path} не восстановлен после мутации!")
+    said_ok = "AUTOPLAY OK" in out
+    named = marker in out
+    ok = (not said_ok) and named
+    (PASSED if ok else FAILED).append(name)
+    print(f"[{'OK  ' if ok else 'ПРОВАЛ'}] {name}: rc={rc} "
+          f"успех={'да' if said_ok else 'нет'} (ждали нет), маркер {marker!r} "
+          f"{'найден' if named else 'НЕ НАЙДЕН'}")
+    if not ok:
+        print("     ---- хвост прогона ----")
+        for line in out.strip().splitlines()[-10:]:
+            print("     " + line)
+
+
 def main():
     before = {p: md5(p) for p in FILES}
     tmp = tempfile.mkdtemp(prefix="negatives_")
@@ -797,11 +922,15 @@ def main():
         SKIPPED.append(SMOKE_NEG)
         SKIPPED.append(LZ_NEG)
         SKIPPED.append(EZ_NEG)
-        print("[ПРОПУСК] движковые негативы смока, leave_zoom и enter_zoom — режим --fast")
+        SKIPPED.extend(c[0] for c in R24_CASES)
+        print("[ПРОПУСК] движковые негативы смока, leave_zoom, enter_zoom и "
+              "регресса р.24 — режим --fast")
     else:
         case_smoke_teeth()
         case_leave_zoom()
         case_enter_zoom()
+        for c in R24_CASES:
+            case_r24(*c)
 
     print(f"\nнегативов: {len(PASSED)} OK, {len(FAILED)} провалов, "
           f"{len(SKIPPED)} пропущено")

@@ -134,6 +134,40 @@ dismiss()
 # ---------- S2: D0 — линейка, ящик, ручка, ятаган, подсобка ----------
 node("h_window"); dismiss()
 node("take_ruler"); dismiss()
+
+# ---------- Р24: регресс состояния интерфейса между партиями ----------
+# Три находки ревью р.24, рано в сценарии — чтобы их негативы в
+# test_negatives.py гоняли короткий префикс. Шаги с меткой tag ищутся там.
+# (1) Esc достаётся паузе раньше зума под ней (пауза — кнопкой «II» из зума).
+to_zoom("zoom_exit_door")
+add(op="hud", id="pause")
+add(op="esc", tag="r24_esc")
+add(op="assert_menu", menu=None, tag="r24_esc")
+add(op="assert_view", id="zoom_exit_door")
+to_room("A")
+# (2) выбранный предмет не переживает «Сохранить и выйти» → «Продолжить»;
+# (3) настройка, изменённая на титуле, не откатывается копией из сейва.
+add(op="click_item", id="ruler")
+add(op="hud", id="pause")                    # Esc снял бы выбор — жмём «II»
+add(op="click", x=960, y=588)                # «Сохранить и выйти»
+add(op="wait", s=0.4)
+add(op="assert_title")
+add(op="click", x=960, y=780)                # титул → НАСТРОЙКИ (есть сейв)
+add(op="click", x=960, y=380)                # «Музыка» → выкл
+add(op="assert_setting", k="music", v=False)
+add(op="esc")                                # назад на титул
+add(op="continue_game")
+add(op="wait", s=0.4); dismiss()
+add(op="assert_setting", k="music", v=False, tag="r24_settings")
+add(op="assert_no_selection", tag="r24_selection")
+add(op="assert_item", id="ruler")
+add(op="esc")                                # пауза
+add(op="click", x=960, y=492)                # → НАСТРОЙКИ
+add(op="click", x=960, y=380)                # «Музыка» → вкл, как было
+add(op="assert_setting", k="music", v=True)
+add(op="esc"); add(op="esc")                 # настройки → пауза → игра
+add(op="assert_menu", menu=None)
+
 node("pry_drawer"); dismiss()
 to_zoom("zoom_lap_drawer")
 node("take_handle"); dismiss()
@@ -223,7 +257,9 @@ add(op="click_hs", id="hs_z_screen")         # кейпад
 add(op="assert_widget", kind="keypad")
 add(op="code", node="pc_unlock", value="0000"); dismiss(); neg("pc_code_0000")
 add(op="assert_not_flag", f="pc_on")
-add(op="code", node="pc_unlock"); dismiss()
+# (р.24) верный код — с цифрового блока (kp0..kp9 + kpenter): раньше кейпад
+# его молча игнорировал; остальные замки набираются кликами, как и прежде
+add(op="code", node="pc_unlock", kp=True, tag="r24_numpad"); dismiss()
 add(op="assert_flag", f="pc_on")
 add(op="click_hs", id="hs_z_screen")         # рабочий стол
 add(op="assert_widget", kind="pc")

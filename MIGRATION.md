@@ -44,6 +44,7 @@ Wine из кириллических путей требует UTF-8 локал�
 luajit tools/test_state.lua                    # ядро: солвер, негативы, roundtrip
 python3 tools/validate_puzzles.py              # GATE1: граф, разрешимость, герринги
 python3 tools/gen_scene.py && python3 tools/gen_texts.py
+python3 tools/gen_texts_dump.py               # дамп текстов для вычитки → docs/ (р.24)
 python3 tools/validate_scene.py                # GATE2: сцена/тексты/тени/иконки
 python3 tools/check_fonts.py                   # гейт шрифтов: тофу-глифы (р.19)
 xvfb-run -a -s "-screen 0 1920x1080x24" love . --selftest      # смок
@@ -58,6 +59,16 @@ python3 tools/gen_verify_sheets.py             # verify-листы зон → с
 xvfb-run -a -s "-screen 0 1920x1080x24" love . --autoplay work/ap_smoke.json  # letterbox-смок
 python3 tools/test_negatives.py                # негативы: гейты обязаны ПАДАТЬ на порче
 ```
+
+Веб-версия (р.24) — отдельной парой шагов после конвейера, если её выпускают:
+
+```bash
+python3 tools/build_web.py --zip --serve 8000 &  # dist/web/ + zip для itch.io, локальный сервер
+NODE_PATH=$(npm root -g) node tools/web_smoke.js http://127.0.0.1:8000/   # Chromium: сейв переживает закрытие браузера
+```
+
+Публикация на GitHub Pages — только вручную, workflow `.github/workflows/web.yml`
+(Actions → «Веб-версия (GitHub Pages)» → Run workflow).
 
 Негативы идут последними намеренно: им нужны и данные, и оба сценария из
 `work/`, и каталог кадров, то есть весь конвейер целиком. Гейт, зелёный на

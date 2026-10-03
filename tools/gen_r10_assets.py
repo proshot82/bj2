@@ -97,7 +97,14 @@ if __name__ == "__main__":
         w, h = bb[2] - bb[0] + 1, bb[3] - bb[1] + 1
         print("  %-22s <- %s центр%s  видимо %dx%d  ядроRGB%s"
               % (name, cell, ctr, w, h, mc))
-    size, lamp = crop_siren()
-    print("=== Сирена st_siren_day.png ===")
-    print("  кроп коробки %dx%d; лампа-купол отн.(%.3f,%.3f)"
-          % (size[0], size[1], lamp[0], lamp[1]))
+    # (р.24) Дневная сирена снята релизом 2.0.5 (карантин work/orig_release205/):
+    # селфтест main.lua роняет сборку на любом лишнем файле в assets/, и
+    # повторный прогон рецепта воскрешал бы st_siren_day.png. Кроп оставлен
+    # для истории и вызывается только явно: --siren (пишет в work/, не в assets/).
+    import sys
+    if "--siren" in sys.argv:
+        CO = os.path.join(ROOT, "work")
+        size, lamp = crop_siren()
+        print("=== Сирена → work/st_siren_day.png (в игру не идёт) ===")
+        print("  кроп коробки %dx%d; лампа-купол отн.(%.3f,%.3f)"
+              % (size[0], size[1], lamp[0], lamp[1]))

@@ -1,8 +1,8 @@
 # «Латунный янычар 2.0» — GDD-аддендум: дельта дизайна v2.0.0 → v2.0.6
 
-> Читается ПОВЕРХ оригинального `handoff/design/GDD.md` (фаза 1). Здесь —
+> Читается ПОВЕРХ оригинального `docs/design/GDD.md` (фаза 1). Здесь —
 > только то, что изменилось или добавилось за раунды 4–23 живого тестирования.
-> Вместе: GDD + этот аддендум + `handoff/design/ASSET_SPEC.md` +
+> Вместе: GDD + этот аддендум + `docs/design/ASSET_SPEC.md` +
 > `docs/ASSET_SPEC_R19.md` (два поздних кадра) + `docs/GAME_TEXTS_FULL.md`
 > (все тексты) + `design/puzzles.json` / `docs/WALKTHROUGH_SPOILERS.md`
 > (значения ответов) — этого достаточно, чтобы пересоздать игру с нуля.
@@ -160,5 +160,5 @@ calm_down; последняя тратит оба ингредиента и пр
 | Тексты (реплики/доки/UI/подсказки) | `tools/gen_texts.py` → `design/texts.json`; дамп для чтения — `docs/GAME_TEXTS_FULL.md` |
 | Граф головоломок и ответы | `tools/gen_puzzles.py` (ответы криптослучайные; штатный regen `--pin` сохраняет их) → `design/puzzles.json`; человекочитаемо — `docs/WALKTHROUGH_SPOILERS.md` |
 | Манифест обязательного арта | `gfx_manifest()` + `AUDIO_LIST`/`MUSIC_LIST` в `main.lua` (сверяется селфтестом в обе стороны, лишние файлы роняют сборку) |
-| Спека генерации арта | `handoff/design/ASSET_SPEC.md` + `docs/ASSET_SPEC_R19.md`; промпт-стиль: контур пером + акварель-гуашь, без фотореализма |
+| Спека генерации арта | `docs/design/ASSET_SPEC.md` + `docs/ASSET_SPEC_R19.md`; промпт-стиль: контур пером + акварель-гуашь, без фотореализма |
 | История решений и мотивов | `docs/QA_JOURNAL.md` (раунды 1–23), `docs/LESSONS.md`, `docs/BUILDLOG.md` |

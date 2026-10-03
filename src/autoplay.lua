@@ -339,7 +339,14 @@ local function exec(s)
       local n = E.state.nodes[s.node]
       ans = E.puzzles.answers[n.lock.id]
     end
-    keypad_type(ans)
+    if s.kp then
+      -- (р.24) набор с цифрового блока: kp0..kp9 + kpenter через настоящий
+      -- keypressed — так, как его шлёт LÖVE с NumPad
+      for ch in tostring(ans):gmatch(".") do key("kp" .. ch) end
+      key("kpenter")
+    else
+      keypad_type(ans)
+    end
     return true
   elseif op == "form" then
     if E.ui.dialog_active() then dismiss_once(); return false end
@@ -443,6 +450,24 @@ local function exec(s)
   elseif op == "assert_widget" then
     if E.ui.widget_kind() ~= s.kind then
       die("виджет " .. tostring(E.ui.widget_kind()) .. " ≠ " .. tostring(s.kind))
+    end
+    return true
+  -- ---- (р.24) регресс состояния интерфейса между партиями ----
+  elseif op == "assert_menu" then
+    local m = E.ui.state().menu            -- nil = меню закрыто
+    if m ~= s.menu then
+      die("меню " .. tostring(m) .. ", ожидалось " .. tostring(s.menu))
+    end
+    return true
+  elseif op == "assert_no_selection" then
+    local sel = E.ui.state().inv.selected
+    if sel then die("выбран предмет «" .. sel .. "» — хвост прошлой партии") end
+    return true
+  elseif op == "assert_setting" then
+    local v = E.ui.settings_table()[s.k]
+    if v ~= s.v then
+      die("настройка " .. tostring(s.k) .. " = " .. tostring(v) ..
+          ", ожидалось " .. tostring(s.v))
     end
     return true
   elseif op == "assert_steps_ge" then

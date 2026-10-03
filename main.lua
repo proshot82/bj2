@@ -244,6 +244,9 @@ function love.load(args)
     ap.start(AUTOPLAY, {ui = ui, scenes = scenes, state = ST,
                         texts = T, puzzles = P, scene = S})
   end
+  -- (р.24) Веб-оболочка (web/index.html) ловит эту строку в консоли и только
+  -- тогда открывает кнопку «Играть»: до неё браузер ещё декодирует ассеты.
+  if love.system.getOS() == "Web" then print("BJ2 READY") end
 end
 
 -- ---------- letterbox ----------
@@ -313,7 +316,7 @@ function love.keypressed(key)
 end
 
 function love.quit()
-  if not ui.in_menu() and not ui.victory_done() then ui.save() end
+  if ui.in_session() and not ui.victory_done() then ui.save() end
 end
 
 function love.errorhandler(msg)
