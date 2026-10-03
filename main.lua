@@ -16,6 +16,7 @@ local HEADLESS = false   -- true в selftest/autoplay: там нужен os.exit
 -- На компьютере флага нет, и окно любой формы ведёт себя как прежде.
 local TOUCH_DEVICE = false
 local cur_cursor = nil   -- (аудит F10) setCursor только при смене
+local WEB = love.system.getOS() == "Web"
 
 local function readfile(p)
   local data = love.filesystem.read(p)
@@ -255,15 +256,22 @@ function love.load(args)
   end
   -- (р.24) Веб-оболочка (web/index.html) ловит эту строку в консоли и только
   -- тогда открывает кнопку «Играть»: до неё браузер ещё декодирует ассеты.
-  if love.system.getOS() == "Web" then print("BJ2 READY") end
+  if WEB then print("BJ2 READY") end
 end
 
 -- ---------- letterbox ----------
+local seen_w, seen_h, seen_rot   -- (р.27) последний кадр, о котором сказано в консоль
 local function recalc_letterbox()
   local w, h = love.graphics.getDimensions()
   -- (р.26) портретное окно сенсорного устройства: кадр «лёжа», мир вписывается
   -- в длинную сторону (см. scenes.unrotate / scenes.to_screen)
   letter.rot = TOUCH_DEVICE and h > w
+  -- (р.27) веб: каким кадр вышел у самой игры — строкой в консоль браузера
+  -- (по ней веб-смок проверяет поворот iPhone в Telegram); только при смене
+  if WEB and (w ~= seen_w or h ~= seen_h or letter.rot ~= seen_rot) then
+    seen_w, seen_h, seen_rot = w, h, letter.rot
+    print(("BJ2 FRAME %dx%d %s"):format(w, h, letter.rot and "лёжа" or "стоя"))
+  end
   letter.w = w
   if letter.rot then w, h = h, w end
   local s = math.min(w / 1920, h / 1080)

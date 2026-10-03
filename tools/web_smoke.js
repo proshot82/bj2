@@ -18,6 +18,15 @@
 // параметрами запуска Mini App, SDK telegram.org подменён записывающей
 // заглушкой; оболочка обязана попросить весь экран, отключить свайп-закрытие,
 // зафиксировать горизонталь и отступить канвасом от кнопок Telegram.
+// (р.27) Шестой — «Telegram на iPhone»: встроенный браузер iOS (WKWebView) в
+// событии resize отдаёт неверный размер окна (ошибка WebKit 170595: при
+// повороте — пересечение старого и нового, почти квадрат), а верный появляется
+// позже уже без события. Заглушка повторяет это на 400 мс после каждого resize.
+// Автор поймал её на живом iPhone: телефон горизонтально, а кадр игры застрял
+// «лёжа» и сплющенным. Сперва контроль — оболочка без сверки кадра (вырезана
+// из index.html на лету) обязана воспроизвести ошибку, потом настоящая —
+// кадр обязан догнать канвас, горизонталь — зафиксироваться только после
+// поворота. Игра печатает в консоль «BJ2 FRAME Ш×В стоя|лёжа» (main.lua).
 // Кадры кладутся в work/web_shots/ — смотреть глазами (урок №7, LESSONS.md).
 //
 // Запуск (нужны Node и Playwright с Chromium; в облачном контейнере они есть):
@@ -278,6 +287,119 @@ async function boot(page, tag) {
         `Telegram: канвас отступил от его кнопок — ${gcv[0]}×${gcv[1]}, сверху ${gcv[2]} px`);
   await gp.screenshot({ path: `${OUT}/web_12_telegram.png` });
   await gctx.close();
+
+  // ---- запуск 6 (р.27): Telegram на iPhone — поворот и ошибка WebKit 170595 ----
+  const IW = 430, IH = 932;                        // iPhone 15 Plus / Pro Max, CSS px
+  const WEBKIT_170595 = `(function () {
+    // Ошибка WebKit 170595 (WKWebView): в обработчике resize размер окна —
+    // пересечение старого и нового; верный приходит через ~400 мс без события.
+    // Telegram в это же время шлёт свои отступы (через 50 мс после поворота).
+    var pw = Object.getOwnPropertyDescriptor(window, "innerWidth") || Object.getOwnPropertyDescriptor(Window.prototype, "innerWidth");
+    var ph = Object.getOwnPropertyDescriptor(window, "innerHeight") || Object.getOwnPropertyDescriptor(Window.prototype, "innerHeight");
+    function rw() { return pw.get.call(window); }
+    function rh() { return ph.get.call(window); }
+    var last = [rw(), rh()], until = 0, bw = 0, bh = 0;
+    function bogus() { return performance.now() < until; }
+    window.__real = function () { return [rw(), rh()]; };
+    Object.defineProperty(window, "innerWidth", { configurable: true, get: function () { return bogus() ? bw : rw(); } });
+    Object.defineProperty(window, "innerHeight", { configurable: true, get: function () { return bogus() ? bh : rh(); } });
+    var gbcr = Element.prototype.getBoundingClientRect;
+    Element.prototype.getBoundingClientRect = function () {
+      var r = gbcr.call(this);
+      if (!bogus() || this.id !== "canvas") return r;
+      return new DOMRect(r.x, r.y, Math.max(0, r.width - (rw() - bw)), Math.max(0, r.height - (rh() - bh)));
+    };
+    window.addEventListener("resize", function (e) {
+      if (!e.isTrusted) return;
+      var w = rw(), h = rh();
+      bw = Math.min(last[0], w); bh = Math.min(last[1], h); until = performance.now() + 400;
+      last = [w, h];
+      setTimeout(function () { var wa = window.Telegram && window.Telegram.WebApp; if (wa && wa._orient) wa._orient(); }, 50);
+    }, true);
+  })();`;
+  // Telegram iOS: отступы iPhone с «островом» — вертикально сверху вырез и
+  // кнопки Telegram, горизонтально — вырез по бокам; порядок: верх, низ, лево, право
+  const TG_MOCK_IOS = `(function () {
+    var calls = [], handlers = {}, side = ["top", "bottom", "left", "right"];
+    var INS = { portrait: { safe: [59, 34, 0, 0], content: [46, 0, 0, 0] },
+                landscape: { safe: [0, 21, 59, 59], content: [48, 0, 0, 0] } };
+    function fire(e) { (handlers[e] || []).forEach(function (f) { f(); }); }
+    function real() { return window.__real ? window.__real() : [innerWidth, innerHeight]; }
+    var wa = {
+      _calls: calls, isFullscreen: false, isOrientationLocked: false,
+      isVersionAtLeast: function (v) {
+        var a = String(v).split("."), b = [8, 0];
+        for (var i = 0; i < 2; i++) { var x = +(a[i] || 0); if (x !== b[i]) return x < b[i]; }
+        return true;
+      },
+      ready: function () { calls.push("ready"); },
+      expand: function () { calls.push("expand"); },
+      setHeaderColor: function () {}, setBackgroundColor: function () {}, setBottomBarColor: function () {},
+      disableVerticalSwipes: function () { calls.push("disableVerticalSwipes"); },
+      _orient: function () {
+        if (!wa.isFullscreen) return;
+        var r = real(), t = INS[r[0] > r[1] ? "landscape" : "portrait"], st = document.documentElement.style;
+        for (var i = 0; i < 4; i++) {
+          st.setProperty("--tg-safe-area-inset-" + side[i], t.safe[i] + "px");
+          st.setProperty("--tg-content-safe-area-inset-" + side[i], t.content[i] + "px");
+        }
+        fire("safeAreaChanged"); fire("contentSafeAreaChanged");
+      },
+      requestFullscreen: function () {
+        calls.push("requestFullscreen"); wa.isFullscreen = true; wa._orient(); fire("fullscreenChanged");
+      },
+      lockOrientation: function () { calls.push("lockOrientation@" + real().join("x")); wa.isOrientationLocked = true; },
+      onEvent: function (e, f) { (handlers[e] = handlers[e] || []).push(f); }
+    };
+    window.Telegram = { WebApp: wa };
+  })();`;
+  // оболочка без сверки кадра: строки с её запуском вырезаются из index.html
+  const FIT_MARK = /^.*\/\/ \(р\.27\) сверка кадра.*$/gm;
+  const iphone = async (control) => {
+    const ictx = await browser.newContext({ viewport: { width: IW, height: IH },
+                                            hasTouch: true, isMobile: true, deviceScaleFactor: 3 });
+    await ictx.addInitScript(WEBKIT_170595);
+    await ictx.route(/telegram\.org\/js\/telegram-web-app\.js/, (r) =>
+      r.fulfill({ status: 200, contentType: "application/javascript", body: TG_MOCK_IOS }));
+    let cut = 0;
+    if (control) await ictx.route((u) => u.pathname === new URL(URL_).pathname, async (r) => {
+      const resp = await r.fetch();
+      const body = (await resp.text()).replace(FIT_MARK, () => { cut++; return ""; });
+      await r.fulfill({ response: resp, body });
+    });
+    const ip = await ictx.newPage();
+    watch(ip);
+    const frames = [];
+    ip.on("console", (m) => { const f = /^BJ2 FRAME (\d+)x(\d+) (\S+)$/.exec(m.text()); if (f) frames.push(f[1] + "×" + f[2] + " " + f[3]); });
+    await ip.goto(URL_ + "#tgWebAppData=query_id%3Dsmoke&tgWebAppVersion=8.0&tgWebAppPlatform=ios", { waitUntil: "load" });
+    await ip.waitForSelector("#play:not([disabled])", { timeout: 180000 });
+    await ip.tap("#play");
+    await ip.waitForTimeout(1500);
+    const fit = () => ip.evaluate(() => { const c = document.getElementById("canvas"), r = c.getBoundingClientRect();
+      return { w: c.width, h: c.height, bw: Math.floor(r.width), bh: Math.floor(r.height),
+               calls: window.Telegram.WebApp._calls.slice() }; });
+    const before = await fit(), frameP = frames[frames.length - 1];
+    if (!control) await ip.screenshot({ path: `${OUT}/web_13_tg_iphone_portrait.png` });
+    await ip.setViewportSize({ width: IH, height: IW });   // повернули телефон
+    await ip.waitForTimeout(2000);
+    const after = await fit(), frameL = frames[frames.length - 1];
+    await ip.screenshot({ path: `${OUT}/web_${control ? "15_tg_iphone_control" : "14_tg_iphone_landscape"}.png` });
+    await ictx.close();
+    return { cut, before, after, frameP, frameL };
+  };
+  const ctl = await iphone(true);
+  check(ctl.cut === 2 && ctl.after.w !== ctl.after.bw && /лёжа$/.test(ctl.frameL || ""),
+        `контроль: оболочка без сверки кадра (вырезано строк: ${ctl.cut}) воспроизводит ошибку iPhone — ` +
+        `после поворота кадр ${ctl.frameL || "?"}, канвас ${ctl.after.w}×${ctl.after.h} на экране ${ctl.after.bw}×${ctl.after.bh}`);
+  const ios = await iphone(false);
+  const b = ios.before, a = ios.after;
+  check(b.w === b.bw && b.h === b.bh && b.bh > b.bw && ios.frameP === `${b.bw}×${b.bh} лёжа`,
+        `Telegram на iPhone вертикально: кадр ${ios.frameP || "?"}, канвас ${b.w}×${b.h} на экране ${b.bw}×${b.bh}`);
+  check(a.w === a.bw && a.h === a.bh && a.bw > a.bh && ios.frameL === `${a.bw}×${a.bh} стоя`,
+        `Telegram на iPhone горизонтально: кадр догнал канвас — ${ios.frameL || "?"}, канвас ${a.w}×${a.h} на экране ${a.bw}×${a.bh}`);
+  const lockP = b.calls.filter((c) => /^lockOrientation/.test(c)), lockL = a.calls.filter((c) => /^lockOrientation/.test(c));
+  check(lockP.length === 0 && lockL.length === 1 && lockL[0] === `lockOrientation@${IH}x${IW}`,
+        `Telegram на iPhone: ориентация зафиксирована только после поворота (${lockL.join(", ") || "не зафиксирована"})`);
   await browser.close();
 
   check(errors.length === 0, `ошибок в консоли/странице: ${errors.length}` + (errors.length ? " — " + errors.slice(0, 3).join(" | ") : ""));
